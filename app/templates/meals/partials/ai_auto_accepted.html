@@ -1,0 +1,103 @@
+<!-- AI auto-accepted ingredients - all editable inline -->
+<div id="ai-auto-accepted">
+    <!-- AI Badge -->
+    <div class="ai-disclaimer-badge" style="
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        color: #155724;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    ">
+        ✓ AI Analysis Complete - Click to edit any field
+    </div>
+
+    <p style="margin-bottom: 1rem; color: #666; font-size: 14px;">
+        Claude {{ model }} analyzed your meal and added {{ meal.meal_ingredients | length }} ingredients.
+        Click on any field to edit it.
+    </p>
+</div>
+
+<script>
+// Helper function for inline editing
+function makeEditable(element, mealId, ingredientId, field) {
+    element.contentEditable = true;
+    element.focus();
+
+    // Select all text
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const originalValue = element.textContent;
+
+    function save() {
+        const newValue = element.textContent.trim();
+
+        if (newValue === originalValue || !newValue) {
+            element.textContent = originalValue;
+            element.contentEditable = false;
+            return;
+        }
+
+        // Determine endpoint and payload
+        let url, body;
+        if (field === 'meal_name') {
+            url = `/meals/${mealId}/name`;
+            body = new URLSearchParams({ name: newValue });
+        } else if (field === 'ingredient_name') {
+            url = `/meals/${mealId}/ingredients/${ingredientId}`;
+            body = new URLSearchParams({ ingredient_name: newValue });
+        } else if (field === 'quantity') {
+            url = `/meals/${mealId}/ingredients/${ingredientId}`;
+            body = new URLSearchParams({ quantity: newValue });
+        }
+
+        // Save to server
+        fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'updated') {
+                element.contentEditable = false;
+                // Update with server response if needed
+                if (data.ingredient_name && field === 'ingredient_name') {
+                    element.textContent = data.ingredient_name;
+                } else if (data.quantity !== undefined && field === 'quantity') {
+                    element.textContent = data.quantity || 'Add quantity';
+                }
+            } else {
+                element.textContent = originalValue;
+                element.contentEditable = false;
+            }
+        })
+        .catch(error => {
+            console.error('Save failed:', error);
+            element.textContent = originalValue;
+            element.contentEditable = false;
+            alert('Failed to save. Please try again.');
+        });
+    }
+
+    element.addEventListener('blur', save, { once: true });
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalValue;
+            element.blur();
+        }
+    }, { once: true });
+}
+</script>

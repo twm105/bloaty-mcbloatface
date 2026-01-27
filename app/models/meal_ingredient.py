@@ -23,6 +23,7 @@ class MealIngredient(Base):
     state = Column(Enum(IngredientState), nullable=False, default=IngredientState.RAW)
     quantity_description = Column(String(255))  # Free-text quantity (e.g., "2 cups", "100g", "a handful")
     confidence = Column(Numeric(3, 2))  # AI confidence score (0.0-1.0) if AI-detected
+    source = Column(String(20), nullable=False, default='manual')  # 'ai' or 'manual' for tracking provenance
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

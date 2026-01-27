@@ -1,25 +1,41 @@
 <div class="ingredient-item" id="ingredient-{{ meal_ingredient.id }}">
     <div class="grid">
         <div>
-            <strong>{{ meal_ingredient.ingredient.name }}</strong>
+            <strong
+                id="ingredient-name-{{ meal_ingredient.id }}"
+                onclick="makeEditable(this, {{ meal_ingredient.meal_id }}, {{ meal_ingredient.id }}, 'ingredient_name')"
+                style="cursor: text; display: inline-block; padding: 0.1rem 0.3rem; border-radius: 3px;"
+                title="Click to edit ingredient name"
+            >
+                {{ meal_ingredient.ingredient.name }}
+            </strong>
+            {% if meal_ingredient.source == 'ai' %}
+            <span style="font-size: 11px; color: #666;" title="AI-suggested">🤖</span>
+            {% endif %}
             <br>
             <small>
                 <span style="display: inline-block; padding: 0.2rem 0.5rem; background: var(--muted-color); border-radius: 3px; font-size: 11px;">
                     {{ meal_ingredient.state.value }}
                 </span>
-                {% if meal_ingredient.quantity_description %}
-                | {{ meal_ingredient.quantity_description }}
-                {% endif %}
+                |
+                <span
+                    id="quantity-{{ meal_ingredient.id }}"
+                    onclick="makeEditable(this, {{ meal_ingredient.meal_id }}, {{ meal_ingredient.id }}, 'quantity')"
+                    style="cursor: text; padding: 0.1rem 0.3rem; border-radius: 3px; {% if not meal_ingredient.quantity_description %}color: #999; font-style: italic;{% endif %}"
+                    title="Click to edit quantity"
+                >
+                    {{ meal_ingredient.quantity_description or 'Add quantity' }}
+                </span>
             </small>
         </div>
         <div style="text-align: right;">
             <button
                 hx-delete="/meals/{{ meal_ingredient.meal_id }}/ingredients/{{ meal_ingredient.id }}"
                 hx-target="#ingredient-{{ meal_ingredient.id }}"
-                hx-swap="outerHTML"
-                hx-confirm="Remove this ingredient?"
+                hx-swap="outerHTML swap:0.2s"
                 class="secondary"
                 style="padding: 0.3rem 0.6rem; font-size: 0.9rem;"
+                title="Remove ingredient"
             >
                 ✕
             </button>

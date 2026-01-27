@@ -1,0 +1,21 @@
+<!-- AI Analysis Error Message -->
+<div class="analysis-error" style="
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+">
+    <div style="display: flex; align-items: start; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">⚠️</span>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #856404;">AI Analysis Failed</h4>
+            <p style="margin: 0; color: #856404;">{{ error }}</p>
+            {% if show_manual_entry %}
+            <p style="margin: 0.5rem 0 0 0; color: #856404;">
+                You can add ingredients manually using the form below.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>

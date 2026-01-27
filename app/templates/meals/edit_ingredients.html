@@ -9,52 +9,77 @@
     state: 'raw',
     quantity: ''
 }">
-    <header>
-        <h1>Add Ingredients</h1>
-        <p>What was in this meal?</p>
-    </header>
-
-    <!-- Meal Info -->
-    <section>
-        {% if meal.image_path %}
-        <div style="text-align: center; margin-bottom: 1rem;">
-            <img src="/{{ meal.image_path }}" alt="Meal photo" class="meal-image-preview">
-        </div>
-        {% endif %}
-
-        <p><small>
-            <strong>When:</strong> {{ meal.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
-            {% if meal.country %}
-            | <strong>Where:</strong> {{ meal.country }}
-            {% endif %}
-        </small></p>
-
-        {% if meal.user_notes %}
-        <p><small><strong>Notes:</strong> {{ meal.user_notes }}</small></p>
-        {% endif %}
+    <!-- Image at top -->
+    {% if meal.image_path %}
+    <section style="text-align: center; margin-bottom: 1.5rem;">
+        <img src="/{{ meal.image_path }}" alt="Meal photo" class="meal-image-preview">
     </section>
+    {% endif %}
 
-    <!-- Current Ingredients List -->
-    <section>
-        <h3>Ingredients</h3>
-
-        <div id="ingredients-list">
-            {% if meal.meal_ingredients %}
-                {% for meal_ingredient in meal.meal_ingredients %}
-                    {% include 'meals/partials/ingredient_item.html' %}
-                {% endfor %}
-            {% else %}
-                <p id="no-ingredients-message"><em>No ingredients added yet.</em></p>
-            {% endif %}
+    <!-- AI container: analyzing status OR complete content (replaced by htmx) -->
+    <div id="ai-container">
+    {% if meal.image_path and not meal.meal_ingredients %}
+        <!-- Analyzing status -->
+        <div
+            hx-post="/meals/{{ meal.id }}/analyze-image"
+            hx-trigger="load"
+            hx-target="#ai-container"
+            hx-swap="outerHTML"
+            style="
+                background: #e3f2fd;
+                border-left: 4px solid #2196F3;
+                color: #1565C0;
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            "
+        >
+            <div class="spinner-small"></div>
+            <span>Analyzing meal image with AI...</span>
         </div>
-    </section>
+    {% else %}
+        <!-- Content section (already analyzed or no image) -->
+        <div id="analysis-and-ingredients">
+        <header style="margin-bottom: 1.5rem;">
+            <h1
+                id="meal-name-header"
+                onclick="makeEditable(this, {{ meal.id }}, null, 'meal_name')"
+                style="cursor: text; padding: 0.25rem; border-radius: 8px; margin-bottom: 0.5rem;"
+                title="Click to edit meal name"
+            >
+                {{ meal.name or 'Untitled Meal' }}
+            </h1>
+            <p style="font-size: 14px; color: #666; margin: 0;">Click any field to edit</p>
+        </header>
+
+        <!-- Ingredients List -->
+        <section style="margin-bottom: 1.5rem;">
+            <h3>Ingredients</h3>
+
+            <div id="ingredients-list">
+                {% if meal.meal_ingredients %}
+                    {% for meal_ingredient in meal.meal_ingredients %}
+                        {% include 'meals/partials/ingredient_item.html' %}
+                    {% endfor %}
+                {% else %}
+                    <p id="no-ingredients-message" style="color: #999; font-style: italic;">No ingredients added yet.</p>
+                {% endif %}
+            </div>
+        </section>
+        </div>
+    {% endif %}
+    </div>
 
     <!-- Add Ingredient Button -->
-    <section>
+    <section style="margin-bottom: 1.5rem;">
         <button
             @click="showForm = !showForm"
             x-text="showForm ? '✕ Cancel' : '+ Add Ingredient'"
-            :class="showForm ? 'secondary' : ''"
+            :class="showForm ? 'secondary pill-button' : 'pill-button'"
         ></button>
     </section>
 
@@ -108,15 +133,51 @@
                 >
             </div>
 
-            <button type="submit">Add Ingredient</button>
+            <button type="submit" class="pill-button">Add Ingredient</button>
         </form>
     </section>
 
-    <!-- Complete Button -->
+    <!-- Meal Metadata (editable inline) -->
+    <section style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+        <h4 style="margin-top: 0;">Meal Details</h4>
+
+        <div style="display: grid; gap: 0.75rem;">
+            <div>
+                <small style="display: block; color: #666; margin-bottom: 0.25rem;">When:</small>
+                <span style="font-size: 0.95rem;">{{ meal.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</span>
+            </div>
+
+            <div>
+                <small style="display: block; color: #666; margin-bottom: 0.25rem;">Where:</small>
+                <span
+                    id="country-{{ meal.id }}"
+                    onclick="makeEditableMetadata(this, {{ meal.id }}, 'country')"
+                    style="cursor: text; padding: 0.1rem 0.3rem; border-radius: 4px; {% if not meal.country %}color: #999; font-style: italic;{% endif %}"
+                    title="Click to edit location"
+                >
+                    {{ meal.country or 'Add location' }}
+                </span>
+            </div>
+
+            <div>
+                <small style="display: block; color: #666; margin-bottom: 0.25rem;">Notes:</small>
+                <span
+                    id="notes-{{ meal.id }}"
+                    onclick="makeEditableMetadata(this, {{ meal.id }}, 'notes')"
+                    style="cursor: text; padding: 0.1rem 0.3rem; border-radius: 4px; {% if not meal.user_notes %}color: #999; font-style: italic;{% endif %}"
+                    title="Click to add notes"
+                >
+                    {{ meal.user_notes or 'Add notes' }}
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Save Meal Button -->
     <section style="margin-top: 2rem;">
         <form action="/meals/{{ meal.id }}/complete" method="post">
-            <button type="submit" class="contrast">
-                ✓ Done - Save Meal
+            <button type="submit" class="contrast pill-button" style="width: 100%;">
+                Save Meal
             </button>
         </form>
 
@@ -131,4 +192,171 @@
         </details>
     </section>
 </article>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Helper function for inline editing metadata (country, notes)
+function makeEditableMetadata(element, mealId, field) {
+    // If already editing, don't select all - let user click to position cursor
+    const alreadyEditing = element.contentEditable === 'true';
+
+    element.contentEditable = true;
+    element.focus();
+
+    const originalValue = element.textContent;
+    const isPlaceholder = originalValue === 'Add location' || originalValue === 'Add notes';
+
+    if (isPlaceholder) {
+        element.textContent = '';
+    } else if (!alreadyEditing) {
+        // Only select all on first click (not a placeholder)
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    // If already editing, clicking again will position cursor naturally
+
+    function save() {
+        const newValue = element.textContent.trim();
+
+        if (!newValue || newValue === originalValue) {
+            element.textContent = originalValue;
+            element.contentEditable = false;
+            return;
+        }
+
+        // Determine endpoint and payload
+        let url = `/meals/${mealId}`;
+        let body;
+
+        if (field === 'country') {
+            body = new URLSearchParams({ country: newValue });
+        } else if (field === 'notes') {
+            body = new URLSearchParams({ user_notes: newValue });
+        }
+
+        // Save to server
+        fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'updated') {
+                element.contentEditable = false;
+                element.style.color = '';
+                element.style.fontStyle = '';
+            } else {
+                element.textContent = originalValue;
+                element.contentEditable = false;
+            }
+        })
+        .catch(error => {
+            console.error('Save failed:', error);
+            element.textContent = originalValue;
+            element.contentEditable = false;
+        });
+    }
+
+    element.addEventListener('blur', save, { once: true });
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalValue;
+            element.blur();
+        }
+    }, { once: true });
+}
+
+// Helper function for inline editing
+function makeEditable(element, mealId, ingredientId, field) {
+    // If already editing, don't select all - let user click to position cursor
+    const alreadyEditing = element.contentEditable === 'true';
+
+    element.contentEditable = true;
+    element.focus();
+
+    const originalValue = element.textContent;
+
+    // Only select all on first click
+    if (!alreadyEditing) {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    // If already editing, clicking again will position cursor naturally
+
+    function save() {
+        const newValue = element.textContent.trim();
+
+        if (newValue === originalValue || !newValue) {
+            element.textContent = originalValue;
+            element.contentEditable = false;
+            return;
+        }
+
+        // Determine endpoint and payload
+        let url, body;
+        if (field === 'meal_name') {
+            url = `/meals/${mealId}/name`;
+            body = new URLSearchParams({ name: newValue });
+        } else if (field === 'ingredient_name') {
+            url = `/meals/${mealId}/ingredients/${ingredientId}`;
+            body = new URLSearchParams({ ingredient_name: newValue });
+        } else if (field === 'quantity') {
+            url = `/meals/${mealId}/ingredients/${ingredientId}`;
+            body = new URLSearchParams({ quantity: newValue });
+        }
+
+        // Save to server
+        fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'updated') {
+                element.contentEditable = false;
+                // Update with server response if needed
+                if (data.ingredient_name && field === 'ingredient_name') {
+                    element.textContent = data.ingredient_name;
+                } else if (data.quantity !== undefined && field === 'quantity') {
+                    element.textContent = data.quantity || 'Add quantity';
+                } else if (data.name && field === 'meal_name') {
+                    element.textContent = data.name;
+                }
+            } else {
+                element.textContent = originalValue;
+                element.contentEditable = false;
+            }
+        })
+        .catch(error => {
+            console.error('Save failed:', error);
+            element.textContent = originalValue;
+            element.contentEditable = false;
+            alert('Failed to save. Please try again.');
+        });
+    }
+
+    element.addEventListener('blur', save, { once: true });
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            element.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = originalValue;
+            element.blur();
+        }
+    }, { once: true });
+}
+</script>
 {% endblock %}

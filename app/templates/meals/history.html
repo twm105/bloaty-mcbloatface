@@ -32,19 +32,18 @@
 
                     <!-- Meal Info -->
                     <div>
-                        <h3 style="margin-top: 0;">
-                            {{ meal.timestamp.strftime('%B %d, %Y') }}
-                            <small style="font-weight: normal; color: var(--muted-color);">
-                                {{ meal.timestamp.strftime('%I:%M %p') }}
-                            </small>
+                        <h3 style="margin-top: 0; margin-bottom: 0.25rem;">
+                            {{ meal.name or 'Untitled Meal' }}
                         </h3>
-
-                        {% if meal.country %}
-                        <p><small>📍 {{ meal.country }}</small></p>
-                        {% endif %}
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: #666;">
+                            {{ meal.timestamp.strftime('%B %d, %Y') }} at {{ meal.timestamp.strftime('%I:%M %p') }}
+                            {% if meal.country %}
+                            • 📍 {{ meal.country }}
+                            {% endif %}
+                        </p>
 
                         {% if meal.user_notes %}
-                        <p><small>{{ meal.user_notes }}</small></p>
+                        <p style="margin-top: 0.5rem;"><small>{{ meal.user_notes }}</small></p>
                         {% endif %}
 
                         <!-- Ingredients Summary -->
@@ -85,11 +84,11 @@
                             </a>
                             <button
                                 hx-delete="/meals/{{ meal.id }}"
-                                hx-confirm="Are you sure you want to delete this meal?"
                                 hx-target="closest .meal-card"
-                                hx-swap="outerHTML"
+                                hx-swap="outerHTML swap:0.3s"
                                 class="secondary"
                                 style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"
+                                title="Delete this meal"
                             >
                                 Delete
                             </button>

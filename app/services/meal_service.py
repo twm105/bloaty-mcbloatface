@@ -41,7 +41,8 @@ class MealService:
             image_path=image_path,
             user_notes=user_notes,
             country=country,
-            timestamp=timestamp or datetime.utcnow()
+            timestamp=timestamp or datetime.utcnow(),
+            status='draft'  # New meals start as drafts
         )
         db.add(meal)
         db.commit()
@@ -55,7 +56,8 @@ class MealService:
         ingredient_name: str,
         state: IngredientState,
         quantity_description: Optional[str] = None,
-        confidence: Optional[float] = None
+        confidence: Optional[float] = None,
+        source: str = 'manual'
     ) -> MealIngredient:
         """
         Add an ingredient to a meal, creating the ingredient if it doesn't exist.
@@ -93,7 +95,8 @@ class MealService:
             ingredient_id=ingredient.id,
             state=state,
             quantity_description=quantity_description,
-            confidence=confidence
+            confidence=confidence,
+            source=source
         )
         db.add(meal_ingredient)
         db.commit()
@@ -137,9 +140,10 @@ class MealService:
         limit: int = 50,
         offset: int = 0
     ) -> List[Meal]:
-        """Get all meals for a user, ordered by timestamp descending."""
+        """Get all published meals for a user, ordered by timestamp descending."""
         return db.query(Meal).filter(
-            Meal.user_id == user_id
+            Meal.user_id == user_id,
+            Meal.status == 'published'  # Only show published meals in history
         ).order_by(
             Meal.timestamp.desc()
         ).limit(limit).offset(offset).all()
@@ -176,6 +180,132 @@ class MealService:
         if timestamp is not None:
             meal.timestamp = timestamp
 
+        db.commit()
+        db.refresh(meal)
+        return meal
+
+    @staticmethod
+    def update_meal_ai_response(
+        db: Session,
+        meal_id: int,
+        ai_response: str
+    ) -> Optional[Meal]:
+        """
+        Update the AI raw response for a meal (for debugging/auditing).
+
+        Args:
+            db: Database session
+            meal_id: Meal ID
+            ai_response: Raw AI response JSON
+
+        Returns:
+            Updated Meal object or None if not found
+        """
+        meal = db.query(Meal).filter(Meal.id == meal_id).first()
+        if not meal:
+            return None
+
+        meal.ai_raw_response = ai_response
+        db.commit()
+        db.refresh(meal)
+        return meal
+
+    @staticmethod
+    def update_meal_name(
+        db: Session,
+        meal_id: int,
+        name: str
+    ) -> Optional[Meal]:
+        """
+        Update the meal name.
+
+        Args:
+            db: Database session
+            meal_id: Meal ID
+            name: New meal name
+
+        Returns:
+            Updated Meal object or None if not found
+        """
+        meal = db.query(Meal).filter(Meal.id == meal_id).first()
+        if not meal:
+            return None
+
+        meal.name = name
+        db.commit()
+        db.refresh(meal)
+        return meal
+
+    @staticmethod
+    def update_ingredient_in_meal(
+        db: Session,
+        meal_ingredient_id: int,
+        ingredient_name: Optional[str] = None,
+        quantity_description: Optional[str] = None
+    ) -> Optional[MealIngredient]:
+        """
+        Update an ingredient's name or quantity.
+
+        Args:
+            db: Database session
+            meal_ingredient_id: MealIngredient ID
+            ingredient_name: New ingredient name (if changing)
+            quantity_description: New quantity description
+
+        Returns:
+            Updated MealIngredient or None if not found
+        """
+        meal_ingredient = db.query(MealIngredient).filter(
+            MealIngredient.id == meal_ingredient_id
+        ).first()
+
+        if not meal_ingredient:
+            return None
+
+        # Update ingredient if name changed
+        if ingredient_name and ingredient_name != meal_ingredient.ingredient.name:
+            normalized_name = Ingredient.normalize_name(ingredient_name)
+
+            # Find or create new ingredient
+            ingredient = db.query(Ingredient).filter(
+                Ingredient.normalized_name == normalized_name
+            ).first()
+
+            if not ingredient:
+                ingredient = Ingredient(
+                    name=ingredient_name,
+                    normalized_name=normalized_name
+                )
+                db.add(ingredient)
+                db.flush()
+
+            meal_ingredient.ingredient_id = ingredient.id
+
+        # Update quantity if provided
+        if quantity_description is not None:
+            meal_ingredient.quantity_description = quantity_description
+
+        db.commit()
+        db.refresh(meal_ingredient)
+        return meal_ingredient
+
+    @staticmethod
+    def publish_meal(db: Session, meal_id: int) -> Optional[Meal]:
+        """
+        Publish a meal (change status from draft to published).
+
+        Args:
+            db: Database session
+            meal_id: Meal ID
+
+        Returns:
+            Published Meal object or None if not found
+        """
+        meal = db.query(Meal).filter(Meal.id == meal_id).first()
+        if not meal:
+            return None
+
+        meal.status = 'published'
         db.commit()
         db.refresh(meal)
         return meal
