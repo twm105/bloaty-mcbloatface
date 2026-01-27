@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}Log Symptoms - Bloaty McBloatface{% endblock %}
+{% block title %}Edit Symptom - Bloaty McBloatface{% endblock %}
 
 {% block content %}
 <article>
     <header>
-        <h1>📋 Log Symptoms</h1>
-        <p>Track how you're feeling to identify patterns with meals.</p>
+        <h1>Edit Symptom</h1>
+        <p>Update symptom details.</p>
     </header>
 
     <section>
         <form
-            action="/symptoms/create"
+            action="/symptoms/{{ symptom.id }}/update"
             method="post"
             x-data="{
-                severity: 5,
-                showNotes: false
+                severity: {{ symptom.severity }},
+                showNotes: {{ 'true' if symptom.notes else 'false' }}
             }"
         >
             <!-- Timestamp -->
@@ -27,7 +27,7 @@
                     type="datetime-local"
                     id="symptom_timestamp"
                     name="symptom_timestamp"
-                    :value="new Date().toISOString().slice(0, 16)"
+                    value="{{ symptom.timestamp.strftime('%Y-%m-%dT%H:%M') }}"
                     required
                 >
             </div>
@@ -42,9 +42,8 @@
                     id="description"
                     name="description"
                     rows="4"
-                    placeholder="e.g., I'm feeling bloated and have stomach cramps about 2 hours after eating..."
                     required
-                ></textarea>
+                >{{ symptom.raw_description }}</textarea>
             </div>
 
             <!-- Symptom Type -->
@@ -55,7 +54,9 @@
                 <select id="symptom_type" name="symptom_type" required>
                     <option value="">-- Select symptom type --</option>
                     {% for symptom_type in symptom_types %}
-                        <option value="{{ symptom_type }}">{{ symptom_type }}</option>
+                        <option value="{{ symptom_type }}" {% if symptom_type == symptom.structured_type %}selected{% endif %}>
+                            {{ symptom_type }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -95,29 +96,15 @@
                     id="notes"
                     name="notes"
                     rows="3"
-                    placeholder="e.g., took antacid, stressed from work, didn't sleep well..."
-                ></textarea>
+                >{{ symptom.notes or '' }}</textarea>
             </div>
 
             <!-- Submit -->
             <div style="margin-top: 2rem;">
-                <button type="submit">Save Symptom</button>
-                <a href="/" role="button" class="secondary">Cancel</a>
+                <button type="submit">Update Symptom</button>
+                <a href="/symptoms/history" role="button" class="secondary">Cancel</a>
             </div>
         </form>
-    </section>
-
-    <!-- Help Text -->
-    <section style="margin-top: 2rem;">
-        <details>
-            <summary>Tips for tracking symptoms</summary>
-            <ul>
-                <li><strong>Be specific:</strong> Note timing relative to meals (e.g., "2 hours after lunch")</li>
-                <li><strong>Include context:</strong> Stress, sleep quality, medication can all affect digestion</li>
-                <li><strong>Track regularly:</strong> Even mild symptoms help identify patterns</li>
-                <li><strong>Don't self-diagnose:</strong> Use this data to discuss with your healthcare provider</li>
-            </ul>
-        </details>
     </section>
 </article>
 {% endblock %}
