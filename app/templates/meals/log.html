@@ -5,13 +5,114 @@
 {% block content %}
 <article>
     <header>
-        <h1>Log a Meal</h1>
-        <p>Upload a photo of your meal or add ingredients manually.</p>
+        <h1>🍽️ Log a Meal</h1>
+        <p>Upload a photo of your meal and add ingredient details.</p>
     </header>
 
     <section>
-        <p><em>Meal logging functionality coming soon...</em></p>
-        <a href="/" role="button" class="secondary">Back to Home</a>
+        <form
+            action="/meals/create"
+            method="post"
+            enctype="multipart/form-data"
+            x-data="{
+                imagePreview: null,
+                showOptional: false,
+                handleFileChange(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.imagePreview = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }"
+        >
+            <!-- Image Upload -->
+            <div>
+                <label for="image">
+                    Meal Photo (Optional)
+                    <small>Supported: JPEG, PNG, WebP</small>
+                </label>
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    @change="handleFileChange"
+                >
+
+                <!-- Image Preview -->
+                <div x-show="imagePreview" style="margin-top: 1rem;">
+                    <img :src="imagePreview" alt="Meal preview" class="meal-image-preview">
+                </div>
+            </div>
+
+            <!-- Timestamp -->
+            <div>
+                <label for="meal_timestamp">
+                    When did you eat this?
+                </label>
+                <input
+                    type="datetime-local"
+                    id="meal_timestamp"
+                    name="meal_timestamp"
+                    :value="new Date().toISOString().slice(0, 16)"
+                >
+            </div>
+
+            <!-- Optional Fields Toggle -->
+            <div>
+                <label>
+                    <input type="checkbox" x-model="showOptional">
+                    Add optional details (location, notes)
+                </label>
+            </div>
+
+            <!-- Optional Fields -->
+            <div x-show="showOptional" x-cloak>
+                <label for="country">
+                    Country/Location (Optional)
+                    <small>Where was this meal consumed?</small>
+                </label>
+                <input
+                    type="text"
+                    id="country"
+                    name="country"
+                    placeholder="e.g., USA, France, Japan"
+                >
+
+                <label for="user_notes">
+                    Notes (Optional)
+                    <small>Any additional context about this meal</small>
+                </label>
+                <textarea
+                    id="user_notes"
+                    name="user_notes"
+                    rows="3"
+                    placeholder="e.g., ate at restaurant, homemade, feeling stressed..."
+                ></textarea>
+            </div>
+
+            <!-- Submit -->
+            <div style="margin-top: 2rem;">
+                <button type="submit">Continue to Add Ingredients →</button>
+                <a href="/" role="button" class="secondary">Cancel</a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Help Text -->
+    <section style="margin-top: 2rem;">
+        <details>
+            <summary>Why add a photo?</summary>
+            <p>
+                Meal photos help you remember what you ate and can be used for AI-powered
+                ingredient detection (coming soon). They're optional but recommended for
+                accurate tracking.
+            </p>
+        </details>
     </section>
 </article>
 {% endblock %}

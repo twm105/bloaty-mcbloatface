@@ -1,0 +1,28 @@
+<div class="ingredient-item" id="ingredient-{{ meal_ingredient.id }}">
+    <div class="grid">
+        <div>
+            <strong>{{ meal_ingredient.ingredient.name }}</strong>
+            <br>
+            <small>
+                <span style="display: inline-block; padding: 0.2rem 0.5rem; background: var(--muted-color); border-radius: 3px; font-size: 11px;">
+                    {{ meal_ingredient.state.value }}
+                </span>
+                {% if meal_ingredient.quantity_description %}
+                | {{ meal_ingredient.quantity_description }}
+                {% endif %}
+            </small>
+        </div>
+        <div style="text-align: right;">
+            <button
+                hx-delete="/meals/{{ meal_ingredient.meal_id }}/ingredients/{{ meal_ingredient.id }}"
+                hx-target="#ingredient-{{ meal_ingredient.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Remove this ingredient?"
+                class="secondary"
+                style="padding: 0.3rem 0.6rem; font-size: 0.9rem;"
+            >
+                ✕
+            </button>
+        </div>
+    </div>
+</div>

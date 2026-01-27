@@ -34,18 +34,6 @@ async def home(request: Request, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/meals/log", response_class=HTMLResponse)
-async def meal_log(request: Request):
-    """Meal logging page."""
-    return templates.TemplateResponse("meals/log.html", {"request": request})
-
-
-@router.get("/meals/history", response_class=HTMLResponse)
-async def meal_history(request: Request):
-    """Meal history page."""
-    return templates.TemplateResponse("meals/history.html", {"request": request})
-
-
 @router.get("/symptoms/log", response_class=HTMLResponse)
 async def symptom_log(request: Request):
     """Symptom logging page."""

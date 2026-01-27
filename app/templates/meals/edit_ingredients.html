@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Add Ingredients - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<article x-data="{
+    showForm: false,
+    ingredientName: '',
+    state: 'raw',
+    quantity: ''
+}">
+    <header>
+        <h1>Add Ingredients</h1>
+        <p>What was in this meal?</p>
+    </header>
+
+    <!-- Meal Info -->
+    <section>
+        {% if meal.image_path %}
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <img src="/{{ meal.image_path }}" alt="Meal photo" class="meal-image-preview">
+        </div>
+        {% endif %}
+
+        <p><small>
+            <strong>When:</strong> {{ meal.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+            {% if meal.country %}
+            | <strong>Where:</strong> {{ meal.country }}
+            {% endif %}
+        </small></p>
+
+        {% if meal.user_notes %}
+        <p><small><strong>Notes:</strong> {{ meal.user_notes }}</small></p>
+        {% endif %}
+    </section>
+
+    <!-- Current Ingredients List -->
+    <section>
+        <h3>Ingredients</h3>
+
+        <div id="ingredients-list">
+            {% if meal.meal_ingredients %}
+                {% for meal_ingredient in meal.meal_ingredients %}
+                    {% include 'meals/partials/ingredient_item.html' %}
+                {% endfor %}
+            {% else %}
+                <p id="no-ingredients-message"><em>No ingredients added yet.</em></p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Add Ingredient Button -->
+    <section>
+        <button
+            @click="showForm = !showForm"
+            x-text="showForm ? '✕ Cancel' : '+ Add Ingredient'"
+            :class="showForm ? 'secondary' : ''"
+        ></button>
+    </section>
+
+    <!-- Add Ingredient Form -->
+    <section x-show="showForm" x-cloak>
+        <form
+            hx-post="/meals/{{ meal.id }}/ingredients/add"
+            hx-target="#ingredients-list"
+            hx-swap="beforeend"
+            @htmx:after-request="ingredientName = ''; quantity = ''; showForm = false; document.getElementById('no-ingredients-message')?.remove()"
+        >
+            <div class="grid">
+                <div>
+                    <label for="ingredient_name">
+                        Ingredient Name *
+                    </label>
+                    <input
+                        type="text"
+                        id="ingredient_name"
+                        name="ingredient_name"
+                        x-model="ingredientName"
+                        placeholder="e.g., chicken breast, olive oil"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div>
+                    <label for="state">
+                        State *
+                    </label>
+                    <select id="state" name="state" x-model="state" required>
+                        {% for state_value in ingredient_states %}
+                            <option value="{{ state_value }}">{{ state_value.capitalize() }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="quantity">
+                    Quantity (Optional)
+                    <small>e.g., "2 cups", "100g", "a handful"</small>
+                </label>
+                <input
+                    type="text"
+                    id="quantity"
+                    name="quantity"
+                    x-model="quantity"
+                    placeholder="e.g., 1 cup, 200g, 3 pieces"
+                >
+            </div>
+
+            <button type="submit">Add Ingredient</button>
+        </form>
+    </section>
+
+    <!-- Complete Button -->
+    <section style="margin-top: 2rem;">
+        <form action="/meals/{{ meal.id }}/complete" method="post">
+            <button type="submit" class="contrast">
+                ✓ Done - Save Meal
+            </button>
+        </form>
+
+        <details style="margin-top: 1rem;">
+            <summary>What do the states mean?</summary>
+            <ul>
+                <li><strong>Raw:</strong> Uncooked ingredients (e.g., raw vegetables, uncooked meat)</li>
+                <li><strong>Cooked:</strong> Cooked or heated ingredients (e.g., grilled chicken, steamed vegetables)</li>
+                <li><strong>Processed:</strong> Commercially processed foods (e.g., canned goods, packaged snacks)</li>
+            </ul>
+            <p><small>Tracking ingredient state helps identify if preparation method affects symptoms.</small></p>
+        </details>
+    </section>
+</article>
+{% endblock %}
