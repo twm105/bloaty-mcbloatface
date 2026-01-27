@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>Welcome to Bloaty McBloatface</h1>
+        <p>Track your meals and symptoms to identify potential trigger foods.</p>
+    </header>
+
+    <!-- Disclaimer notice for first-time users -->
+    {% if not disclaimer_acknowledged %}
+    <div class="disclaimer-box">
+        <h3>⚠️ Important Notice</h3>
+        <p>
+            Before using this app, please review and acknowledge our
+            <a href="/disclaimer">medical disclaimer</a> and <a href="/privacy">privacy policy</a>.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Main action cards -->
+    <section>
+        <div class="grid">
+            <!-- Log Meal Card -->
+            <article>
+                <header>
+                    <h2>🍽️ Log a Meal</h2>
+                </header>
+                <p>Upload a photo of your meal and let AI help identify ingredients, or add them manually.</p>
+                <footer>
+                    <a href="/meals/log" role="button">Log Meal</a>
+                </footer>
+            </article>
+
+            <!-- Log Symptoms Card -->
+            <article>
+                <header>
+                    <h2>📋 Log Symptoms</h2>
+                </header>
+                <p>Describe how you're feeling and track gastro symptoms to correlate with meals.</p>
+                <footer>
+                    <a href="/symptoms/log" role="button">Log Symptoms</a>
+                </footer>
+            </article>
+        </div>
+    </section>
+
+    <!-- Quick links -->
+    <section style="margin-top: 2rem;">
+        <h3>Quick Access</h3>
+        <div class="grid">
+            <a href="/meals/history" role="button" class="secondary">View Meal History</a>
+            <a href="/symptoms/history" role="button" class="secondary">View Symptom History</a>
+            <a href="/analysis" role="button" class="contrast">View Analysis & Patterns</a>
+        </div>
+    </section>
+
+    <!-- Getting started info -->
+    <section style="margin-top: 2rem;">
+        <details>
+            <summary>How it works</summary>
+            <ol>
+                <li><strong>Log meals:</strong> Take photos of what you eat, AI identifies ingredients</li>
+                <li><strong>Track symptoms:</strong> Note any gastro symptoms with timestamps</li>
+                <li><strong>Find patterns:</strong> AI analyzes correlations between ingredients and symptoms</li>
+                <li><strong>Make informed choices:</strong> Use insights to discuss potential triggers with your doctor</li>
+            </ol>
+            <p style="margin-top: 1rem; font-size: 14px; color: var(--muted-color);">
+                <strong>Remember:</strong> This app helps you track data, but only a healthcare professional
+                can provide proper medical diagnosis and advice.
+            </p>
+        </details>
+    </section>
+</article>
+{% endblock %}

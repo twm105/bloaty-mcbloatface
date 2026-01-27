@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>Settings</h1>
+        <p>Manage your preferences and data.</p>
+    </header>
+
+    <section>
+        <h3>Privacy & Data</h3>
+        <ul>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/disclaimer">Medical Disclaimer</a></li>
+            <li>Data Export (coming soon)</li>
+            <li>Delete All Data (coming soon)</li>
+        </ul>
+    </section>
+
+    <section>
+        <a href="/" role="button" class="secondary">Back to Home</a>
+    </section>
+</article>
+{% endblock %}
