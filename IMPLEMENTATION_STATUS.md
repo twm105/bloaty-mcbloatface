@@ -1,0 +1,194 @@
+# Bloaty McBloatface - Implementation Status
+
+**Last Updated:** January 27, 2026
+**Session:** AI Integration & UX Polish
+**Commit:** ffc237c
+
+## ✅ Completed Features
+
+### Phase 1: Database Foundation (CRITICAL) - COMPLETE
+- ✅ All SQLAlchemy models created and migrated
+- ✅ Ingredient taxonomy seeded (10 root categories)
+- ✅ Provenance tracking (meal_ingredients.source: ai/manual)
+- ✅ AI tracking fields (ai_suggested_ingredients JSONB)
+- ✅ Draft/published workflow (meals.status)
+
+### Phase 5: Claude Integration - Meal Analysis - COMPLETE
+- ✅ ClaudeService with three methods:
+  - validate_meal_image() - checks if image is food
+  - analyze_meal_image() - extracts name + ingredients
+  - analyze_patterns() - correlation analysis (placeholder)
+- ✅ Prompt engineering with medical ethics safeguards
+- ✅ Auto-accept workflow (AI suggestions added immediately)
+- ✅ Inline editing for all fields (meal name, ingredients, quantities, metadata)
+- ✅ Error handling with graceful fallbacks
+- ✅ Cost: ~$0.003 per meal with Claude Sonnet 4.5
+
+### UX Enhancements - COMPLETE
+- ✅ Linear top-to-bottom flow (image → status → name → ingredients → metadata → save)
+- ✅ Compact status indicators (analyzing → complete)
+- ✅ Pill-shaped buttons (modern look)
+- ✅ Click-to-edit: first click selects all, subsequent clicks position cursor
+- ✅ Smooth delete animations (no confirmation popups)
+- ✅ History page: meal name prominent, date subtle
+- ✅ Draft filtering: only published meals in history
+
+## 🚧 Next Priorities (From MVP Plan)
+
+### Phase 6: Symptom Clarification (HIGH) - NOT STARTED
+**Goal:** Conversational symptom capture with AI
+
+**Implementation needed:**
+1. Add clarify_symptom() method to ClaudeService
+2. Multi-turn conversation (max 3 questions)
+3. Tactful, empathetic questioning
+4. Store clarification_history in symptoms.clarification_history (JSONB)
+5. Extract structured data: type, severity (1-10), notes
+6. UI: /symptoms/log with multi-step form
+7. Medical ethics: skip button, qualified language, no diagnosis
+
+**Files to create/modify:**
+- `app/api/symptoms.py` - Add /clarify endpoint
+- `app/templates/symptoms/log.html` - Update with Q&A flow
+- `app/services/ai_service.py` - Add clarify_symptom method
+- Prompts already in `app/services/prompts.py`
+
+**Cost:** ~$0.0126 per symptom (~4,200 tokens over 3 turns)
+
+### Phase 8: Pattern Analysis Dashboard (HIGH) - NOT STARTED
+**Goal:** Show meal-symptom correlations with charts
+
+**Implementation needed:**
+1. Complete analyze_patterns() in ClaudeService (use prompt caching!)
+2. Create analysis_service.py for correlation queries
+3. Build timeline view (meals + symptoms chronologically)
+4. Add Chart.js visualizations
+5. Medical disclaimer modal before showing results
+6. Qualified language in all AI outputs
+
+**Files to create:**
+- `app/services/analysis_service.py` - SQL correlation queries
+- `app/api/analysis.py` - Analysis endpoints
+- `app/templates/analysis/view.html` - Main dashboard
+- `app/templates/analysis/timeline.html` - Timeline partial
+- `app/static/js/charts.js` - Chart.js setup
+
+**Cost:** First analysis ~$0.0508, cached ~$0.0053 (90% savings with prompt caching)
+
+### Phase 7: History Management (MEDIUM) - PARTIALLY COMPLETE
+**Current:** View and delete meals
+**Missing:** Edit meals, date range filtering
+
+### Phase 9: Evals Framework (MEDIUM) - NOT STARTED
+**Goal:** Quantify AI accuracy
+
+**Implementation needed:**
+1. BBC Good Food scraper (`evals/scrapers/bbc_good_food.py`)
+2. Eval runner (`evals/run.py`)
+3. Metrics calculator (`evals/metrics.py`) - precision, recall, F1
+4. Store results in eval_runs table
+
+### Phase 10: Polish (MEDIUM) - NOT STARTED
+- Error handling improvements
+- Mobile responsiveness
+- Performance optimization
+- User testing
+
+## 🗺️ Architecture Overview
+
+### Models (All Complete)
+- User, Meal, Ingredient, MealIngredient
+- IngredientCategory, IngredientCategoryRelation
+- Symptom, UserSettings, DataExport, EvalRun
+
+### Services
+- ✅ `ai_service.py` - Claude integration
+- ✅ `prompts.py` - All prompt templates
+- ✅ `meal_service.py` - Meal CRUD + inline editing
+- ✅ `symptom_service.py` - Symptom CRUD (basic)
+- ✅ `file_service.py` - Image handling
+- ⚠️ `analysis_service.py` - NOT CREATED (Phase 8)
+
+### API Routes
+- ✅ `/meals/*` - Full CRUD + AI analysis + inline editing
+- ⚠️ `/symptoms/*` - Basic CRUD (missing clarification)
+- ❌ `/analysis` - NOT CREATED
+- ❌ `/settings/*` - NOT CREATED (GDPR exports, disclaimers)
+
+## 📊 Current Status: ~40% MVP Complete
+
+**Working End-to-End:**
+1. Upload meal photo
+2. AI analyzes → suggests name + ingredients
+3. Auto-accepted to database
+4. Inline editing for all fields
+5. Save meal → appears in history
+
+**Missing Critical Features:**
+- Symptom logging with AI clarification
+- Pattern analysis dashboard
+- Medical disclaimers & GDPR compliance
+
+## 🔑 Key Design Decisions Made
+
+1. **Auto-accept AI suggestions** - No manual staging, immediate save
+2. **Draft/published workflow** - Hide incomplete meals from history
+3. **Inline editing** - Click-to-edit with immediate persistence
+4. **Provenance tracking** - AI vs manual for data science
+5. **Pure htmx** - No script execution in partials (security)
+6. **Claude Sonnet 4.5** - For both meal and symptom analysis
+7. **Prompt caching** - For pattern analysis only (90% cost savings)
+
+## 🚨 Known Issues / Tech Debt
+
+None currently - recent session fixed:
+- ✅ Inline editing cursor placement
+- ✅ Delete button UX (removed popups, fixed JSON placeholder)
+- ✅ Status indicator stacking (analyzing + complete both showing)
+- ✅ Draft meals appearing in history
+
+## 💾 Database State
+
+**Migrations applied:**
+- `431a799ebeb8` - Initial schema (all models)
+- `6d7c0be526eb` - Seed ingredient categories
+- `61e8ee85c42e` - Add meal name + AI tracking fields
+- `5acf901daa38` - Add meal status field
+
+**Sample Data:**
+- 10 ingredient categories seeded
+- Test meals with AI-analyzed ingredients
+- No symptoms logged yet
+
+## 🔐 Environment
+
+**Required:**
+- `ANTHROPIC_API_KEY` - Set in `.env` (working)
+- `DATABASE_URL` - PostgreSQL connection (working)
+
+**Models:**
+- `haiku_model=claude-sonnet-4-5-20250929`
+- `sonnet_model=claude-sonnet-4-5-20250929`
+
+## 📝 Next Session TODO
+
+**Immediate priorities:**
+1. Implement symptom clarification (Phase 6)
+2. Test conversational flow with tactful questions
+3. Add pattern analysis queries (Phase 8)
+4. Create timeline view (meals + symptoms)
+5. Add medical disclaimers (GDPR compliance)
+
+**Quick wins:**
+- Add date range filtering to history
+- Implement data export endpoint
+- Create privacy policy page
+- Add user settings page
+
+---
+
+**To resume development:**
+1. `docker-compose up -d`
+2. Check current status: `git log --oneline -5`
+3. Review this file for next priorities
+4. Refer to original plan in session transcript or `/Users/twm/.claude/projects/-Users-twm-Library-CloudStorage-OneDrive-Personal-Coding-Projects-bloaty-mcbloatface/` for detailed requirements
