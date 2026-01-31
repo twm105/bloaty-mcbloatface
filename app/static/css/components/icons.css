@@ -1,0 +1,93 @@
+/**
+ * Icon Components
+ */
+
+/* ============================================
+   BASE ICON STYLES
+   ============================================ */
+
+.icon {
+  display: inline-block;
+  stroke-width: 2px;
+  stroke: currentColor;
+  fill: none;
+  color: inherit;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   ICON SIZES
+   ============================================ */
+
+.icon-xs {
+  width: var(--icon-xs);
+  height: var(--icon-xs);
+}
+
+.icon-sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.icon-md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.icon-lg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+/* ============================================
+   ICON IN BUTTON
+   ============================================ */
+
+button .icon,
+.btn-primary .icon,
+.btn-secondary .icon,
+.btn-ghost .icon,
+.btn-destructive .icon {
+  margin-right: 0;
+}
+
+/* ============================================
+   INTERACTIVE ICONS
+   ============================================ */
+
+.icon-button {
+  transition: transform var(--transition-fast);
+}
+
+.icon-button:hover .icon {
+  transform: scale(1.1);
+}
+
+/* ============================================
+   ICON COLORS
+   ============================================ */
+
+.icon-primary {
+  color: var(--color-accent-green);
+}
+
+.icon-secondary {
+  color: var(--color-text-secondary);
+}
+
+.icon-success {
+  color: var(--color-success);
+}
+
+.icon-warning {
+  color: var(--color-warning);
+}
+
+.icon-error {
+  color: var(--color-error);
+}
+
+.icon-info {
+  color: var(--color-info);
+}

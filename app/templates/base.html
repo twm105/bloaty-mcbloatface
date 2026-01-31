@@ -5,8 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bloaty McBloatface{% endblock %}</title>
 
-    <!-- Pico.css CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="/static/css/design-tokens.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components/buttons.css">
+    <link rel="stylesheet" href="/static/css/components/cards.css">
+    <link rel="stylesheet" href="/static/css/components/forms.css">
+    <link rel="stylesheet" href="/static/css/components/navigation.css">
+    <link rel="stylesheet" href="/static/css/components/badges.css">
+    <link rel="stylesheet" href="/static/css/components/images.css">
+    <link rel="stylesheet" href="/static/css/components/disclaimers.css">
+    <link rel="stylesheet" href="/static/css/components/icons.css">
 
     <!-- htmx -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -14,66 +23,26 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Custom CSS -->
+    <!-- Custom CSS (for page-specific overrides) -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
     <style>
-        /* Disclaimer styling */
-        .disclaimer-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-
-        .disclaimer-box strong {
-            color: #856404;
-        }
-
-        .ai-badge {
-            background: #ffc107;
-            color: #000;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-            margin-left: 0.5rem;
-        }
-
+        /* Alpine.js cloak */
         [x-cloak] {
             display: none !important;
-        }
-
-        footer.disclaimer-footer {
-            margin-top: 3rem;
-            padding: 2rem 1rem;
-            background: #fff3cd;
-            border-top: 4px solid #ffc107;
-        }
-
-        footer.disclaimer-footer p {
-            font-size: 14px;
-            margin: 0;
-            color: #856404;
-            max-width: 900px;
-            margin: 0 auto;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="container">
-        <ul>
-            <li><strong><a href="/" style="text-decoration: none; color: inherit;">🍔 Bloaty McBloatface</a></strong></li>
-        </ul>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/meals/history">Meal History</a></li>
-            <li><a href="/symptoms/history">Symptom History</a></li>
-            <li><a href="/analysis">Analysis</a></li>
-            <li><a href="/settings">Settings</a></li>
+    <nav class="main-nav">
+        <a href="/" class="nav-logo">Bloaty McBloatface</a>
+        <ul class="nav-links">
+            <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="/meals/history" class="nav-link {% if request.path.startswith('/meals') %}active{% endif %}">Meal History</a></li>
+            <li><a href="/symptoms/history" class="nav-link {% if request.path.startswith('/symptoms') %}active{% endif %}">Symptom History</a></li>
+            <li><a href="/analysis" class="nav-link {% if request.path == '/analysis' %}active{% endif %}">Analysis</a></li>
+            <li><a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">Settings</a></li>
         </ul>
     </nav>
 
@@ -83,15 +52,19 @@
     </main>
 
     <!-- Medical Disclaimer Footer (on every page) -->
-    <footer class="disclaimer-footer">
-        <div>
-            <p>
-                <strong>⚠️ MEDICAL DISCLAIMER:</strong> This application is for personal tracking
-                and informational purposes only. It does not provide medical advice, diagnosis, or
-                treatment. Correlations shown are statistical patterns in your data and may contain
-                errors. <strong>Correlation does not prove causation.</strong> Always consult a
-                qualified healthcare professional before making dietary changes or health decisions.
-            </p>
+    <footer class="container" style="margin-top: 4rem; margin-bottom: 2rem;">
+        <div class="disclaimer disclaimer-footer" id="medical-disclaimer">
+            <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+            </svg>
+            <div class="disclaimer-content">
+                <div class="disclaimer-title">Medical Disclaimer</div>
+                <div class="disclaimer-text">
+                    <p>
+                        This application is for personal tracking and informational purposes only. It does not provide medical advice, diagnosis, or treatment. Correlations shown are statistical patterns in your data and may contain errors. Correlation does not prove causation. Always consult a qualified healthcare professional before making dietary changes or health decisions.
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
 

@@ -1,0 +1,213 @@
+/**
+ * Image Components
+ */
+
+/* ============================================
+   MEAL THUMBNAILS (Circular crop)
+   ============================================ */
+
+.meal-thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: var(--crop-x, 50%) var(--crop-y, 50%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.meal-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.2);
+}
+
+/* Large thumbnail (featured) */
+.meal-thumbnail-lg {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: var(--crop-x, 50%) var(--crop-y, 50%);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.meal-thumbnail-lg:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.2);
+}
+
+/* ============================================
+   FULL-SIZE MEAL IMAGES
+   ============================================ */
+
+.meal-image-full {
+  max-height: 500px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  object-fit: contain;
+  box-shadow: var(--shadow-lg);
+  margin: 0 auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .meal-image-full {
+    max-height: 400px;
+  }
+}
+
+/* ============================================
+   MEAL IMAGE PREVIEW (during upload/analysis)
+   ============================================ */
+
+.meal-image-preview {
+  max-width: 100%;
+  max-height: 400px;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  box-shadow: var(--shadow-md);
+  margin: 0 auto var(--space-6);
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .meal-image-preview {
+    max-height: 300px;
+  }
+}
+
+/* ============================================
+   IMAGE UPLOAD ZONE
+   ============================================ */
+
+.image-upload-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  text-align: center;
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.image-upload-zone:hover {
+  border-color: var(--color-accent-green);
+  background: rgba(45, 106, 79, 0.05);
+}
+
+.image-upload-zone.dragging {
+  border-color: var(--color-accent-green);
+  background: rgba(45, 106, 79, 0.1);
+}
+
+.image-upload-icon {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  margin: 0 auto var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.image-upload-text {
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.image-upload-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   IMAGE GALLERY (if needed for multiple images)
+   ============================================ */
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.image-gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.image-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-base);
+}
+
+.image-gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+/* ============================================
+   LAZY LOADING PLACEHOLDER
+   ============================================ */
+
+.image-loading {
+  background: var(--color-bg-secondary);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ============================================
+   IMAGE CAPTION
+   ============================================ */
+
+.image-caption {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: var(--space-2);
+  line-height: var(--line-normal);
+}
+
+/* ============================================
+   AVATAR (for user profiles, if needed)
+   ============================================ */
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+}

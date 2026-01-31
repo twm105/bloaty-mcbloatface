@@ -3,190 +3,112 @@
 {% block title %}Symptom History - Bloaty McBloatface{% endblock %}
 
 {% block content %}
-<article>
-    <header>
-        <h1>Symptom History</h1>
-        <p>View and manage your logged symptoms.</p>
-    </header>
+<div style="margin-bottom: var(--space-6);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+        <div>
+            <h1 style="margin-bottom: var(--space-2);">Symptom History</h1>
+            <p class="text-muted" style="margin: 0;">View and manage your logged symptoms</p>
+        </div>
+        <a href="/symptoms/log" class="btn-primary">
+            <svg class="icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#plus"></use>
+            </svg>
+            Log New Symptom
+        </a>
+    </div>
 
     {% if success %}
-    <section>
-        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 1rem; border-radius: 4px; color: #155724;">
-            ✓ Symptom logged successfully!
-        </div>
-    </section>
+    <div style="background: var(--color-success); color: var(--color-bg-primary); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-6);">
+        <svg class="icon icon-xs" aria-hidden="true" style="vertical-align: text-bottom;">
+            <use href="/static/icons/lucide-sprite.svg#check"></use>
+        </svg>
+        Symptom logged successfully!
+    </div>
     {% endif %}
 
-    <section>
-        <a href="/symptoms/log" role="button">+ Log New Symptom</a>
-    </section>
+    <!-- Symptoms Grid -->
+    {% if symptoms %}
+    <div class="card-grid">
+        {% for symptom in symptoms %}
+        <a
+            href="/symptoms/{{ symptom.id }}/edit"
+            class="meal-card"
+            style="text-decoration: none; color: inherit; cursor: pointer; position: relative; padding: var(--space-5);"
+            onclick="if (event.target.closest('.icon-button')) { event.preventDefault(); return false; }"
+        >
+            <!-- Symptom Tags -->
+            {% if symptom.tags %}
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3);">
+                {% for tag in symptom.tags %}
+                <span class="severity-pill {% if tag['severity'] >= 7 %}severity-high{% elif tag['severity'] >= 4 %}severity-medium{% else %}severity-low{% endif %}">
+                    {{ tag['name'] }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-    <!-- Symptoms List -->
-    <section>
-        {% if symptoms %}
-            {% for symptom in symptoms %}
-            <article class="symptom-card">
-                <header>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 250px;">
-                            <!-- Tags Display (new schema) or Fallback (old schema) -->
-                            {% if symptom.tags %}
-                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                    {% for tag in symptom.tags %}
-                                    <span style="
-                                        display: inline-block;
-                                        padding: 0.4rem 0.8rem;
-                                        border-radius: 20px;
-                                        font-size: 0.9rem;
-                                        font-weight: 500;
-                                        {% if tag['severity'] >= 7 %}
-                                            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
-                                        {% elif tag['severity'] >= 4 %}
-                                            background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;
-                                        {% else %}
-                                            background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
-                                        {% endif %}
-                                    ">
-                                        {{ tag['name'] }} ({{ tag['severity'] }}/10)
-                                    </span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <!-- Old schema fallback -->
-                                <h3 style="margin: 0;">
-                                    {{ symptom.structured_type or "Symptom" }}
-                                    <small style="font-weight: normal;">
-                                        - Severity {{ symptom.severity }}/10
-                                    </small>
-                                </h3>
-                            {% endif %}
+            <!-- Date and Time -->
+            <div style="
+                margin-bottom: var(--space-3);
+                font-size: var(--text-sm);
+                color: var(--color-text-secondary);
+            ">
+                {% if symptom.start_time %}
+                <div>{{ symptom.start_time.strftime('%b %d, %Y • %I:%M %p') }}</div>
+                {% if symptom.end_timestamp %}
+                <div style="margin-top: var(--space-1);">
+                    Ended: {{ symptom.end_timestamp.strftime('%I:%M %p') }}
+                    <span style="color: var(--color-text-tertiary);">
+                        ({{ ((symptom.end_timestamp - symptom.start_time).total_seconds() / 3600) | round(1) }}h duration)
+                    </span>
+                </div>
+                {% else %}
+                <div style="margin-top: var(--space-1); font-style: italic; color: var(--color-text-tertiary);">
+                    Ongoing or no end time logged
+                </div>
+                {% endif %}
+                {% else %}
+                <div>{{ symptom.timestamp.strftime('%b %d, %Y • %I:%M %p') }}</div>
+                {% endif %}
+            </div>
 
-                            <!-- Time Display -->
-                            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--muted-color);">
-                                {% if symptom.start_time %}
-                                    <strong>Started:</strong> {{ symptom.start_time.strftime('%b %d, %Y at %I:%M %p') }}
-                                    {% if symptom.end_time %}
-                                        <br><strong>Ended:</strong> {{ symptom.end_time.strftime('%b %d, %Y at %I:%M %p') }}
-                                        {% set duration = (symptom.end_time - symptom.start_time).total_seconds() / 3600 %}
-                                        ({{ "%.1f"|format(duration) }} hours)
-                                    {% else %}
-                                        <br><em>Ongoing or no end time logged</em>
-                                    {% endif %}
-                                {% else %}
-                                    {{ symptom.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
-                                {% endif %}
-                            </p>
+            <!-- Delete button (absolute positioned) -->
+            <button
+                hx-delete="/symptoms/{{ symptom.id }}"
+                hx-confirm="Are you sure you want to delete this symptom log?"
+                hx-target="closest .meal-card"
+                hx-swap="outerHTML"
+                class="icon-button danger"
+                style="position: absolute; top: var(--space-3); right: var(--space-3);"
+                onclick="event.preventDefault(); event.stopPropagation();"
+                @click.stop
+            >
+                <svg class="icon icon-xs" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
+                </svg>
+            </button>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div style="text-align: center; padding: var(--space-12) var(--space-6); color: var(--color-text-secondary);">
+        <svg class="icon icon-lg" aria-hidden="true" style="margin-bottom: var(--space-4); color: var(--color-accent-green);">
+            <use href="/static/icons/lucide-sprite.svg#list"></use>
+        </svg>
+        <p style="margin-bottom: var(--space-4); font-size: var(--text-lg);">No symptoms logged yet</p>
+        <a href="/symptoms/log" class="btn-primary">Log Your First Symptom</a>
+    </div>
+    {% endif %}
 
-                            <!-- Episode Link -->
-                            {% if symptom.episode_id %}
-                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
-                                <span style="background: #e7f3ff; color: #004085; padding: 0.2rem 0.5rem; border-radius: 4px;">
-                                    🔗 Part of episode (linked to symptom #{{ symptom.episode_id }})
-                                </span>
-                            </p>
-                            {% endif %}
-
-                            <!-- AI Badge -->
-                            {% if symptom.ai_elaborated %}
-                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
-                                <span style="background: #f0f0f0; color: #333; padding: 0.2rem 0.5rem; border-radius: 4px;">
-                                    🤖 AI{% if symptom.user_edited_elaboration %} (edited){% endif %}
-                                </span>
-                            </p>
-                            {% endif %}
-                        </div>
-
-                        <!-- Severity Badge (most severe tag or overall) -->
-                        <div style="text-align: right;">
-                            {% if symptom.tags %}
-                                {% set max_severity = symptom.tags | selectattr('severity') | map(attribute='severity') | max %}
-                            {% else %}
-                                {% set max_severity = symptom.severity %}
-                            {% endif %}
-                            <span style="
-                                display: inline-block;
-                                padding: 0.5rem 0.8rem;
-                                border-radius: 4px;
-                                font-weight: bold;
-                                font-size: 1rem;
-                                {% if max_severity >= 8 %}
-                                    background: #f8d7da; color: #721c24;
-                                {% elif max_severity >= 5 %}
-                                    background: #fff3cd; color: #856404;
-                                {% else %}
-                                    background: #d4edda; color: #155724;
-                                {% endif %}
-                            ">
-                                {{ max_severity }}/10
-                            </span>
-                        </div>
-                    </div>
-                </header>
-
-                <!-- Notes/Description -->
-                <section>
-                    {% if symptom.notes %}
-                    <p><strong>{% if symptom.ai_elaborated %}AI Description:{% else %}Notes:{% endif %}</strong></p>
-                    <p style="margin-left: 1rem;">
-                        {{ symptom.notes }}
-                    </p>
-                    {% elif symptom.raw_description %}
-                    <p><strong>Description:</strong></p>
-                    <p style="margin-left: 1rem; font-style: italic;">
-                        "{{ symptom.raw_description }}"
-                    </p>
-                    {% endif %}
-
-                    {% if symptom.clarification_history and symptom.clarification_history|length > 0 %}
-                    <details style="margin-top: 1rem;">
-                        <summary>AI Clarification History</summary>
-                        <div style="margin-left: 1rem; margin-top: 0.5rem;">
-                            {% for qa in symptom.clarification_history %}
-                            <div style="margin-bottom: 0.5rem;">
-                                <p style="margin: 0;"><strong>Q:</strong> {{ qa.question }}</p>
-                                <p style="margin: 0; margin-left: 1rem;">
-                                    <strong>A:</strong>
-                                    {% if qa.skipped %}
-                                        <em>(skipped)</em>
-                                    {% else %}
-                                        {{ qa.answer }}
-                                    {% endif %}
-                                </p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </details>
-                    {% endif %}
-                </section>
-
-                <!-- Actions -->
-                <footer>
-                    <a href="/symptoms/{{ symptom.id }}/edit" role="button" class="secondary" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
-                        Edit
-                    </a>
-                    <button
-                        hx-delete="/symptoms/{{ symptom.id }}"
-                        hx-confirm="Are you sure you want to delete this symptom?"
-                        hx-target="closest .symptom-card"
-                        hx-swap="outerHTML"
-                        class="secondary"
-                        style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"
-                    >
-                        Delete
-                    </button>
-                </footer>
-            </article>
-            {% endfor %}
-        {% else %}
-            <article>
-                <p><em>No symptoms logged yet.</em></p>
-                <a href="/symptoms/log" role="button">Log your first symptom</a>
-            </article>
-        {% endif %}
-    </section>
-
-    <section>
-        <a href="/" role="button" class="secondary">Back to Home</a>
-    </section>
-</article>
+    <!-- Back Button -->
+    <div style="margin-top: var(--space-8); text-align: center;">
+        <a href="/" class="btn-ghost">
+            <svg class="icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#arrow-left"></use>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+</div>
 {% endblock %}

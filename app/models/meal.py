@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, Float
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -17,6 +17,8 @@ class Meal(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     country = Column(String(100))  # Optional: where meal was consumed (e.g., "USA", "France", "Japan")
     image_path = Column(String(512))  # Path to uploaded meal image
+    meal_image_crop_x = Column(Float, default=50.0)  # X coordinate for circular crop (percentage from left)
+    meal_image_crop_y = Column(Float, default=50.0)  # Y coordinate for circular crop (percentage from top)
     user_notes = Column(Text)  # User's own notes about the meal
     ai_raw_response = Column(Text)  # Raw JSON response from Claude for debugging
     ai_suggested_ingredients = Column(JSONB)  # Original AI suggestions for evals/data science

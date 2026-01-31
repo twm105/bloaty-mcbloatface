@@ -1,0 +1,181 @@
+/**
+ * Badge Components
+ */
+
+/* ============================================
+   BASE BADGE
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* ============================================
+   AI BADGE (redesigned from yellow)
+   ============================================ */
+
+.badge-ai {
+  background: var(--color-bg-secondary);
+  border: 1px solid rgba(69, 123, 157, 0.4);
+  color: var(--color-info-light);
+  font-weight: var(--font-semibold);
+}
+
+/* ============================================
+   SEVERITY PILLS (symptom tags)
+   ============================================ */
+
+.severity-pill {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  color: white;
+}
+
+/* Low severity (1-3) */
+.severity-low {
+  background: var(--color-success);
+}
+
+/* Medium severity (4-7) */
+.severity-medium {
+  background: var(--color-warning);
+}
+
+/* High severity (8-10) */
+.severity-high {
+  background: var(--color-error);
+}
+
+/* Helper to calculate severity class dynamically */
+/* Use with: class="severity-pill severity-{{ 'low' if severity <= 3 else 'medium' if severity <= 7 else 'high' }}" */
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+
+.badge-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.badge-warning {
+  background: var(--color-warning);
+  color: white;
+}
+
+.badge-error {
+  background: var(--color-error);
+  color: white;
+}
+
+.badge-info {
+  background: var(--color-info);
+  color: white;
+}
+
+/* ============================================
+   OUTLINED BADGES
+   ============================================ */
+
+.badge-outline {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.badge-outline.badge-success {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.badge-outline.badge-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.badge-outline.badge-error {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.badge-outline.badge-info {
+  color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+/* ============================================
+   INGREDIENT PILLS (for meal history)
+   ============================================ */
+
+.ingredient-pill {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+  margin: 2px;
+}
+
+/* Ingredient state variants */
+.ingredient-pill.raw {
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.ingredient-pill.cooked {
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+}
+
+.ingredient-pill.processed {
+  border: 1px solid var(--color-info);
+  color: var(--color-info);
+}
+
+/* ============================================
+   BADGE GROUPS
+   ============================================ */
+
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ============================================
+   BADGE WITH REMOVE BUTTON
+   ============================================ */
+
+.badge-removable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-right: var(--space-1);
+}
+
+.badge-removable .remove-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: opacity var(--transition-fast);
+}
+
+.badge-removable .remove-btn:hover {
+  opacity: 1;
+}

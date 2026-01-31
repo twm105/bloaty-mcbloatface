@@ -12,21 +12,48 @@
             {% if meal_ingredient.source == 'ai' %}
             <span style="font-size: 11px; color: #666;" title="AI-suggested">🤖</span>
             {% endif %}
-            <br>
-            <small>
-                <span style="display: inline-block; padding: 0.2rem 0.5rem; background: var(--muted-color); border-radius: 3px; font-size: 11px;">
-                    {{ meal_ingredient.state.value }}
-                </span>
-                |
-                <span
-                    id="quantity-{{ meal_ingredient.id }}"
-                    onclick="makeEditable(this, {{ meal_ingredient.meal_id }}, {{ meal_ingredient.id }}, 'quantity')"
-                    style="cursor: text; padding: 0.1rem 0.3rem; border-radius: 3px; {% if not meal_ingredient.quantity_description %}color: #999; font-style: italic;{% endif %}"
-                    title="Click to edit quantity"
-                >
-                    {{ meal_ingredient.quantity_description or 'Add quantity' }}
-                </span>
-            </small>
+
+            <div style="display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-2);">
+                <!-- State Dropdown -->
+                <div>
+                    <select
+                        id="state-{{ meal_ingredient.id }}"
+                        onchange="updateIngredientState({{ meal_ingredient.id }}, this.value)"
+                        style="
+                            font-size: var(--text-xs);
+                            padding: 4px 8px;
+                            border-radius: var(--radius-sm);
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                            background: var(--color-bg-secondary);
+                            color: var(--color-text-primary);
+                            cursor: pointer;
+                        "
+                    >
+                        <option value="raw" {% if meal_ingredient.state.value == 'raw' %}selected{% endif %}>Raw</option>
+                        <option value="cooked" {% if meal_ingredient.state.value == 'cooked' %}selected{% endif %}>Cooked</option>
+                        <option value="processed" {% if meal_ingredient.state.value == 'processed' %}selected{% endif %}>Processed</option>
+                    </select>
+                </div>
+
+                <span style="color: var(--color-text-secondary);">•</span>
+
+                <!-- Quantity (editable text) -->
+                <div style="flex: 1;">
+                    <span
+                        id="quantity-{{ meal_ingredient.id }}"
+                        onclick="makeEditable(this, {{ meal_ingredient.meal_id }}, {{ meal_ingredient.id }}, 'quantity')"
+                        style="
+                            cursor: text;
+                            color: {% if meal_ingredient.quantity_description %}var(--color-text-primary){% else %}var(--color-text-secondary){% endif %};
+                            font-style: {% if not meal_ingredient.quantity_description %}italic{% else %}normal{% endif %};
+                            font-size: var(--text-sm);
+                        "
+                        title="Click to edit quantity"
+                    >
+                        {{ meal_ingredient.quantity_description or 'Add quantity' }}
+                    </span>
+                </div>
+            </div>
         </div>
         <div style="text-align: right;">
             <button

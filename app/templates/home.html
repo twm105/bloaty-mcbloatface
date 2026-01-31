@@ -3,75 +3,172 @@
 {% block title %}Home - Bloaty McBloatface{% endblock %}
 
 {% block content %}
-<article>
-    <header>
-        <h1>Welcome to Bloaty McBloatface</h1>
-        <p>Track your meals and symptoms to identify potential trigger foods.</p>
-    </header>
+<!-- Hero Section -->
+<section style="text-align: center; margin: 3rem auto; max-width: 600px;">
+    <p style="font-size: var(--text-xl); color: var(--color-text-secondary); margin-bottom: 3rem;">
+        Track meals, identify triggers, take control
+    </p>
+</section>
 
-    <!-- Disclaimer notice for first-time users -->
-    {% if not disclaimer_acknowledged %}
-    <div class="disclaimer-box">
-        <h3>⚠️ Important Notice</h3>
-        <p>
-            Before using this app, please review and acknowledge our
-            <a href="/disclaimer">medical disclaimer</a> and <a href="/privacy">privacy policy</a>.
-        </p>
-    </div>
-    {% endif %}
+<!-- Primary Actions (side-by-side on desktop) -->
+<section style="margin-bottom: 3rem;">
+    <div class="home-primary-actions" style="display: grid; gap: var(--space-6); grid-template-columns: 1fr; max-width: 900px; margin: 0 auto;">
+        <!-- Log Meal - Upload Area -->
+        <div>
+            <form
+                action="/meals/create"
+                method="post"
+                enctype="multipart/form-data"
+                x-data="{
+                    imagePreview: null,
+                    isUploading: false,
+                    handleFileChange(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.imagePreview = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                            // Auto-submit form after file selection
+                            this.isUploading = true;
+                            event.target.form.submit();
+                        }
+                    }
+                }"
+            >
+                <!-- Hidden timestamp field (auto-set to now) -->
+                <input
+                    type="hidden"
+                    name="meal_timestamp"
+                    :value="new Date().toISOString().slice(0, 16)"
+                >
 
-    <!-- Main action cards -->
-    <section>
-        <div class="grid">
-            <!-- Log Meal Card -->
-            <article>
-                <header>
-                    <h2>🍽️ Log a Meal</h2>
-                </header>
-                <p>Upload a photo of your meal and let AI help identify ingredients, or add them manually.</p>
-                <footer>
-                    <a href="/meals/log" role="button">Log Meal</a>
-                </footer>
-            </article>
+                <!-- File upload area with button -->
+                <div
+                    class="upload-area"
+                    style="
+                        border: 2px dashed var(--color-accent-green);
+                        border-radius: var(--radius-md);
+                        padding: var(--space-8);
+                        text-align: center;
+                        background: var(--color-bg-secondary);
+                        transition: all var(--transition-base);
+                        min-height: 200px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                    "
+                    @dragover.prevent="$el.style.borderColor = 'var(--color-accent-green-light)'; $el.style.background = 'rgba(45, 106, 79, 0.05)'"
+                    @dragleave.prevent="$el.style.borderColor = 'var(--color-accent-green)'; $el.style.background = 'var(--color-bg-secondary)'"
+                    @drop.prevent="
+                        $el.style.borderColor = 'var(--color-accent-green)';
+                        $el.style.background = 'var(--color-bg-secondary)';
+                        if ($event.dataTransfer.files[0]) {
+                            document.getElementById('meal-image-home').files = $event.dataTransfer.files;
+                            handleFileChange({ target: { files: $event.dataTransfer.files } });
+                        }
+                    "
+                >
+                    <svg class="icon icon-lg" aria-hidden="true" style="margin-bottom: var(--space-4); color: var(--color-accent-green);">
+                        <use href="/static/icons/lucide-sprite.svg#image"></use>
+                    </svg>
+                    <h2 style="font-size: var(--text-lg); margin-bottom: var(--space-2);">Log Meal</h2>
+                    <p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+                        Drag & drop meal photo here
+                    </p>
 
-            <!-- Log Symptoms Card -->
-            <article>
-                <header>
-                    <h2>📋 Log Symptoms</h2>
-                </header>
-                <p>Describe how you're feeling and track gastro symptoms to correlate with meals.</p>
-                <footer>
-                    <a href="/symptoms/log" role="button">Log Symptoms</a>
-                </footer>
-            </article>
+                    <!-- Upload Button -->
+                    <label for="meal-image-home" class="btn-primary">
+                        <svg class="icon icon-sm" aria-hidden="true">
+                            <use href="/static/icons/lucide-sprite.svg#upload"></use>
+                        </svg>
+                        Choose File
+                    </label>
+                    <input
+                        type="file"
+                        id="meal-image-home"
+                        name="image"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        @change="handleFileChange"
+                        style="display: none;"
+                        required
+                    >
+
+                    <!-- Loading indicator -->
+                    <div x-show="isUploading" x-cloak style="margin-top: var(--space-4);">
+                        <p style="font-size: var(--text-sm); color: var(--color-text-secondary);">
+                            Uploading...
+                        </p>
+                    </div>
+                </div>
+            </form>
         </div>
-    </section>
 
-    <!-- Quick links -->
-    <section style="margin-top: 2rem;">
-        <h3>Quick Access</h3>
-        <div class="grid">
-            <a href="/meals/history" role="button" class="secondary">View Meal History</a>
-            <a href="/symptoms/history" role="button" class="secondary">View Symptom History</a>
-            <a href="/analysis" role="button" class="contrast">View Analysis & Patterns</a>
-        </div>
-    </section>
-
-    <!-- Getting started info -->
-    <section style="margin-top: 2rem;">
-        <details>
-            <summary>How it works</summary>
-            <ol>
-                <li><strong>Log meals:</strong> Take photos of what you eat, AI identifies ingredients</li>
-                <li><strong>Track symptoms:</strong> Note any gastro symptoms with timestamps</li>
-                <li><strong>Find patterns:</strong> AI analyzes correlations between ingredients and symptoms</li>
-                <li><strong>Make informed choices:</strong> Use insights to discuss potential triggers with your doctor</li>
-            </ol>
-            <p style="margin-top: 1rem; font-size: 14px; color: var(--muted-color);">
-                <strong>Remember:</strong> This app helps you track data, but only a healthcare professional
-                can provide proper medical diagnosis and advice.
+        <!-- Log Symptoms - Button Area -->
+        <div style="
+            border: 2px solid var(--color-accent-green);
+            border-radius: var(--radius-md);
+            padding: var(--space-8);
+            text-align: center;
+            background: var(--color-bg-secondary);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        ">
+            <svg class="icon icon-lg" aria-hidden="true" style="margin-bottom: var(--space-4); color: var(--color-accent-green);">
+                <use href="/static/icons/lucide-sprite.svg#list"></use>
+            </svg>
+            <h2 style="font-size: var(--text-lg); margin-bottom: var(--space-2);">Log Symptoms</h2>
+            <p style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+                Track how you're feeling
             </p>
-        </details>
-    </section>
-</article>
+            <a href="/symptoms/log" class="btn-primary">
+                Record Symptoms
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Secondary Actions (Ghost Buttons) -->
+<section style="margin-bottom: 3rem;">
+    <div class="btn-group justify-center">
+        <a href="/meals/history" class="btn-ghost">Meal History</a>
+        <span style="color: var(--color-text-secondary);">|</span>
+        <a href="/symptoms/history" class="btn-ghost">Symptom History</a>
+        <span style="color: var(--color-text-secondary);">|</span>
+        <a href="/analysis" class="btn-ghost">Analysis</a>
+    </div>
+</section>
+
+<!-- Disclaimer notice for first-time users -->
+{% if not disclaimer_acknowledged %}
+<section style="max-width: 700px; margin: 0 auto;">
+    <div class="disclaimer disclaimer-info">
+        <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+            <use href="/static/icons/lucide-sprite.svg#info"></use>
+        </svg>
+        <div class="disclaimer-content">
+            <div class="disclaimer-title">Important Notice</div>
+            <div class="disclaimer-text">
+                <p>
+                    Before using this app, please review and acknowledge our
+                    <a href="/disclaimer">medical disclaimer</a> and <a href="/privacy">privacy policy</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<style>
+    @media (min-width: 768px) {
+        .home-primary-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
 {% endblock %}

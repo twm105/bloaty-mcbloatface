@@ -3,110 +3,130 @@
 {% block title %}Meal History - Bloaty McBloatface{% endblock %}
 
 {% block content %}
-<article>
-    <header>
-        <h1>Meal History</h1>
-        <p>View and manage your logged meals.</p>
-    </header>
+<div style="margin-bottom: var(--space-6);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+        <div>
+            <h1 style="margin-bottom: var(--space-2);">Meal History</h1>
+            <p class="text-muted" style="margin: 0;">View and manage your logged meals</p>
+        </div>
+        <a href="/meals/log" class="btn-primary">
+            <svg class="icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#plus"></use>
+            </svg>
+            Log New Meal
+        </a>
+    </div>
 
-    <section>
-        <a href="/meals/log" role="button">+ Log New Meal</a>
-    </section>
+    <!-- Meals Grid -->
+    {% if meals %}
+    <div class="card-grid" x-data="{ expandedMeal: null }">
+        {% for meal in meals %}
+        <a
+            href="/meals/{{ meal.id }}/edit-ingredients"
+            class="meal-card"
+            style="text-decoration: none; color: inherit; cursor: pointer; position: relative;"
+            onclick="if (event.target.closest('.ingredient-toggle') || event.target.closest('.icon-button')) { event.preventDefault(); return false; }"
+        >
+            <!-- Circular Image -->
+            {% if meal.image_path %}
+            <div class="meal-card-image-container">
+                <img
+                    src="/{{ meal.image_path }}"
+                    alt="{{ meal.name or 'Meal' }}"
+                    class="meal-thumbnail-lg"
+                    style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;"
+                    loading="lazy"
+                >
+            </div>
+            {% endif %}
 
-    <!-- Meals List -->
-    <section>
-        {% if meals %}
-            {% for meal in meals %}
-            <article class="meal-card" x-data="{ showDetails: false }">
-                <div class="grid">
-                    <!-- Meal Image (if available) -->
-                    {% if meal.image_path %}
-                    <div style="max-width: 200px;">
-                        <img
-                            src="/{{ meal.image_path }}"
-                            alt="Meal"
-                            style="width: 100%; height: auto; border-radius: 8px;"
-                        >
-                    </div>
-                    {% endif %}
+            <!-- Meal Name -->
+            <h3 class="meal-card-name">{{ meal.name or 'Untitled Meal' }}</h3>
 
-                    <!-- Meal Info -->
-                    <div>
-                        <h3 style="margin-top: 0; margin-bottom: 0.25rem;">
-                            {{ meal.name or 'Untitled Meal' }}
-                        </h3>
-                        <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: #666;">
-                            {{ meal.timestamp.strftime('%B %d, %Y') }} at {{ meal.timestamp.strftime('%I:%M %p') }}
-                            {% if meal.country %}
-                            • 📍 {{ meal.country }}
-                            {% endif %}
-                        </p>
+            <!-- Metadata -->
+            <div class="meal-card-meta">
+                <div>{{ meal.timestamp.strftime('%b %d, %Y') }} • {{ meal.timestamp.strftime('%I:%M %p') }}</div>
+                {% if meal.country %}
+                <div style="margin-top: var(--space-1);">
+                    <svg class="icon icon-xs" aria-hidden="true" style="vertical-align: text-bottom;">
+                        <use href="/static/icons/lucide-sprite.svg#map-pin"></use>
+                    </svg>
+                    {{ meal.country }}
+                </div>
+                {% else %}
+                <!-- Empty placeholder to maintain vertical spacing -->
+                <div style="height: 20px;"></div>
+                {% endif %}
+            </div>
 
-                        {% if meal.user_notes %}
-                        <p style="margin-top: 0.5rem;"><small>{{ meal.user_notes }}</small></p>
-                        {% endif %}
+            <!-- Ingredients (collapsible) -->
+            {% if meal.meal_ingredients %}
+            <div style="margin-top: var(--space-4);">
+                <button
+                    type="button"
+                    @click.stop="expandedMeal === {{ meal.id }} ? expandedMeal = null : expandedMeal = {{ meal.id }}"
+                    class="ingredient-toggle btn-ghost btn-sm"
+                    style="width: 100%;"
+                >
+                    <span>{{ meal.meal_ingredients|length }} ingredient{{ 's' if meal.meal_ingredients|length != 1 else '' }}</span>
+                    <svg class="icon icon-xs" aria-hidden="true" :style="expandedMeal === {{ meal.id }} ? 'transform: rotate(180deg)' : ''">
+                        <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
+                    </svg>
+                </button>
 
-                        <!-- Ingredients Summary -->
-                        {% if meal.meal_ingredients %}
-                        <div style="margin-top: 1rem;">
-                            <button
-                                @click="showDetails = !showDetails"
-                                class="secondary"
-                                style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"
-                            >
-                                <span x-text="showDetails ? '▼' : '▶'"></span>
-                                {{ meal.meal_ingredients|length }} ingredient(s)
-                            </button>
-
-                            <!-- Ingredients List (collapsible) -->
-                            <div x-show="showDetails" x-cloak style="margin-top: 0.5rem;">
-                                <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem;">
-                                    {% for meal_ingredient in meal.meal_ingredients %}
-                                    <li>
-                                        <strong>{{ meal_ingredient.ingredient.name }}</strong>
-                                        ({{ meal_ingredient.state.value }})
-                                        {% if meal_ingredient.quantity_description %}
-                                        - {{ meal_ingredient.quantity_description }}
-                                        {% endif %}
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                        {% else %}
-                        <p><small><em>No ingredients logged</em></small></p>
-                        {% endif %}
-
-                        <!-- Actions -->
-                        <div style="margin-top: 1rem;">
-                            <a href="/meals/{{ meal.id }}/edit-ingredients" role="button" class="secondary" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">
-                                Edit
-                            </a>
-                            <button
-                                hx-delete="/meals/{{ meal.id }}"
-                                hx-target="closest .meal-card"
-                                hx-swap="outerHTML swap:0.3s"
-                                class="secondary"
-                                style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"
-                                title="Delete this meal"
-                            >
-                                Delete
-                            </button>
-                        </div>
+                <!-- Ingredients List -->
+                <div x-show="expandedMeal === {{ meal.id }}" x-cloak style="margin-top: var(--space-3);">
+                    <div class="badge-group" style="justify-content: center;">
+                        {% for meal_ingredient in meal.meal_ingredients %}
+                        <span class="ingredient-pill {{ meal_ingredient.state.value }}">
+                            {{ meal_ingredient.ingredient.name }}
+                        </span>
+                        {% endfor %}
                     </div>
                 </div>
-            </article>
-            {% endfor %}
-        {% else %}
-            <article>
-                <p><em>No meals logged yet.</em></p>
-                <a href="/meals/log" role="button">Log your first meal</a>
-            </article>
-        {% endif %}
-    </section>
+            </div>
+            {% else %}
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); font-style: italic; text-align: center; margin: var(--space-4) 0;">
+                No ingredients logged
+            </p>
+            {% endif %}
 
-    <section>
-        <a href="/" role="button" class="secondary">Back to Home</a>
-    </section>
-</article>
+            <!-- Delete button (absolute positioned) -->
+            <button
+                hx-delete="/meals/{{ meal.id }}"
+                hx-target="closest .meal-card"
+                hx-swap="outerHTML swap:0.3s"
+                hx-confirm="Are you sure you want to delete this meal? This action cannot be undone."
+                class="icon-button danger"
+                style="position: absolute; top: var(--space-3); right: var(--space-3);"
+                onclick="event.preventDefault(); event.stopPropagation();"
+                @click.stop
+            >
+                <svg class="icon icon-xs" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
+                </svg>
+            </button>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: var(--space-12);">
+        <svg class="icon icon-lg" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary);">
+            <use href="/static/icons/lucide-sprite.svg#image"></use>
+        </svg>
+        <p style="font-size: var(--text-lg); margin-bottom: var(--space-6);">No meals logged yet</p>
+        <a href="/meals/log" class="btn-primary">Log your first meal</a>
+    </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div style="margin-top: var(--space-8); text-align: center;">
+        <a href="/" class="btn-ghost">
+            <svg class="icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#arrow-left"></use>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+</div>
 {% endblock %}

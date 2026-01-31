@@ -1,0 +1,156 @@
+/**
+ * Disclaimer Components
+ */
+
+/* ============================================
+   BASE DISCLAIMER (redesigned from yellow)
+   ============================================ */
+
+.disclaimer {
+  background: rgba(212, 115, 75, 0.08);
+  border: 1px solid rgba(212, 115, 75, 0.3);
+  border-left: 3px solid var(--color-highlight-terra);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin: var(--space-6) 0;
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.disclaimer-icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: var(--color-highlight-terra);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.disclaimer-content {
+  flex: 1;
+}
+
+.disclaimer-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.disclaimer-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.disclaimer-text p {
+  margin-bottom: var(--space-2);
+}
+
+.disclaimer-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   FOOTER DISCLAIMER (with distinct background)
+   ============================================ */
+
+.disclaimer-footer {
+  background: var(--color-bg-secondary);
+  border: 1px solid rgba(212, 115, 75, 0.3);
+  border-left: 3px solid var(--color-highlight-terra);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+/* ============================================
+   COLLAPSIBLE DISCLAIMER
+   ============================================ */
+
+.disclaimer-collapsible .disclaimer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.disclaimer-collapsible .disclaimer-toggle {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), transform var(--transition-base);
+}
+
+.disclaimer-collapsible .disclaimer-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.disclaimer-collapsible.collapsed .disclaimer-toggle {
+  transform: rotate(-90deg);
+}
+
+.disclaimer-collapsible.collapsed .disclaimer-content {
+  display: none;
+}
+
+.disclaimer-collapsible.collapsed .disclaimer-text {
+  display: none;
+}
+
+/* ============================================
+   DISCLAIMER VARIANTS
+   ============================================ */
+
+/* Info disclaimer (blue accent) */
+.disclaimer-info {
+  background: rgba(69, 123, 157, 0.08);
+  border: 1px solid rgba(69, 123, 157, 0.3);
+  border-left: 3px solid var(--color-info);
+}
+
+.disclaimer-info .disclaimer-icon {
+  color: var(--color-info);
+}
+
+/* Success disclaimer (green accent) */
+.disclaimer-success {
+  background: rgba(82, 183, 136, 0.08);
+  border: 1px solid rgba(82, 183, 136, 0.3);
+  border-left: 3px solid var(--color-success);
+}
+
+.disclaimer-success .disclaimer-icon {
+  color: var(--color-success);
+}
+
+/* Error disclaimer (red accent) */
+.disclaimer-error {
+  background: rgba(230, 57, 70, 0.08);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  border-left: 3px solid var(--color-error);
+}
+
+.disclaimer-error .disclaimer-icon {
+  color: var(--color-error);
+}
+
+/* ============================================
+   COMPACT DISCLAIMER (smaller padding)
+   ============================================ */
+
+.disclaimer-compact {
+  padding: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.disclaimer-compact .disclaimer-text {
+  font-size: var(--text-xs);
+}

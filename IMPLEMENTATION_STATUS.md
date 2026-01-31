@@ -1,7 +1,7 @@
 # Bloaty McBloatface - Implementation Status
 
 **Last Updated:** January 31, 2026
-**Session:** Symptom Logging & History Page Debug
+**Session:** UI/UX Redesign - Dark Theme Implementation
 **Commit:** (pending)
 
 ## ✅ Completed Features
@@ -70,6 +70,44 @@
 - ✅ Delete meals and symptoms
 - ✅ Edit symptoms (dedicated edit page)
 - ⚠️ Missing: Date range filtering, meal editing UI
+
+### UI/UX Redesign - Dark Theme - COMPLETE (Phase 1)
+**Goal:** Transform from Pico.css Notion aesthetic to elegant, minimal dark theme
+
+**Completed:**
+- ✅ Comprehensive design system documentation (`/DESIGN_PRINCIPLES.md`)
+- ✅ CSS architecture overhaul:
+  - Created `/app/static/css/design-tokens.css` - All design variables
+  - Created `/app/static/css/base.css` - Replaces Pico.css
+  - Created modular component CSS (buttons, cards, forms, navigation, badges, images, disclaimers, icons)
+- ✅ Icon system - Lucide Icons (409KB sprite, no emojis)
+- ✅ Template updates:
+  - `base.html` - Dark nav, terracotta disclaimer, removed Pico.css
+  - `home.html` - Streamlined (40% less vertical height)
+  - `meals/history.html` - Grid layout with circular AI-cropped images
+- ✅ Database schema - Added `meal_image_crop_x` and `meal_image_crop_y` columns
+- ✅ AI image crop service (`/app/services/image_crop.py`) - Async circular crop detection
+- ✅ Migration created (`a1b2c3d4e5f6_add_meal_image_crop_coordinates.py`)
+
+**Design System:**
+- 60/30/10 color palette (dark/green/terracotta)
+- Typography: 2-4px smaller, lighter weights
+- Border radius: 4px/8px/12px/full
+- WCAG AAA compliance for contrast
+- Responsive grid layouts
+
+**Still Using Old Design:**
+- `/meals/log.html`, `/meals/edit_ingredients.html`
+- `/symptoms/log.html`, `/symptoms/history.html`
+- `/analysis.html`, `/settings.html`
+
+**Next Steps:**
+- Apply migration: `alembic upgrade head`
+- Integrate AI crop detection into meal upload endpoint
+- Update remaining templates with new design system
+- Test responsive design and accessibility
+
+**Documentation:** See `/REDESIGN_SUMMARY.md` for full implementation details
 
 ## 🚧 Next Priorities (From MVP Plan)
 
@@ -184,6 +222,9 @@ None currently - recent sessions fixed:
 - `c362f51a0834` - Add symptom tags and episodes
 - `a20f1e06adcf` - Add AI generated text and final notes to symptoms
 
+**Migrations pending:**
+- `a1b2c3d4e5f6` - Add meal image crop coordinates (NOT YET APPLIED)
+
 **Sample Data:**
 - 10 ingredient categories seeded
 - Test meals with AI-analyzed ingredients
@@ -198,6 +239,27 @@ None currently - recent sessions fixed:
 **Models:**
 - `haiku_model=claude-sonnet-4-5-20250929`
 - `sonnet_model=claude-sonnet-4-5-20250929`
+
+## 🔮 Future Enhancements (Post-MVP)
+
+### Mobile Camera Integration
+**Status:** Planned, not prioritized
+**Description:** Add native camera capture for mobile devices (iOS/Android)
+- Direct photo capture within the app (vs file upload)
+- May require PWA features or native wrapper
+- Icon choice: Currently using "Image/Photo" icon (NOT "Camera") to differentiate from this future feature
+
+### Visual Meal Similarity Detection
+**Status:** Research needed
+**Description:** Detect visually similar meals to flag potential duplicates
+- Use case: "Did you already log this meal today?"
+- Technical approach: Embedding model (CLIP, ResNet, or similar) to generate image embeddings
+- Compare embeddings with cosine similarity
+- Alert user if similarity > threshold (e.g., 0.85)
+- May require vector database (pgvector extension for PostgreSQL)
+- Cost considerations: Embedding API costs vs self-hosted model
+- **Do not implement now** - focus on core MVP features first
+- Can refine with evals later if needed
 
 ## 📝 Next Session TODO
 

@@ -403,6 +403,32 @@ async def update_ingredient(
     }
 
 
+@router.patch("/ingredients/{meal_ingredient_id}/state")
+async def update_ingredient_state(
+    meal_ingredient_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Update ingredient state (raw/cooked/processed)."""
+    data = await request.json()
+    new_state = data.get("state")
+
+    if new_state not in ["raw", "cooked", "processed"]:
+        raise HTTPException(status_code=400, detail="Invalid state")
+
+    # Update state
+    meal_ingredient = meal_service.update_ingredient_state(
+        db=db,
+        meal_ingredient_id=meal_ingredient_id,
+        state=IngredientState(new_state)
+    )
+
+    if not meal_ingredient:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+
+    return {"status": "success", "state": new_state}
+
+
 @router.delete("/{meal_id}")
 async def delete_meal(
     meal_id: int,

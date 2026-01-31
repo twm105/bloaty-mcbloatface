@@ -290,6 +290,35 @@ class MealService:
         return meal_ingredient
 
     @staticmethod
+    def update_ingredient_state(
+        db: Session,
+        meal_ingredient_id: int,
+        state: IngredientState
+    ) -> Optional[MealIngredient]:
+        """
+        Update an ingredient's state (raw/cooked/processed).
+
+        Args:
+            db: Database session
+            meal_ingredient_id: MealIngredient ID
+            state: New ingredient state
+
+        Returns:
+            Updated MealIngredient or None if not found
+        """
+        meal_ingredient = db.query(MealIngredient).filter(
+            MealIngredient.id == meal_ingredient_id
+        ).first()
+
+        if not meal_ingredient:
+            return None
+
+        meal_ingredient.state = state
+        db.commit()
+        db.refresh(meal_ingredient)
+        return meal_ingredient
+
+    @staticmethod
     def publish_meal(db: Session, meal_id: int) -> Optional[Meal]:
         """
         Publish a meal (change status from draft to published).
