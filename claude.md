@@ -124,5 +124,8 @@ bloaty-mcbloatface/
 - Sharing/collaboration features
 
 ## Current Status
-- Initial project scaffold created
-- Ready to build out directory structure and dependencies
+- ~65% MVP Complete (see IMPLEMENTATION_STATUS.md for details)
+- Working features: Meal tracking with AI analysis, symptom logging with AI elaboration, history management
+- Recent: UI/UX dark theme redesign with bug fixes (template rendering, icon sizing)
+- Next priority: Pattern analysis dashboard (Phase 8) - the core value proposition
+- See README.md and IMPLEMENTATION_STATUS.md for current progress

@@ -34,43 +34,58 @@
             href="/symptoms/{{ symptom.id }}/edit"
             class="meal-card"
             style="text-decoration: none; color: inherit; cursor: pointer; position: relative; padding: var(--space-5);"
-            onclick="if (event.target.closest('.icon-button')) { event.preventDefault(); return false; }"
+            @click="if ($event.target.closest('.icon-button')) $event.preventDefault()"
         >
-            <!-- Symptom Tags -->
-            {% if symptom.tags %}
-            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3);">
-                {% for tag in symptom.tags %}
-                <span class="severity-pill {% if tag['severity'] >= 7 %}severity-high{% elif tag['severity'] >= 4 %}severity-medium{% else %}severity-low{% endif %}">
-                    {{ tag['name'] }}
-                </span>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Date and Time -->
+            <!-- Date and Time (TOP) -->
             <div style="
                 margin-bottom: var(--space-3);
                 font-size: var(--text-sm);
                 color: var(--color-text-secondary);
             ">
                 {% if symptom.start_time %}
-                <div>{{ symptom.start_time.strftime('%b %d, %Y • %I:%M %p') }}</div>
-                {% if symptom.end_timestamp %}
-                <div style="margin-top: var(--space-1);">
-                    Ended: {{ symptom.end_timestamp.strftime('%I:%M %p') }}
-                    <span style="color: var(--color-text-tertiary);">
-                        ({{ ((symptom.end_timestamp - symptom.start_time).total_seconds() / 3600) | round(1) }}h duration)
-                    </span>
+                <div style="font-weight: var(--font-medium); color: var(--color-text-primary);">
+                    {{ symptom.start_time.strftime('%b %d, %Y • %I:%M %p') }}
                 </div>
                 {% else %}
-                <div style="margin-top: var(--space-1); font-style: italic; color: var(--color-text-tertiary);">
-                    Ongoing or no end time logged
+                <div style="font-weight: var(--font-medium); color: var(--color-text-primary);">
+                    {{ symptom.timestamp.strftime('%b %d, %Y • %I:%M %p') }}
                 </div>
-                {% endif %}
-                {% else %}
-                <div>{{ symptom.timestamp.strftime('%b %d, %Y • %I:%M %p') }}</div>
                 {% endif %}
             </div>
+
+            <!-- Ongoing Note (if applicable) -->
+            {% if symptom.start_time and not symptom.end_timestamp %}
+            <div style="margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--color-text-tertiary); font-style: italic;">
+                Ongoing or no end time logged
+            </div>
+            {% elif symptom.end_timestamp %}
+            <div style="margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--color-text-secondary);">
+                Ended: {{ symptom.end_timestamp.strftime('%I:%M %p') }}
+                <span style="color: var(--color-text-tertiary);">
+                    ({{ ((symptom.end_timestamp - symptom.start_time).total_seconds() / 3600) | round(1) }}h duration)
+                </span>
+            </div>
+            {% endif %}
+
+            <!-- Symptom Tags (max 2 visible, show +N) -->
+            {% if symptom.tags %}
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                {% set visible_tags = symptom.tags[:2] %}
+                {% set hidden_count = symptom.tags|length - 2 %}
+
+                {% for tag in visible_tags %}
+                <span class="severity-pill {% if tag['severity'] >= 7 %}severity-high{% elif tag['severity'] >= 4 %}severity-medium{% else %}severity-low{% endif %}">
+                    {{ tag['name'] }}
+                </span>
+                {% endfor %}
+
+                {% if hidden_count > 0 %}
+                <span class="severity-pill" style="background: var(--color-bg-secondary); color: var(--color-text-secondary); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    +{{ hidden_count }}
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <!-- Delete button (absolute positioned) -->
             <button
@@ -83,7 +98,7 @@
                 onclick="event.preventDefault(); event.stopPropagation();"
                 @click.stop
             >
-                <svg class="icon icon-xs" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
                     <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
                 </svg>
             </button>

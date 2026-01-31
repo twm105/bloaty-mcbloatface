@@ -21,11 +21,12 @@
     {% if meals %}
     <div class="card-grid" x-data="{ expandedMeal: null }">
         {% for meal in meals %}
-        <a
-            href="/meals/{{ meal.id }}/edit-ingredients"
+        <div
             class="meal-card"
-            style="text-decoration: none; color: inherit; cursor: pointer; position: relative;"
-            onclick="if (event.target.closest('.ingredient-toggle') || event.target.closest('.icon-button')) { event.preventDefault(); return false; }"
+            style="text-decoration: none; color: inherit; cursor: pointer; position: relative; display: flex; flex-direction: column; height: 100%;"
+            @click="if (!$event.target.closest('.ingredient-toggle') && !$event.target.closest('.icon-button')) {
+                window.location.href = '/meals/{{ meal.id }}/edit-ingredients';
+            }"
         >
             <!-- Circular Image -->
             {% if meal.image_path %}
@@ -44,24 +45,26 @@
             <h3 class="meal-card-name">{{ meal.name or 'Untitled Meal' }}</h3>
 
             <!-- Metadata -->
-            <div class="meal-card-meta">
+            <div class="meal-card-meta" style="margin-bottom: var(--space-2);">
                 <div>{{ meal.timestamp.strftime('%b %d, %Y') }} • {{ meal.timestamp.strftime('%I:%M %p') }}</div>
-                {% if meal.country %}
-                <div style="margin-top: var(--space-1);">
-                    <svg class="icon icon-xs" aria-hidden="true" style="vertical-align: text-bottom;">
-                        <use href="/static/icons/lucide-sprite.svg#map-pin"></use>
-                    </svg>
-                    {{ meal.country }}
-                </div>
-                {% else %}
-                <!-- Empty placeholder to maintain vertical spacing -->
-                <div style="height: 20px;"></div>
-                {% endif %}
             </div>
+
+            <!-- Spacer to push location and ingredients to bottom -->
+            <div style="flex-grow: 1;"></div>
+
+            <!-- Location (lower-justified, just above ingredients) -->
+            {% if meal.country %}
+            <div style="margin-bottom: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary);">
+                <svg class="icon icon-xs" aria-hidden="true" style="vertical-align: text-bottom;">
+                    <use href="/static/icons/lucide-sprite.svg#map-pin"></use>
+                </svg>
+                {{ meal.country }}
+            </div>
+            {% endif %}
 
             <!-- Ingredients (collapsible) -->
             {% if meal.meal_ingredients %}
-            <div style="margin-top: var(--space-4);">
+            <div style="margin-top: var(--space-2);">
                 <button
                     type="button"
                     @click.stop="expandedMeal === {{ meal.id }} ? expandedMeal = null : expandedMeal = {{ meal.id }}"
@@ -102,11 +105,11 @@
                 onclick="event.preventDefault(); event.stopPropagation();"
                 @click.stop
             >
-                <svg class="icon icon-xs" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
                     <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
                 </svg>
             </button>
-        </a>
+        </div>
         {% endfor %}
     </div>
     {% else %}

@@ -5,7 +5,7 @@
 {% block content %}
 <article>
     <header>
-        <h1>Log Symptoms</h1>
+        <h1>{% if editing %}Update Symptom{% else %}Log Symptoms{% endif %}</h1>
         <p>Track how you're feeling to identify patterns with meals.</p>
     </header>
 
@@ -14,18 +14,32 @@
         <p style="margin: 0;"><strong>Medical Disclaimer:</strong> This tool is for personal tracking only and does not constitute medical advice. If you have concerning symptoms, please consult a healthcare professional.</p>
     </section>
 
+    <!-- Initialize Alpine data from server -->
+    <script>
+        window.symptomInitData = {
+            editing: {{ editing|default(false)|tojson }},
+            symptomId: {{ symptom_id|default(null)|tojson }},
+            selectedTags: {{ (symptom.tags if (editing and symptom and symptom.tags) else [])|tojson }},
+            finalNotes: {{ (symptom.notes if (editing and symptom and symptom.notes) else null)|tojson }},
+            startTime: {% if editing and symptom and symptom.start_time %}{{ symptom.start_time.strftime('%Y-%m-%dT%H:%M')|tojson }}{% else %}null{% endif %},
+            endTime: {% if editing and symptom and symptom.end_timestamp %}{{ symptom.end_timestamp.strftime('%Y-%m-%dT%H:%M')|tojson }}{% else %}null{% endif %}
+        };
+    </script>
+
     <section
         x-data="{
-            selectedTags: [],  // [{name, severity, expanded, startTime, endTime, showStartTime, showEndTime, episodeId}, ...]
+            editing: window.symptomInitData.editing,
+            symptomId: window.symptomInitData.symptomId,
+            selectedTags: window.symptomInitData.selectedTags,
             currentTag: '',
             autocompleteSuggestions: [],
             commonTags: [],
             aiGeneratedText: null,
-            finalNotes: null,
+            finalNotes: window.symptomInitData.finalNotes,
             isGeneratingAi: false,
-            ongoingDetection: null,      // Holds ongoing detection result for popup
-            showOngoingPopup: false,      // Controls popup visibility
-            pendingTagIndex: null,        // Index of tag being processed for ongoing
+            ongoingDetection: null,
+            showOngoingPopup: false,
+            pendingTagIndex: null,
             isSubmitting: false,
 
             async init() {
@@ -33,6 +47,21 @@
                 const response = await fetch('/symptoms/tags/common');
                 const data = await response.json();
                 this.commonTags = data.tags || [];
+
+                // If editing, pre-populate times from existing symptom
+                if (this.editing && this.selectedTags.length > 0) {
+                    const startTime = window.symptomInitData.startTime;
+                    const endTime = window.symptomInitData.endTime;
+
+                    // Apply to all tags (expand first tag)
+                    for (let i = 0; i < this.selectedTags.length; i++) {
+                        this.selectedTags[i].expanded = (i === 0);
+                        this.selectedTags[i].startTime = startTime;
+                        this.selectedTags[i].endTime = endTime;
+                        this.selectedTags[i].showStartTime = !!startTime;
+                        this.selectedTags[i].showEndTime = !!endTime;
+                    }
+                }
             },
 
             async addTag(name, severity = 4.0) {  // Changed default from 5.0 to 4.0
@@ -233,44 +262,77 @@
 
                 this.isSubmitting = true;
 
-                // Build form data
-                const formData = new FormData();
+                if (this.editing) {
+                    // Update existing symptom
+                    try {
+                        // Get common start/end times (use first tag's times)
+                        const firstTag = this.selectedTags[0];
+                        const startTime = firstTag.showStartTime && firstTag.startTime ? new Date(firstTag.startTime).toISOString() : null;
+                        const endTime = firstTag.showEndTime && firstTag.endTime ? new Date(firstTag.endTime).toISOString() : null;
 
-                // Build tags with per-symptom times
-                const tagsToSubmit = this.selectedTags.map(tag => ({
-                    name: tag.name,
-                    severity: Math.round(tag.severity),
-                    start_time: tag.showStartTime && tag.startTime ? new Date(tag.startTime).toISOString() : null,
-                    end_time: tag.showEndTime && tag.endTime ? new Date(tag.endTime).toISOString() : null,
-                    episode_id: tag.episodeId || null
-                }));
+                        const response = await fetch(`/symptoms/${this.symptomId}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                tags: this.selectedTags.map(t => ({name: t.name, severity: Math.round(t.severity)})),
+                                start_time: startTime,
+                                end_time: endTime,
+                                notes: this.finalNotes
+                            })
+                        });
 
-                formData.append('tags_json', JSON.stringify(tagsToSubmit));
+                        if (response.ok) {
+                            window.location.href = '/symptoms/history';
+                        } else {
+                            const error = await response.text();
+                            alert('Failed to update symptom: ' + error);
+                            this.isSubmitting = false;
+                        }
+                    } catch (error) {
+                        console.error('Update failed:', error);
+                        alert('Failed to update symptom: ' + error);
+                        this.isSubmitting = false;
+                    }
+                } else {
+                    // Create new symptom
+                    const formData = new FormData();
 
-                // Send AI text fields
-                formData.append('ai_generated_text', this.aiGeneratedText || '');
-                formData.append('final_notes', this.finalNotes || '');
+                    // Build tags with per-symptom times
+                    const tagsToSubmit = this.selectedTags.map(tag => ({
+                        name: tag.name,
+                        severity: Math.round(tag.severity),
+                        start_time: tag.showStartTime && tag.startTime ? new Date(tag.startTime).toISOString() : null,
+                        end_time: tag.showEndTime && tag.endTime ? new Date(tag.endTime).toISOString() : null,
+                        episode_id: tag.episodeId || null
+                    }));
 
-                // Submit form
-                try {
-                    const response = await fetch('/symptoms/create-tagged', {
-                        method: 'POST',
-                        body: formData
-                    });
+                    formData.append('tags_json', JSON.stringify(tagsToSubmit));
 
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else if (response.ok) {
-                        window.location.href = '/symptoms/history?success=true';
-                    } else {
-                        const error = await response.text();
+                    // Send AI text fields
+                    formData.append('ai_generated_text', this.aiGeneratedText || '');
+                    formData.append('final_notes', this.finalNotes || '');
+
+                    // Submit form
+                    try {
+                        const response = await fetch('/symptoms/create-tagged', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else if (response.ok) {
+                            window.location.href = '/symptoms/history?success=true';
+                        } else {
+                            const error = await response.text();
+                            alert('Failed to save symptom: ' + error);
+                            this.isSubmitting = false;
+                        }
+                    } catch (error) {
+                        console.error('Submit failed:', error);
                         alert('Failed to save symptom: ' + error);
                         this.isSubmitting = false;
                     }
-                } catch (error) {
-                    console.error('Submit failed:', error);
-                    alert('Failed to save symptom: ' + error);
-                    this.isSubmitting = false;
                 }
             }
         }"
@@ -553,8 +615,8 @@
                 @click="submitForm()"
                 :disabled="selectedTags.length === 0 || isSubmitting"
             >
-                <span x-show="!isSubmitting">Approve Symptoms</span>
-                <span x-show="isSubmitting">Approving...</span>
+                <span x-show="!isSubmitting">{% if editing %}Update{% else %}Approve Symptoms{% endif %}</span>
+                <span x-show="isSubmitting">{% if editing %}Updating...{% else %}Approving...{% endif %}</span>
             </button>
             <a href="/symptoms/history" role="button" class="secondary">Cancel</a>
         </div>

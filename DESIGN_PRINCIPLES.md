@@ -938,7 +938,112 @@ Track design inconsistencies or technical debt:
 
 ---
 
+## Technical Guidelines
+
+### Alpine.js + Jinja2 Integration
+
+**Problem:** When using Jinja2 template variables inside Alpine.js `x-data` attributes, HTML escaping conflicts can occur, causing the browser's HTML parser to misinterpret JSON quotes as attribute boundaries.
+
+**Solution:** Use a separate `<script>` tag to initialize data from Jinja2, then reference it in Alpine.js:
+
+#### ✅ Correct Pattern
+
+```html
+<!-- Initialize data in script tag (JavaScript context, not HTML attribute) -->
+<script>
+    window.symptomInitData = {
+        editing: {{ editing|default(false)|tojson }},
+        symptomId: {{ symptom_id|default(null)|tojson }},
+        selectedTags: {{ (symptom.tags if (editing and symptom and symptom.tags) else [])|tojson }},
+        finalNotes: {{ (symptom.notes if (editing and symptom and symptom.notes) else null)|tojson }}
+    };
+</script>
+
+<!-- Reference the data in Alpine.js x-data -->
+<section x-data="{
+    editing: window.symptomInitData.editing,
+    symptomId: window.symptomInitData.symptomId,
+    selectedTags: window.symptomInitData.selectedTags,
+    currentTag: '',
+    finalNotes: window.symptomInitData.finalNotes,
+    // ... other properties
+}">
+```
+
+#### ❌ Incorrect Pattern (Causes Escaping Issues)
+
+```html
+<!-- AVOID: Inline Jinja2 in x-data attribute -->
+<section x-data="{
+    editing: {{ editing|tojson }},
+    selectedTags: {{ symptom.tags|tojson }},  <!-- Browser may interpret quotes as attribute end -->
+    finalNotes: {{ symptom.notes|tojson }}
+}">
+```
+
+**Why This Works:**
+- Jinja2 `|tojson` filter outputs JSON with double quotes
+- When in a script tag (JavaScript context), quotes are handled correctly
+- When in an HTML attribute, the browser's HTML parser processes it first and may misinterpret quotes
+- The script tag pattern separates concerns: Jinja2 renders JavaScript, Alpine.js consumes JavaScript objects
+
+**Key Principles:**
+1. Always use `|default()` filter for potentially undefined Jinja2 variables
+2. Always use `|tojson` filter for all JavaScript values (booleans, null, objects, strings)
+3. For complex data (objects, arrays), use the script tag pattern
+4. For simple primitives in isolated attributes, inline may work but script tag is safer
+
+### SVG Icon Sizing
+
+**Problem:** CSS `width` and `height` alone don't scale SVG content when using external references (`<use href="...">`). Icons render at intrinsic size (often 300x150px).
+
+**Solution:** Add explicit `width`, `height`, and `viewBox` attributes to SVG elements:
+
+#### ✅ Correct Pattern
+
+```html
+<svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true">
+    <use href="/static/icons/lucide-sprite.svg#upload"></use>
+</svg>
+```
+
+#### ❌ Incorrect Pattern (CSS Only)
+
+```html
+<!-- CSS class applies container size but doesn't scale content -->
+<svg class="icon icon-xxs" aria-hidden="true">
+    <use href="/static/icons/lucide-sprite.svg#upload"></use>
+</svg>
+```
+
+**Why This Works:**
+- `width` and `height` attributes set explicit element dimensions
+- `viewBox` defines the SVG coordinate system and aspect ratio
+- For Lucide icons (24x24 source), `viewBox="0 0 24 24"` scales to fit the target size
+- CSS classes can still apply for consistency, but attributes are required for proper rendering
+
+**Icon Size Reference:**
+```css
+.icon-xxs { width: 12px; height: 12px; }  /* Attributes: width="12" height="12" */
+.icon-xs  { width: 16px; height: 16px; }  /* Attributes: width="16" height="16" */
+.icon-sm  { width: 20px; height: 20px; }  /* Attributes: width="20" height="20" */
+.icon-md  { width: 24px; height: 24px; }  /* Attributes: width="24" height="24" */
+.icon-lg  { width: 32px; height: 32px; }  /* Attributes: width="32" height="32" */
+```
+
+All Lucide icons use `viewBox="0 0 24 24"` regardless of target size.
+
+---
+
 ## Changelog
+
+### v1.1 - 2026-01-31
+
+Added technical guidelines for Alpine.js + Jinja2 integration and SVG icon sizing.
+
+**Bug fixes documented:**
+- Fixed symptom edit page template rendering (Jinja2/Alpine.js escaping)
+- Fixed icon sizing (SVG intrinsic size vs CSS)
 
 ### v1.0 - 2026-01-31
 

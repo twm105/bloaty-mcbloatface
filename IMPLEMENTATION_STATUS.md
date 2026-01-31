@@ -1,7 +1,7 @@
 # Bloaty McBloatface - Implementation Status
 
 **Last Updated:** January 31, 2026
-**Session:** UI/UX Redesign - Dark Theme Implementation
+**Session:** UI/UX Bug Fixes - Round 4 (Template Rendering & Icon Sizing)
 **Commit:** (pending)
 
 ## ✅ Completed Features
@@ -95,6 +95,26 @@
 - Border radius: 4px/8px/12px/full
 - WCAG AAA compliance for contrast
 - Responsive grid layouts
+
+**Critical Bug Fixes (Jan 31, 2026):**
+- ✅ **Symptom edit page template rendering** - Fixed Jinja2/Alpine.js escaping conflicts by moving template variables to separate `<script>` tag (window.symptomInitData pattern)
+- ✅ **Icon sizing** - Fixed SVG icons rendering at intrinsic 300x150px by adding explicit `width="12" height="12" viewBox="0 0 24 24"` attributes to all `.icon-xxs` elements
+- ✅ Verified with Playwright browser testing - no console errors, correct rendering
+
+**Template Integration Pattern for Alpine.js + Jinja2:**
+```html
+<!-- CORRECT: Use script tag for complex data -->
+<script>
+    window.initData = {
+        editing: {{ editing|default(false)|tojson }},
+        data: {{ complex_object|tojson }}
+    };
+</script>
+<section x-data="{ editing: window.initData.editing, ... }">
+
+<!-- INCORRECT: Inline Jinja2 in x-data attribute (causes HTML escaping issues) -->
+<section x-data="{ editing: {{ editing|tojson }}, ... }">
+```
 
 **Still Using Old Design:**
 - `/meals/log.html`, `/meals/edit_ingredients.html`
@@ -211,6 +231,8 @@ None currently - recent sessions fixed:
 - ✅ Status indicator stacking (analyzing + complete both showing)
 - ✅ Draft meals appearing in history
 - ✅ Symptom history showing empty (duplicate route in `routes.py` was overriding symptoms router)
+- ✅ Symptom edit page template rendering (Jinja2/Alpine.js escaping issue - fixed with script tag pattern)
+- ✅ Icon sizing (SVG elements rendering at intrinsic 300x150px - fixed with explicit width/height/viewBox attributes)
 
 ## 💾 Database State
 

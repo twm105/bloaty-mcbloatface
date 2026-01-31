@@ -20,6 +20,11 @@
    ICON SIZES
    ============================================ */
 
+.icon-xxs {
+  width: var(--icon-xxs);
+  height: var(--icon-xxs);
+}
+
 .icon-xs {
   width: var(--icon-xs);
   height: var(--icon-xs);

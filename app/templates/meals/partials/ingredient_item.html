@@ -10,7 +10,19 @@
                 {{ meal_ingredient.ingredient.name }}
             </strong>
             {% if meal_ingredient.source == 'ai' %}
-            <span style="font-size: 11px; color: #666;" title="AI-suggested">🤖</span>
+            <span style="
+                font-size: 10px;
+                color: var(--color-text-secondary);
+                background: rgba(255, 255, 255, 0.03);
+                padding: 2px 6px;
+                border-radius: var(--radius-sm);
+                margin-left: var(--space-2);
+                font-weight: var(--font-medium);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            " title="Suggested by AI">
+                AI
+            </span>
             {% endif %}
 
             <div style="display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-2);">

@@ -533,21 +533,56 @@ async def edit_symptom_page(
     symptom_id: int,
     db: Session = Depends(get_db)
 ):
-    """Edit symptom page."""
+    """Reuse log page for editing (same pattern as meals)."""
     symptom = symptom_service.get_symptom(db, symptom_id)
     if not symptom:
         raise HTTPException(status_code=404, detail="Symptom not found")
 
-    symptom_types = symptom_service.get_common_symptom_types()
-
     return templates.TemplateResponse(
-        "symptoms/edit.html",
+        "symptoms/log.html",
         {
             "request": request,
+            "editing": True,
             "symptom": symptom,
-            "symptom_types": symptom_types
+            "symptom_id": symptom_id
         }
     )
+
+
+@router.put("/{symptom_id}")
+async def update_symptom_tags(
+    symptom_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Update symptom with tag-based data."""
+    from fastapi.responses import Response
+
+    data = await request.json()
+
+    symptom = symptom_service.get_symptom(db, symptom_id)
+    if not symptom:
+        raise HTTPException(status_code=404, detail="Symptom not found")
+
+    # Update symptom
+    symptom.tags = data.get('tags', [])
+    symptom.notes = data.get('notes')
+
+    # Parse timestamps if provided
+    if data.get('start_time'):
+        try:
+            symptom.start_time = datetime.fromisoformat(data['start_time'].replace('Z', '+00:00'))
+        except (ValueError, AttributeError):
+            pass
+
+    if data.get('end_time'):
+        try:
+            symptom.end_timestamp = datetime.fromisoformat(data['end_time'].replace('Z', '+00:00'))
+        except (ValueError, AttributeError):
+            pass
+
+    db.commit()
+    return Response(status_code=200)
 
 
 @router.post("/{symptom_id}/update")
@@ -618,4 +653,6 @@ async def delete_symptom(
     if not success:
         raise HTTPException(status_code=404, detail="Symptom not found")
 
-    return {"status": "deleted"}
+    # Return empty response - htmx will remove the element
+    from fastapi.responses import Response
+    return Response(status_code=200)

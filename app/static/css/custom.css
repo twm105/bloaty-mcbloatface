@@ -77,15 +77,6 @@ dialog[id*="disclaimer"] header {
     display: inline-block;
 }
 
-/* Image preview */
-.meal-image-preview {
-    max-width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 8px;
-    margin: 1rem 0;
-}
-
 /* Severity slider */
 input[type="range"] {
     width: 100%;

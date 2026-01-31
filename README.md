@@ -4,6 +4,11 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 
 **🚧 Work in Progress - ~65% MVP Complete**
 
+**Recent Updates (Jan 31, 2026):**
+- ✅ Fixed critical UI bugs: Symptom edit page rendering, icon sizing issues
+- ✅ Dark theme implementation with improved UX and design consistency
+- ✅ All core features tested and verified with Playwright browser automation
+
 ## ✅ What's Working
 
 ### Meal Tracking
