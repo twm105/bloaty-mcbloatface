@@ -2,10 +2,11 @@
 
 A meal tracking and gastro issue diagnosis application. Upload meal images, AI analyzes ingredients, log symptoms, and discover patterns between food and digestive health.
 
-**🚧 Work in Progress - ~40% MVP Complete**
+**🚧 Work in Progress - ~65% MVP Complete**
 
 ## ✅ What's Working
 
+### Meal Tracking
 - **AI-Powered Meal Analysis**: Upload photos → Claude Sonnet 4.5 suggests meal name + ingredients
 - **Auto-Accept Workflow**: AI suggestions immediately added (no manual staging)
 - **Inline Editing**: Click any field to edit (meal name, ingredients, quantities, location, notes)
@@ -14,13 +15,22 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 - **Meal History**: View published meals with prominent names, subtle dates
 - **Ingredient Taxonomy**: 10 root categories (Dairy, Grains, Proteins, etc.)
 
+### Symptom Tracking
+- **Tag-Based Entry**: Select symptom tags with autocomplete suggestions
+- **Per-Symptom Severity**: 1-10 slider for each symptom tag
+- **Per-Symptom Timing**: Individual start/end times with "Apply to all" option
+- **Ongoing Symptom Detection**: 3-day lookback window auto-links to previous episodes
+- **Episode Linking**: Related symptoms grouped via `episode_id`
+- **AI Elaboration**: Streaming AI-generated summaries of symptom entries
+- **Symptom History**: View, edit, and delete symptoms with tags, severity, and episode links
+
 ## 🚧 Not Yet Implemented
 
-- ⚠️ **Symptom Logging**: Basic form exists, but no AI clarification yet
-- ❌ **Pattern Analysis**: Correlation dashboard not built
+- ❌ **Pattern Analysis**: Correlation dashboard not built (Phase 8)
 - ❌ **Charts & Visualizations**: No Chart.js integration yet
-- ❌ **Medical Disclaimers**: GDPR compliance pages not created
+- ❌ **GDPR Compliance**: Data export, privacy policy, settings pages not created
 - ❌ **Evals Framework**: AI accuracy testing not implemented
+- ❌ **Date Range Filtering**: History pages lack filtering controls
 
 **See `IMPLEMENTATION_STATUS.md` for detailed progress and next priorities.**
 
@@ -69,12 +79,21 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 
 ### Usage
 
+**Meal Logging:**
 1. Navigate to http://localhost:8000
 2. Click "Log a Meal"
 3. Upload a meal photo
 4. AI analyzes and suggests name + ingredients (takes ~3-5 seconds)
 5. Click any field to edit inline
 6. Click "Save Meal" to publish
+
+**Symptom Logging:**
+1. Click "Log Symptoms"
+2. Type symptom tags (autocomplete suggests common symptoms)
+3. Adjust severity per symptom (1-10 slider)
+4. Set start/end times (optional "Apply to all")
+5. Optionally request AI elaboration
+6. Save to track over time
 
 ## Development
 
@@ -83,18 +102,18 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 app/
 ├── api/                  # FastAPI routes
 │   ├── meals.py         # ✅ Meal CRUD + AI analysis + inline editing
-│   └── symptoms.py      # ⚠️ Basic CRUD (missing AI clarification)
+│   └── symptoms.py      # ✅ Full CRUD + AI elaboration + episodes
 ├── models/              # ✅ All SQLAlchemy models complete
 ├── services/
 │   ├── ai_service.py    # ✅ Claude integration (meal analysis)
 │   ├── prompts.py       # ✅ Prompt templates with medical ethics
 │   ├── meal_service.py  # ✅ Meal CRUD + inline editing
-│   └── symptom_service.py # ⚠️ Basic CRUD
+│   └── symptom_service.py # ✅ Full CRUD + episodes + tags
 ├── static/              # CSS, images
 │   └── css/custom.css   # Pill buttons, spinners, disclaimers
 └── templates/           # htmx + Alpine.js templates
     ├── meals/           # ✅ Complete UI flow
-    └── symptoms/        # ⚠️ Basic forms only
+    └── symptoms/        # ✅ Tag entry, history, editing
 
 alembic/versions/        # ✅ 4 migrations applied
 evals/                   # ❌ Not implemented yet
@@ -147,12 +166,12 @@ docker-compose restart web
 
 ### Cost Analysis
 - **Meal analysis**: ~$0.003 per image (Claude Sonnet 4.5)
-- **Symptom clarification**: ~$0.0126 per symptom (not yet implemented)
+- **Symptom elaboration**: ~$0.003-0.01 per symptom
 - **Pattern analysis**: ~$0.0508 first run, ~$0.0053 cached (not yet implemented)
 
 **Monthly estimate (1 user):**
 - 60 meals: $0.18
-- 30 symptoms: $0.38 (when implemented)
+- 30 symptoms: $0.09-0.30
 - 4 analyses: $0.07 (when implemented)
 - **Total: ~$0.60/user/month**
 
@@ -163,10 +182,10 @@ docker-compose restart web
 ## Next Steps
 
 **Immediate priorities (see `IMPLEMENTATION_STATUS.md`):**
-1. Implement symptom clarification (Phase 6)
-2. Build pattern analysis dashboard (Phase 8)
-3. Add medical disclaimers & GDPR compliance
-4. Create evals framework (BBC Good Food scraper)
+1. Build pattern analysis dashboard (Phase 8) - the core value proposition
+2. Add GDPR compliance (data export, privacy policy, settings)
+3. Create evals framework (BBC Good Food scraper)
+4. Date range filtering for history pages
 
 ## Contributing
 
