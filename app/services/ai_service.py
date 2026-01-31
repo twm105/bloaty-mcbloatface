@@ -22,6 +22,8 @@ from app.services.prompts import (
     MEAL_VALIDATION_SYSTEM_PROMPT,
     MEAL_ANALYSIS_SYSTEM_PROMPT,
     SYMPTOM_CLARIFICATION_SYSTEM_PROMPT,
+    SYMPTOM_ELABORATION_SYSTEM_PROMPT,
+    EPISODE_CONTINUATION_SYSTEM_PROMPT,
     build_cached_analysis_context
 )
 
@@ -311,6 +313,313 @@ class ClaudeService:
                     raise ValueError("Could not parse AI response as JSON")
 
             return parsed
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Failed to parse AI response: {str(e)}") from e
+
+    # =========================================================================
+    # SYMPTOM ELABORATION & EPISODE DETECTION
+    # =========================================================================
+
+    async def elaborate_symptom_tags_streaming(
+        self,
+        tags: list,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        user_notes: Optional[str] = None
+    ):
+        """
+        Stream AI-generated medical note from symptom tags (async generator).
+
+        Args:
+            tags: List of {"name": str, "severity": int}
+            start_time: When symptoms began
+            end_time: When symptoms ended (if applicable)
+            user_notes: Optional user context
+
+        Yields:
+            Text chunks as they arrive from Claude API
+
+        Cost: ~$0.003 per elaboration (~1000 tokens)
+
+        Raises:
+            ServiceUnavailableError: AI service temporarily down
+            RateLimitError: Too many requests
+            ValueError: Invalid response or request error
+        """
+        try:
+            # Build context string (same as non-streaming)
+            context_parts = [f"Tags: {json.dumps(tags)}"]
+
+            if start_time:
+                context_parts.append(f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}")
+
+            if end_time:
+                duration = end_time - start_time
+                hours = duration.total_seconds() / 3600
+                context_parts.append(f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)")
+
+            if user_notes:
+                context_parts.append(f"User notes: {user_notes}")
+
+            context = "\n".join(context_parts)
+
+            # Use streaming API
+            with self.client.messages.stream(
+                model=self.sonnet_model,
+                max_tokens=512,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}"
+                    }
+                ],
+                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT
+            ) as stream:
+                for text in stream.text_stream:
+                    yield text
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+
+    async def elaborate_symptom_tags(
+        self,
+        tags: list,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None,
+        user_notes: Optional[str] = None
+    ) -> dict:
+        """
+        Generate medical-note paragraph from symptom tags.
+
+        Args:
+            tags: List of {"name": str, "severity": int}
+            start_time: When symptoms began
+            end_time: When symptoms ended (if applicable)
+            user_notes: Optional user context
+
+        Returns:
+            {
+                "elaboration": "Patient experienced severe bloating...",
+                "raw_response": "...",
+                "model": "claude-sonnet-4-5-20250929"
+            }
+
+        Cost: ~$0.003 per elaboration (~1000 tokens)
+
+        Raises:
+            ServiceUnavailableError: AI service temporarily down
+            RateLimitError: Too many requests
+            ValueError: Invalid response or request error
+        """
+        try:
+            # Build context string
+            context_parts = [f"Tags: {json.dumps(tags)}"]
+
+            if start_time:
+                context_parts.append(f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}")
+
+            if end_time:
+                duration = end_time - start_time
+                hours = duration.total_seconds() / 3600
+                context_parts.append(f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)")
+
+            if user_notes:
+                context_parts.append(f"User notes: {user_notes}")
+
+            context = "\n".join(context_parts)
+
+            # Call Claude
+            response = self.client.messages.create(
+                model=self.sonnet_model,
+                max_tokens=512,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}"
+                    }
+                ],
+                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT
+            )
+
+            elaboration = response.content[0].text.strip()
+
+            return {
+                "elaboration": elaboration,
+                "raw_response": elaboration,
+                "model": self.sonnet_model
+            }
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+
+    async def detect_ongoing_symptom(
+        self,
+        previous_symptom: dict,
+        current_symptom: dict
+    ) -> dict:
+        """
+        Determine if current symptom is ongoing from previous occurrence.
+
+        Args:
+            previous_symptom: {name, severity, start_time, end_time}
+            current_symptom: {name, severity, time}
+
+        Returns:
+            {
+                "is_ongoing": bool,
+                "confidence": float (0-1),
+                "reasoning": str
+            }
+        """
+        try:
+            # Build analysis context
+            analysis_data = {
+                "previous_symptom": {
+                    "name": previous_symptom.get("name"),
+                    "severity": previous_symptom.get("severity"),
+                    "start_time": previous_symptom.get("start_time").isoformat() if isinstance(previous_symptom.get("start_time"), datetime) else previous_symptom.get("start_time"),
+                    "end_time": previous_symptom.get("end_time").isoformat() if previous_symptom.get("end_time") else None
+                },
+                "current_symptom": {
+                    "name": current_symptom.get("name"),
+                    "severity": current_symptom.get("severity"),
+                    "time": current_symptom.get("time").isoformat() if isinstance(current_symptom.get("time"), datetime) else current_symptom.get("time")
+                }
+            }
+
+            # Call Claude with episode continuation prompt (reuse existing logic)
+            response = self.client.messages.create(
+                model=self.sonnet_model,
+                max_tokens=512,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Analyze if this symptom is ongoing:\n\n{json.dumps(analysis_data, indent=2)}"
+                    }
+                ],
+                system=EPISODE_CONTINUATION_SYSTEM_PROMPT  # Reuse existing prompt
+            )
+
+            raw_response = response.content[0].text
+
+            # Parse JSON response
+            try:
+                parsed = json.loads(raw_response)
+            except json.JSONDecodeError:
+                if "```json" in raw_response:
+                    json_str = raw_response.split("```json")[1].split("```")[0].strip()
+                    parsed = json.loads(json_str)
+                elif "```" in raw_response:
+                    json_str = raw_response.split("```")[1].split("```")[0].strip()
+                    parsed = json.loads(json_str)
+                else:
+                    raise ValueError("Could not parse AI response as JSON")
+
+            return {
+                "is_ongoing": parsed.get("is_continuation", False),  # Reuse continuation logic
+                "confidence": parsed.get("confidence", 0.0),
+                "reasoning": parsed.get("reasoning", "")
+            }
+
+        except Exception as e:
+            raise ValueError(f"AI ongoing detection failed: {str(e)}")
+
+    async def detect_episode_continuation(
+        self,
+        current_tags: list,
+        current_time: datetime,
+        previous_symptom: dict
+    ) -> dict:
+        """
+        Determine if current symptoms continue a previous episode.
+
+        Args:
+            current_tags: List of {"name": str, "severity": int}
+            current_time: When current symptoms began
+            previous_symptom: Dict with keys: tags, start_time, end_time, notes
+
+        Returns:
+            {
+                "is_continuation": bool,
+                "confidence": float (0-1),
+                "reasoning": str
+            }
+
+        Cost: ~$0.002 per check (~700 tokens)
+
+        Raises:
+            ServiceUnavailableError: AI service temporarily down
+            RateLimitError: Too many requests
+            ValueError: Invalid response or request error
+        """
+        try:
+            # Build analysis context
+            analysis_data = {
+                "current_tags": current_tags,
+                "current_time": current_time.isoformat(),
+                "previous_symptom": {
+                    "tags": previous_symptom.get("tags"),
+                    "start_time": previous_symptom.get("start_time").isoformat() if previous_symptom.get("start_time") else None,
+                    "end_time": previous_symptom.get("end_time").isoformat() if previous_symptom.get("end_time") else None,
+                    "notes": previous_symptom.get("notes")
+                }
+            }
+
+            # Call Claude
+            response = self.client.messages.create(
+                model=self.sonnet_model,
+                max_tokens=512,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Analyze if these symptoms are a continuation:\n\n{json.dumps(analysis_data, indent=2)}"
+                    }
+                ],
+                system=EPISODE_CONTINUATION_SYSTEM_PROMPT
+            )
+
+            raw_response = response.content[0].text
+
+            # Parse JSON response
+            try:
+                parsed = json.loads(raw_response)
+            except json.JSONDecodeError:
+                # Try to extract JSON from markdown
+                if "```json" in raw_response:
+                    json_str = raw_response.split("```json")[1].split("```")[0].strip()
+                    parsed = json.loads(json_str)
+                elif "```" in raw_response:
+                    json_str = raw_response.split("```")[1].split("```")[0].strip()
+                    parsed = json.loads(json_str)
+                else:
+                    raise ValueError("Could not parse AI response as JSON")
+
+            return {
+                "is_continuation": parsed.get("is_continuation", False),
+                "confidence": parsed.get("confidence", 0.0),
+                "reasoning": parsed.get("reasoning", "")
+            }
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e

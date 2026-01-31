@@ -27,53 +27,113 @@
             {% for symptom in symptoms %}
             <article class="symptom-card">
                 <header>
-                    <div class="grid">
-                        <div>
-                            <h3 style="margin: 0;">
-                                {{ symptom.structured_type or "Symptom" }}
-                                <small style="font-weight: normal;">
-                                    - Severity {{ symptom.severity }}/10
-                                </small>
-                            </h3>
-                            <p style="margin: 0.3rem 0 0 0;">
-                                <small style="color: var(--muted-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <!-- Tags Display (new schema) or Fallback (old schema) -->
+                            {% if symptom.tags %}
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    {% for tag in symptom.tags %}
+                                    <span style="
+                                        display: inline-block;
+                                        padding: 0.4rem 0.8rem;
+                                        border-radius: 20px;
+                                        font-size: 0.9rem;
+                                        font-weight: 500;
+                                        {% if tag['severity'] >= 7 %}
+                                            background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+                                        {% elif tag['severity'] >= 4 %}
+                                            background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;
+                                        {% else %}
+                                            background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+                                        {% endif %}
+                                    ">
+                                        {{ tag['name'] }} ({{ tag['severity'] }}/10)
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <!-- Old schema fallback -->
+                                <h3 style="margin: 0;">
+                                    {{ symptom.structured_type or "Symptom" }}
+                                    <small style="font-weight: normal;">
+                                        - Severity {{ symptom.severity }}/10
+                                    </small>
+                                </h3>
+                            {% endif %}
+
+                            <!-- Time Display -->
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--muted-color);">
+                                {% if symptom.start_time %}
+                                    <strong>Started:</strong> {{ symptom.start_time.strftime('%b %d, %Y at %I:%M %p') }}
+                                    {% if symptom.end_time %}
+                                        <br><strong>Ended:</strong> {{ symptom.end_time.strftime('%b %d, %Y at %I:%M %p') }}
+                                        {% set duration = (symptom.end_time - symptom.start_time).total_seconds() / 3600 %}
+                                        ({{ "%.1f"|format(duration) }} hours)
+                                    {% else %}
+                                        <br><em>Ongoing or no end time logged</em>
+                                    {% endif %}
+                                {% else %}
                                     {{ symptom.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
-                                </small>
+                                {% endif %}
                             </p>
+
+                            <!-- Episode Link -->
+                            {% if symptom.episode_id %}
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                                <span style="background: #e7f3ff; color: #004085; padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                    🔗 Part of episode (linked to symptom #{{ symptom.episode_id }})
+                                </span>
+                            </p>
+                            {% endif %}
+
+                            <!-- AI Badge -->
+                            {% if symptom.ai_elaborated %}
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                                <span style="background: #f0f0f0; color: #333; padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                    🤖 AI{% if symptom.user_edited_elaboration %} (edited){% endif %}
+                                </span>
+                            </p>
+                            {% endif %}
                         </div>
+
+                        <!-- Severity Badge (most severe tag or overall) -->
                         <div style="text-align: right;">
-                            <!-- Severity Badge -->
+                            {% if symptom.tags %}
+                                {% set max_severity = symptom.tags | selectattr('severity') | map(attribute='severity') | max %}
+                            {% else %}
+                                {% set max_severity = symptom.severity %}
+                            {% endif %}
                             <span style="
                                 display: inline-block;
-                                padding: 0.3rem 0.6rem;
+                                padding: 0.5rem 0.8rem;
                                 border-radius: 4px;
                                 font-weight: bold;
-                                font-size: 0.9rem;
-                                {% if symptom.severity >= 8 %}
+                                font-size: 1rem;
+                                {% if max_severity >= 8 %}
                                     background: #f8d7da; color: #721c24;
-                                {% elif symptom.severity >= 5 %}
+                                {% elif max_severity >= 5 %}
                                     background: #fff3cd; color: #856404;
                                 {% else %}
                                     background: #d4edda; color: #155724;
                                 {% endif %}
                             ">
-                                {{ symptom.severity }}/10
+                                {{ max_severity }}/10
                             </span>
                         </div>
                     </div>
                 </header>
 
-                <!-- Description -->
+                <!-- Notes/Description -->
                 <section>
+                    {% if symptom.notes %}
+                    <p><strong>{% if symptom.ai_elaborated %}AI Description:{% else %}Notes:{% endif %}</strong></p>
+                    <p style="margin-left: 1rem;">
+                        {{ symptom.notes }}
+                    </p>
+                    {% elif symptom.raw_description %}
                     <p><strong>Description:</strong></p>
                     <p style="margin-left: 1rem; font-style: italic;">
                         "{{ symptom.raw_description }}"
-                    </p>
-
-                    {% if symptom.notes %}
-                    <p><strong>Notes:</strong></p>
-                    <p style="margin-left: 1rem;">
-                        {{ symptom.notes }}
                     </p>
                     {% endif %}
 

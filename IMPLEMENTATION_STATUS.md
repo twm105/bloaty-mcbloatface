@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** January 27, 2026
-**Session:** AI Integration & UX Polish
-**Commit:** ffc237c
+**Last Updated:** January 31, 2026
+**Session:** Symptom Logging & History Page Debug
+**Commit:** (pending)
 
 ## ✅ Completed Features
 
@@ -33,27 +33,45 @@
 - ✅ History page: meal name prominent, date subtle
 - ✅ Draft filtering: only published meals in history
 
+### Phase 6: Symptom Logging with AI - COMPLETE
+**Goal:** Structured symptom capture with AI assistance
+
+**Implementation approach:** Tag-based entry with AI elaboration (alternative to original multi-turn Q&A plan)
+
+**Features implemented:**
+- ✅ Tag-based symptom selection with autocomplete
+- ✅ Per-symptom severity slider (1-10 scale, default 4.0)
+- ✅ Per-symptom start/end times with "Apply to all" functionality
+- ✅ Ongoing symptom detection (3-day lookback window)
+- ✅ Episode linking via `episode_id` field
+- ✅ AI elaboration via `/tags/elaborate-stream` endpoint
+- ✅ Streaming response for real-time feedback
+- ✅ Medical disclaimer and tactful language
+- ✅ Full CRUD: create, view history, edit, delete symptoms
+- ✅ Database schema: tags (JSONB), severity, start_time, end_time, episode_id, ai_elaborated, clarification_history
+
+**API endpoints:**
+- `/symptoms/log` - Symptom logging UI
+- `/symptoms/history` - View all symptoms with tags, severity, episode links
+- `/symptoms/{id}/edit` - Edit existing symptoms
+- `/symptoms/tags/autocomplete` - Tag suggestions
+- `/symptoms/tags/elaborate-stream` - AI elaboration (streaming)
+- `/symptoms/detect-ongoing` - Detect ongoing symptoms
+- `/symptoms/detect-episode` - Detect episode continuation
+- `/symptoms/create-tagged` - Create symptom with tags
+
+**Cost:** ~$0.003-0.01 per symptom elaboration with Claude Sonnet 4.5
+
+**Note:** Original plan called for multi-turn conversational clarification. The `clarify_symptom()` method exists in `ai_service.py` but is unused. Tag-based approach provides better UX (faster, more structured) while still leveraging AI.
+
+### Phase 7: History Management - COMPLETE
+- ✅ View meal history with inline editing
+- ✅ View symptom history with tags, severity, episode links
+- ✅ Delete meals and symptoms
+- ✅ Edit symptoms (dedicated edit page)
+- ⚠️ Missing: Date range filtering, meal editing UI
+
 ## 🚧 Next Priorities (From MVP Plan)
-
-### Phase 6: Symptom Clarification (HIGH) - NOT STARTED
-**Goal:** Conversational symptom capture with AI
-
-**Implementation needed:**
-1. Add clarify_symptom() method to ClaudeService
-2. Multi-turn conversation (max 3 questions)
-3. Tactful, empathetic questioning
-4. Store clarification_history in symptoms.clarification_history (JSONB)
-5. Extract structured data: type, severity (1-10), notes
-6. UI: /symptoms/log with multi-step form
-7. Medical ethics: skip button, qualified language, no diagnosis
-
-**Files to create/modify:**
-- `app/api/symptoms.py` - Add /clarify endpoint
-- `app/templates/symptoms/log.html` - Update with Q&A flow
-- `app/services/ai_service.py` - Add clarify_symptom method
-- Prompts already in `app/services/prompts.py`
-
-**Cost:** ~$0.0126 per symptom (~4,200 tokens over 3 turns)
 
 ### Phase 8: Pattern Analysis Dashboard (HIGH) - NOT STARTED
 **Goal:** Show meal-symptom correlations with charts
@@ -74,10 +92,6 @@
 - `app/static/js/charts.js` - Chart.js setup
 
 **Cost:** First analysis ~$0.0508, cached ~$0.0053 (90% savings with prompt caching)
-
-### Phase 7: History Management (MEDIUM) - PARTIALLY COMPLETE
-**Current:** View and delete meals
-**Missing:** Edit meals, date range filtering
 
 ### Phase 9: Evals Framework (MEDIUM) - NOT STARTED
 **Goal:** Quantify AI accuracy
@@ -102,32 +116,43 @@
 - Symptom, UserSettings, DataExport, EvalRun
 
 ### Services
-- ✅ `ai_service.py` - Claude integration
+- ✅ `ai_service.py` - Claude integration (meal analysis, symptom elaboration, episode detection)
 - ✅ `prompts.py` - All prompt templates
 - ✅ `meal_service.py` - Meal CRUD + inline editing
-- ✅ `symptom_service.py` - Symptom CRUD (basic)
+- ✅ `symptom_service.py` - Symptom CRUD + episode detection + tag management
 - ✅ `file_service.py` - Image handling
 - ⚠️ `analysis_service.py` - NOT CREATED (Phase 8)
 
 ### API Routes
 - ✅ `/meals/*` - Full CRUD + AI analysis + inline editing
-- ⚠️ `/symptoms/*` - Basic CRUD (missing clarification)
+- ✅ `/symptoms/*` - Full CRUD + AI elaboration + episode detection + tag autocomplete
 - ❌ `/analysis` - NOT CREATED
 - ❌ `/settings/*` - NOT CREATED (GDPR exports, disclaimers)
 
-## 📊 Current Status: ~40% MVP Complete
+## 📊 Current Status: ~65% MVP Complete
 
 **Working End-to-End:**
+
+**Meal Tracking:**
 1. Upload meal photo
 2. AI analyzes → suggests name + ingredients
 3. Auto-accepted to database
 4. Inline editing for all fields
 5. Save meal → appears in history
 
+**Symptom Tracking:**
+1. Select symptom tags with autocomplete
+2. Adjust severity per symptom (1-10 slider)
+3. Set per-symptom start/end times
+4. Ongoing symptom detection (auto-link to previous episodes)
+5. Optional AI elaboration (streaming)
+6. Save → appears in history with tags, episode links, AI badges
+7. Edit or delete symptoms
+
 **Missing Critical Features:**
-- Symptom logging with AI clarification
-- Pattern analysis dashboard
-- Medical disclaimers & GDPR compliance
+- Pattern analysis dashboard (meal-symptom correlations)
+- GDPR data export functionality
+- Privacy policy and settings pages
 
 ## 🔑 Key Design Decisions Made
 
@@ -138,27 +163,31 @@
 5. **Pure htmx** - No script execution in partials (security)
 6. **Claude Sonnet 4.5** - For both meal and symptom analysis
 7. **Prompt caching** - For pattern analysis only (90% cost savings)
+8. **Tag-based symptom entry** - Chose structured tags over conversational Q&A for better UX and data consistency
 
 ## 🚨 Known Issues / Tech Debt
 
-None currently - recent session fixed:
+None currently - recent sessions fixed:
 - ✅ Inline editing cursor placement
 - ✅ Delete button UX (removed popups, fixed JSON placeholder)
 - ✅ Status indicator stacking (analyzing + complete both showing)
 - ✅ Draft meals appearing in history
+- ✅ Symptom history showing empty (duplicate route in `routes.py` was overriding symptoms router)
 
 ## 💾 Database State
 
 **Migrations applied:**
-- `431a799ebeb8` - Initial schema (all models)
+- `a02d9fd847b2` - Initial schema (all models)
 - `6d7c0be526eb` - Seed ingredient categories
 - `61e8ee85c42e` - Add meal name + AI tracking fields
 - `5acf901daa38` - Add meal status field
+- `c362f51a0834` - Add symptom tags and episodes
+- `a20f1e06adcf` - Add AI generated text and final notes to symptoms
 
 **Sample Data:**
 - 10 ingredient categories seeded
 - Test meals with AI-analyzed ingredients
-- No symptoms logged yet
+- 6 symptoms logged with tags, severity, episode links, and AI elaboration
 
 ## 🔐 Environment
 
@@ -173,17 +202,23 @@ None currently - recent session fixed:
 ## 📝 Next Session TODO
 
 **Immediate priorities:**
-1. Implement symptom clarification (Phase 6)
-2. Test conversational flow with tactful questions
-3. Add pattern analysis queries (Phase 8)
-4. Create timeline view (meals + symptoms)
-5. Add medical disclaimers (GDPR compliance)
+1. **Pattern Analysis Dashboard (Phase 8)** - The core value proposition
+   - Implement `analyze_patterns()` in ClaudeService with prompt caching
+   - Create `analysis_service.py` for SQL correlation queries
+   - Build timeline view showing meals + symptoms chronologically
+   - Add Chart.js visualizations (correlation graphs, heatmaps)
+   - Medical disclaimer modal before showing results
+
+2. **GDPR Compliance**
+   - Data export endpoint (`/settings/export`)
+   - Privacy policy page
+   - User settings page (disclaimer acknowledgment)
 
 **Quick wins:**
-- Add date range filtering to history
-- Implement data export endpoint
-- Create privacy policy page
-- Add user settings page
+- Add date range filtering to meal/symptom history
+- Add meal editing UI (currently only inline editing)
+- Create settings page for user preferences
+- Add "Delete All Data" functionality for testing
 
 ---
 

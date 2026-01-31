@@ -56,6 +56,7 @@ Users
 3. **Native evals over promptfoo**: Simpler setup, store results in PostgreSQL, easier to customize
 4. **Auth later**: Focus on core functionality first, add authentication post-MVP
 5. **Ingredient state tracking**: Track raw/cooked/processed to improve correlation accuracy
+6. **Minimize vertical length**: Reduce vertical UI clutter by showing contextual controls only when needed, not preemptively. Keep forms compact and focused on primary inputs.
 
 ## Development Approach
 

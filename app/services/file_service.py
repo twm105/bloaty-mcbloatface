@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import UploadFile
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 class FileService:
@@ -63,6 +63,9 @@ class FileService:
         """
         try:
             with Image.open(file_path) as img:
+                # Apply EXIF orientation (fixes iPhone rotation issues)
+                img = ImageOps.exif_transpose(img)
+
                 # Convert RGBA to RGB if needed
                 if img.mode == "RGBA":
                     rgb_img = Image.new("RGB", img.size, (255, 255, 255))

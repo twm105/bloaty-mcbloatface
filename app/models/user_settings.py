@@ -29,6 +29,9 @@ class UserSettings(Base):
     height_cm = Column(Integer)
     gender = Column(String(50))  # Free-text for inclusivity
 
+    # AI Feature Preferences
+    ai_elaborate_symptoms = Column(Boolean, default=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
