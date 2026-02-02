@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}How Diagnosis Works{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">How Diagnosis Works</h1>
+    <p class="page-description">Understanding our ingredient-symptom correlation analysis</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Overview</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary">
+            Our diagnosis feature analyzes your meal and symptom data to identify ingredients that may be associated with your health symptoms. This analysis is based on temporal patterns, statistical correlations, and medical research.
+        </p>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h2 class="card-title">Temporal Lag Windows</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            We analyze symptoms that occur within different time windows after eating:
+        </p>
+        <ul style="list-style: disc; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-sm);"><strong>Immediate (0-2 hours):</strong> Typical of allergic reactions and intolerances</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Delayed (4-24 hours):</strong> Common for digestive issues and IBS triggers</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Cumulative (24+ hours):</strong> Inflammatory responses and long-term effects</li>
+        </ul>
+        <p class="text-secondary" style="margin-top: var(--space-md);">
+            These windows are grounded in medical research on how different types of food reactions manifest over time.
+        </p>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h2 class="card-title">Confidence Scoring</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            We calculate a confidence score for each ingredient-symptom correlation based on:
+        </p>
+        <ul style="list-style: disc; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-sm);"><strong>Statistical confidence (50% weight):</strong> How often symptoms follow consumption</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Temporal specificity (30% weight):</strong> Concentration in specific time windows</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Severity weighting (20% weight):</strong> Average severity of associated symptoms</li>
+        </ul>
+        <div style="margin-top: var(--space-md);">
+            <p class="text-secondary" style="margin-bottom: var(--space-xs);"><strong>Confidence levels:</strong></p>
+            <ul style="list-style: none; padding: 0; margin-left: var(--space-lg);">
+                <li style="margin-bottom: var(--space-xs);"><span style="color: #52B788; font-weight: 600;">● HIGH:</span> ≥70% confidence</li>
+                <li style="margin-bottom: var(--space-xs);"><span style="color: #D4734B; font-weight: 600;">● MEDIUM:</span> 40-69% confidence</li>
+                <li style="margin-bottom: var(--space-xs);"><span style="color: #E63946; font-weight: 600;">● LOW:</span> <40% confidence</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h2 class="card-title">Medical Grounding</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            Our AI analysis uses web search to find relevant medical research and provide context for identified correlations. We prioritize sources from:
+        </p>
+        <ul style="list-style: disc; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-xs);">NIH (National Institutes of Health)</li>
+            <li style="margin-bottom: var(--space-xs);">PubMed and peer-reviewed medical journals</li>
+            <li style="margin-bottom: var(--space-xs);">Registered dietitian organizations</li>
+            <li style="margin-bottom: var(--space-xs);">Academic and medical institutions (.edu, .org domains)</li>
+        </ul>
+        <p class="text-secondary" style="margin-top: var(--space-md);">
+            All sources are cited with hyperlinks so you can verify the information.
+        </p>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h2 class="card-title">Important Limitations</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            <strong>This analysis has important limitations:</strong>
+        </p>
+        <ul style="list-style: disc; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-sm);"><strong>Correlation ≠ Causation:</strong> Just because symptoms follow eating an ingredient doesn't mean the ingredient caused the symptoms</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Confounding factors:</strong> Many things influence symptoms (stress, sleep, other foods, medications, etc.)</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Sample size:</strong> Results improve with more data. Minimum 5 meals and 3 symptoms required</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Individual variation:</strong> Food responses are highly personal and may not match typical patterns</li>
+            <li style="margin-bottom: var(--space-sm);"><strong>Not medical advice:</strong> This tool does NOT diagnose conditions or replace professional medical consultation</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h2 class="card-title">What To Do With Results</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            If the analysis identifies potential trigger ingredients:
+        </p>
+        <ol style="list-style: decimal; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-sm);">
+                <strong>Discuss with a healthcare professional:</strong> Share the results with your doctor, gastroenterologist, or registered dietitian for proper evaluation
+            </li>
+            <li style="margin-bottom: var(--space-sm);">
+                <strong>Consider an elimination trial:</strong> With medical supervision, try removing the ingredient for 2-3 weeks, then reintroduce it to observe effects
+            </li>
+            <li style="margin-bottom: var(--space-sm);">
+                <strong>Continue tracking:</strong> More data improves accuracy. Keep logging meals and symptoms
+            </li>
+            <li style="margin-bottom: var(--space-sm);">
+                <strong>Try different preparations:</strong> If state matters (raw vs cooked), experiment with different cooking methods
+            </li>
+            <li style="margin-bottom: var(--space-sm);">
+                <strong>Provide feedback:</strong> Rate the results to help us improve the analysis
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div style="margin-top: var(--space-lg);">
+    <a href="/diagnosis" class="btn btn-primary">Back to Diagnosis</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnosis Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Food Trigger Diagnosis</h1>
+    <p class="page-description">
+        Analysis of {{ diagnosis_run.meals_analyzed }} meals and {{ diagnosis_run.symptoms_analyzed }} symptoms
+        from {{ diagnosis_run.date_range_start.strftime('%b %d, %Y') }} to {{ diagnosis_run.date_range_end.strftime('%b %d, %Y') }}
+    </p>
+</div>
+
+<!-- Medical Disclaimer -->
+<div class="disclaimer disclaimer-warning" style="margin-bottom: var(--space-lg);">
+    <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+        <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+    </svg>
+    <div class="disclaimer-content">
+        <div class="disclaimer-title">Important Medical Disclaimer</div>
+        <div class="disclaimer-text">
+            This analysis identifies correlations in your personal data and does NOT constitute medical advice or diagnosis. Correlation does not prove causation. Multiple factors may influence your symptoms. Please consult with a qualified healthcare professional before making any dietary changes or health decisions.
+        </div>
+    </div>
+</div>
+
+{% if results %}
+    <!-- Results Grid -->
+    <div style="display: grid; gap: var(--space-lg);">
+        {% for result in results %}
+            <div class="card">
+                <div class="card-header" style="border-bottom: 2px solid {% if result.confidence_level == 'high' %}#52B788{% elif result.confidence_level == 'medium' %}#D4734B{% else %}#E63946{% endif %};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="card-title">
+                            {{ result.ingredient.normalized_name.title() }}
+                            {% if result.problematic_states %}
+                                <span class="badge badge-secondary" style="margin-left: var(--space-xs); font-size: var(--font-sm);">
+                                    {{ result.problematic_states[0] }}
+                                </span>
+                            {% endif %}
+                        </h2>
+                        <span class="badge" style="background-color: {% if result.confidence_level == 'high' %}#52B788{% elif result.confidence_level == 'medium' %}#D4734B{% else %}#E63946{% endif %}; color: white; font-weight: 600;">
+                            {{ result.confidence_level.upper() }}: {{ (result.confidence_score * 100)|round|int }}%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-content">
+                    <!-- Associated Symptoms -->
+                    <div style="margin-bottom: var(--space-md);">
+                        <h3 style="font-size: var(--font-base); font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-primary);">Associated Symptoms</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            {% for symptom in result.associated_symptoms %}
+                                <li style="padding: var(--space-xs) 0; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span class="text-base">{{ symptom.name.title() }}</span>
+                                        <span class="text-secondary text-sm">
+                                            {{ symptom.frequency }} time{{ 's' if symptom.frequency != 1 else '' }},
+                                            {{ symptom.lag_hours|round(1) }}hr lag,
+                                            severity {{ symptom.severity_avg|round(1) }}/10
+                                        </span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <p class="text-secondary text-sm" style="margin-top: var(--space-xs);">
+                            Occurred after {{ result.times_followed_by_symptoms }}/{{ result.times_eaten }} exposures
+                            ({{ (result.times_followed_by_symptoms / result.times_eaten * 100)|round|int }}%)
+                        </p>
+                    </div>
+
+                    <!-- AI Analysis -->
+                    {% if result.ai_analysis %}
+                        <div style="background-color: var(--bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+                            <div style="white-space: pre-wrap; color: var(--text-secondary); font-size: var(--font-sm);">{{ result.ai_analysis }}</div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Citations -->
+                    {% if result.citations %}
+                        <div style="margin-bottom: var(--space-md);">
+                            <h4 style="font-size: var(--font-sm); font-weight: 600; margin-bottom: var(--space-xs); color: var(--text-primary);">
+                                Sources ({{ result.citations|length }}):
+                            </h4>
+                            <ul style="list-style: none; padding: 0;">
+                                {% for citation in result.citations %}
+                                    <li style="margin-bottom: var(--space-xs);">
+                                        <a href="{{ citation.source_url }}" target="_blank" rel="noopener noreferrer" class="text-accent text-sm" style="text-decoration: none;">
+                                            {{ citation.source_title }}
+                                        </a>
+                                        <span class="badge badge-secondary" style="margin-left: var(--space-xs); font-size: 10px;">{{ citation.source_type }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- User Feedback -->
+                    <div style="border-top: 1px solid var(--border-color); padding-top: var(--space-md);" x-data="{ rating: 0, feedback: '', submitted: false }">
+                        <h4 style="font-size: var(--font-sm); font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-primary);">Rate this result:</h4>
+                        <div style="display: flex; gap: var(--space-xs); margin-bottom: var(--space-sm);">
+                            <template x-for="i in [1,2,3,4,5]" :key="i">
+                                <button
+                                    @click="rating = i"
+                                    style="background: none; border: none; cursor: pointer; font-size: 24px;"
+                                    :style="{ color: rating >= i ? '#40916C' : '#B0B0B0' }"
+                                >
+                                    ★
+                                </button>
+                            </template>
+                        </div>
+                        <textarea
+                            x-model="feedback"
+                            placeholder="Optional: Share your thoughts on this result..."
+                            style="width: 100%; min-height: 60px; padding: var(--space-sm); border: 1px solid var(--border-color); border-radius: var(--radius-sm); background-color: var(--bg-primary); color: var(--text-primary); font-family: inherit; font-size: var(--font-sm); margin-bottom: var(--space-sm);"
+                        ></textarea>
+                        <button
+                            @click="
+                                fetch('/diagnosis/feedback', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ result_id: {{ result.id }}, rating: rating, feedback_text: feedback })
+                                }).then(() => { submitted = true; });
+                            "
+                            :disabled="rating === 0 || submitted"
+                            class="btn btn-sm"
+                            :class="submitted ? 'btn-secondary' : 'btn-primary'"
+                        >
+                            <span x-text="submitted ? 'Submitted ✓' : 'Submit Feedback'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <div class="card-content">
+            <p class="text-secondary">No potential trigger ingredients identified in this analysis period. Try expanding the date range or continue logging meals and symptoms.</p>
+        </div>
+    </div>
+{% endif %}
+
+<div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md);">
+    <button class="btn btn-primary" onclick="window.location.reload()">Run New Analysis</button>
+    <a href="/diagnosis/methodology" class="btn btn-secondary">How This Works</a>
+</div>
+
+{% endblock %}

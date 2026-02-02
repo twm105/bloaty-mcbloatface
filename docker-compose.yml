@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8' # note version attribute is obsolete and ignored, commented out to avoid potential confusion
 
 services:
   db:

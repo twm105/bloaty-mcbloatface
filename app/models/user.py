@@ -21,3 +21,4 @@ class User(Base):
     symptoms = relationship("Symptom", back_populates="user", cascade="all, delete-orphan")
     settings = relationship("UserSettings", back_populates="user", cascade="all, delete-orphan", uselist=False)
     data_exports = relationship("DataExport", back_populates="user", cascade="all, delete-orphan")
+    diagnosis_runs = relationship("DiagnosisRun", back_populates="user", cascade="all, delete-orphan")

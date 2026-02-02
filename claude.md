@@ -108,11 +108,50 @@ bloaty-mcbloatface/
 - Chart.js for frontend visualization
 - Interactive filtering (date ranges, ingredient selection)
 
+## Diagnosis Feature Planning
+
+### Phase 1: AI Correlation Analysis (MVP)
+**Backend Analysis Engine:**
+- SQL windowing approach: For each symptom, aggregate ingredients eaten across multiple temporal lag windows
+  - Immediate lag: 0-2 hours (allergic reactions, intolerances)
+  - Delayed lag: 4-24 hours (digestive issues, IBS triggers)
+  - Cumulative lag: days/weeks (inflammatory responses)
+  - Lag windows grounded in dietitian/medical research
+- Statistical confidence scoring with thresholds (data volume + statistical significance)
+- Ingredient state consideration (raw vs cooked vs processed)
+- Web search integration for medical grounding (constrained to trusted domains: NIH, medical journals, RD organizations)
+- Citations with hyperlinks and hover footnotes for ethical transparency
+
+**Simple Results View:**
+- List/table of suspected triggers ranked by confidence
+- Confidence visualization using color scale (per design principles)
+- Citations displayed as hyperlinked sources with brief pop-over footnotes
+- User feedback mechanism: 0-5 star rating + optional text justification per diagnosis
+- Results only shown when confidence threshold met (prevents premature/unreliable diagnoses)
+- All symptom types included from start
+
+**Methodology Page:**
+- "How Diagnosis Works" explainer linked from diagnosis page
+- Layman's terms explanation of temporal lag analysis, statistical methods, and grounding approach
+
+### Phase 2: Visual Timeline (Future)
+**Deferred for post-MVP development:**
+- Interactive scrolling timeline: meals above centerline, symptoms below
+- Meals expandable to show ingredients; suspected triggers highlighted
+- Symptoms as points (acute) or bars (enduring) with severity visualization
+- Granularity options: hourly vs daily views with zoom
+- Interactive filtering: date range, symptom type, ingredient type
+- Connection visualization: lines/highlighting from trigger ingredients to symptoms
+- Hover interactions to explore cause → effect relationships
+- Color-coded confidence levels for correlations
+
 ## Constraints & Guidelines
 - **Rapid MVP**: Prioritize speed to working prototype
 - **User has final say**: All architectural and design decisions require user approval
+- **Critical judgment**: Apply critical thinking to user inputs. Be polite but not sycophantic. Test alternative ideas where they exist without delaying development. User has final say.
 - **Track everything**: Ingredient state (raw/cooked), timestamps for correlation analysis
 - **Evals from day 1**: Quantify AI performance before building features on top
+- **Design Principles**: Refer to the DESIGN_PRINCIPLES.md document whenever applying UX or UI design
 
 ## Future Considerations
 - Authentication system

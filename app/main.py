@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-from app.api import routes, meals, symptoms
+from app.api import routes, meals, symptoms, diagnosis
 
 app = FastAPI(title="Bloaty McBloatface", version="0.1.0")
 
@@ -16,6 +16,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.include_router(routes.router)
 app.include_router(meals.router)
 app.include_router(symptoms.router)
+app.include_router(diagnosis.router)
 
 @app.get("/health")
 async def health_check():

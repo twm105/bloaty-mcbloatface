@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnosis - Need More Data{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Food Trigger Diagnosis</h1>
+    <p class="page-description">Identify ingredients that may be associated with your symptoms</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Need More Data</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            To run diagnosis analysis, we need sufficient data to identify meaningful patterns. Please continue tracking your meals and symptoms.
+        </p>
+
+        <div style="margin: var(--space-lg) 0;">
+            <div style="margin-bottom: var(--space-md);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+                    <span class="text-base">Meals logged</span>
+                    <span class="text-base font-bold {{ 'text-success' if meals_count >= min_meals else 'text-secondary' }}">
+                        {{ meals_count }}/{{ min_meals }}
+                    </span>
+                </div>
+                <div style="background-color: var(--bg-secondary); border-radius: var(--radius-md); height: 8px; overflow: hidden;">
+                    <div style="background-color: {{ '#52B788' if meals_count >= min_meals else '#6B7280' }}; height: 100%; width: {{ (meals_count / min_meals * 100) if meals_count < min_meals else 100 }}%;"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: var(--space-md);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+                    <span class="text-base">Symptoms logged</span>
+                    <span class="text-base font-bold {{ 'text-success' if symptoms_count >= min_symptoms else 'text-secondary' }}">
+                        {{ symptoms_count }}/{{ min_symptoms }}
+                    </span>
+                </div>
+                <div style="background-color: var(--bg-secondary); border-radius: var(--radius-md); height: 8px; overflow: hidden;">
+                    <div style="background-color: {{ '#52B788' if symptoms_count >= min_symptoms else '#6B7280' }}; height: 100%; width: {{ (symptoms_count / min_symptoms * 100) if symptoms_count < min_symptoms else 100 }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        {% if meals_count < min_meals %}
+            <p class="text-secondary" style="margin: var(--space-md) 0;">
+                <strong>Need {{ min_meals - meals_count }} more meal{{ 's' if (min_meals - meals_count) != 1 else '' }}.</strong>
+                Continue logging your meals to build up data for analysis.
+            </p>
+        {% endif %}
+
+        {% if symptoms_count < min_symptoms %}
+            <p class="text-secondary" style="margin: var(--space-md) 0;">
+                <strong>Need {{ min_symptoms - symptoms_count }} more symptom entr{{ 'ies' if (min_symptoms - symptoms_count) != 1 else 'y' }}.</strong>
+                Log any gastro or health symptoms you experience.
+            </p>
+        {% endif %}
+
+        <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
+            <a href="/meals/log" class="btn btn-primary">
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#plus"></use>
+                </svg>
+                Log Meal
+            </a>
+            <a href="/symptoms/log" class="btn btn-secondary">
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#plus"></use>
+                </svg>
+                Log Symptom
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: var(--space-lg);">
+    <div class="card-header">
+        <h3 class="card-title">How Diagnosis Works</h3>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-md);">
+            Our analysis uses temporal lag windows to identify ingredients that frequently appear before symptoms occur. We analyze:
+        </p>
+        <ul style="list-style: disc; margin-left: var(--space-lg); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-xs);">Immediate reactions (0-2 hours after eating)</li>
+            <li style="margin-bottom: var(--space-xs);">Delayed reactions (4-24 hours)</li>
+            <li style="margin-bottom: var(--space-xs);">Cumulative effects (24+ hours)</li>
+        </ul>
+        <p class="text-secondary" style="margin-top: var(--space-md);">
+            Results are grounded in medical research and include citations from reputable sources.
+        </p>
+        <a href="/diagnosis/methodology" class="btn btn-link" style="margin-top: var(--space-sm); padding-left: 0;">
+            Learn more about our methodology →
+        </a>
+    </div>
+</div>
+{% endblock %}

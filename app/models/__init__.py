@@ -15,6 +15,10 @@ from app.models.symptom import Symptom
 from app.models.user_settings import UserSettings
 from app.models.data_export import DataExport
 from app.models.eval_run import EvalRun
+from app.models.diagnosis_run import DiagnosisRun
+from app.models.diagnosis_result import DiagnosisResult
+from app.models.diagnosis_citation import DiagnosisCitation
+from app.models.diagnosis_feedback import DiagnosisFeedback
 
 __all__ = [
     "Base",
@@ -29,4 +33,8 @@ __all__ = [
     "UserSettings",
     "DataExport",
     "EvalRun",
+    "DiagnosisRun",
+    "DiagnosisResult",
+    "DiagnosisCitation",
+    "DiagnosisFeedback",
 ]

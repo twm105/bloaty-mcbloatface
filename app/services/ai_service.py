@@ -710,6 +710,194 @@ class ClaudeService:
             raise ValueError(f"Request error: {e.message}") from e
 
     # =========================================================================
+    # DIAGNOSIS - INGREDIENT-SYMPTOM CORRELATION ANALYSIS
+    # =========================================================================
+
+    async def diagnose_correlations(
+        self,
+        correlation_data: list[dict],
+        web_search_enabled: bool = True
+    ) -> dict:
+        """
+        Analyze ingredient-symptom correlations with medical grounding via web search.
+
+        Uses Sonnet model with web search to:
+        1. Assess statistical correlation strength
+        2. Research medical literature for known associations
+        3. Provide scientific context and citations
+        4. Interpret findings in plain language
+        5. Suggest next steps
+
+        Args:
+            correlation_data: List of dicts with ingredient-symptom correlation stats
+            web_search_enabled: Whether to enable web search for medical research
+
+        Returns:
+            Dict with structure:
+            {
+                "ingredient_analyses": [...],
+                "overall_summary": str,
+                "caveats": [str],
+                "usage_stats": {
+                    "input_tokens": int,
+                    "cached_tokens": int,
+                    "cache_hit": bool
+                }
+            }
+
+        Raises:
+            ServiceUnavailableError: AI service unavailable
+            RateLimitError: Too many requests
+            ValueError: Invalid response format
+
+        Cost: ~$0.15-0.30 first run, ~$0.02-0.05 cached runs (90% savings)
+        """
+        try:
+            # Format correlation data for AI analysis
+            formatted_data = self._format_correlation_data(correlation_data)
+
+            # Build request - import DIAGNOSIS_SYSTEM_PROMPT from prompts
+            from app.services.prompts import DIAGNOSIS_SYSTEM_PROMPT
+
+            # Prepare messages with prefill to force JSON output
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"""Analyze the following ingredient-symptom correlation data and provide medical context:
+
+{formatted_data}
+
+Remember to:
+1. Research medical literature for known associations
+2. Provide citations from reputable sources (NIH, PubMed, medical journals, RD sites)
+3. Use qualified language (correlation, not causation)
+4. Include plain-language interpretation
+5. Suggest next steps including professional consultation"""
+                },
+                {
+                    "role": "assistant",
+                    "content": "{"
+                }
+            ]
+
+            # Call Claude API with web search if enabled
+            request_params = {
+                "model": self.sonnet_model,
+                "max_tokens": 8192,  # Increased to prevent truncation
+                "messages": messages,
+                "stop_sequences": ["\n```", "```"],  # Prevent markdown wrapping
+                "system": [
+                    {
+                        "type": "text",
+                        "text": DIAGNOSIS_SYSTEM_PROMPT,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ]
+            }
+
+            # Add web search tool if enabled
+            if web_search_enabled:
+                request_params["tools"] = [
+                    {
+                        "type": "web_search_20250305",
+                        "name": "web_search"
+                    }
+                ]
+
+            response = self.client.messages.create(**request_params)
+
+            # Debug logging
+            print(f"DEBUG: Response type: {type(response)}")
+            print(f"DEBUG: Response content length: {len(response.content)}")
+            print(f"DEBUG: Response content: {response.content}")
+
+            # Extract JSON from response
+            # Handle different response content types
+            response_text = ""
+            for content_block in response.content:
+                print(f"DEBUG: Content block type: {content_block.type}")
+                if hasattr(content_block, 'text'):
+                    response_text += content_block.text
+                    print(f"DEBUG: Found text: {content_block.text[:200]}...")
+
+            if not response_text:
+                raise ValueError(f"No text content in Claude response. Content blocks: {[c.type for c in response.content]}")
+
+            response_text = response_text.strip()
+            print(f"DEBUG: Final response_text length: {len(response_text)}")
+
+            # Prepend the opening brace from prefill (Claude continues from "{")
+            response_text = "{" + response_text
+
+            # Parse JSON directly (no markdown wrapper expected with prefill)
+            try:
+                result = json.loads(response_text)
+            except json.JSONDecodeError as e:
+                # Log the problematic JSON for debugging
+                print(f"DEBUG: JSON parse failed at line {e.lineno}, column {e.colno}")
+                print(f"DEBUG: Error: {e.msg}")
+                print(f"DEBUG: Problematic JSON (first 500 chars): {response_text[:500]}")
+                print(f"DEBUG: Problematic JSON (last 500 chars): {response_text[-500:]}")
+                print(f"DEBUG: Problematic JSON (around error): {response_text[max(0, e.pos-200):e.pos+200]}")
+
+                # Save full response to file for inspection
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as f:
+                    f.write(response_text)
+                    print(f"DEBUG: Full JSON saved to: {f.name}")
+                raise
+
+            # Add usage stats
+            usage = response.usage
+            result["usage_stats"] = {
+                "input_tokens": usage.input_tokens,
+                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
+                "cache_hit": getattr(usage, 'cache_read_input_tokens', 0) > 0
+            }
+
+            return result
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON response from AI: {e}") from e
+
+    def _format_correlation_data(self, correlation_data: list[dict]) -> str:
+        """
+        Format correlation data for AI analysis.
+
+        Args:
+            correlation_data: Raw correlation statistics from DiagnosisService
+
+        Returns:
+            Formatted string representation for AI consumption
+        """
+        formatted = "CORRELATION DATA:\n\n"
+
+        for i, item in enumerate(correlation_data, 1):
+            formatted += f"{i}. {item['ingredient_name']} ({item.get('state', 'unknown')})\n"
+            formatted += f"   Times eaten: {item['times_eaten']}\n"
+            formatted += f"   Symptom occurrences: {item['total_symptom_occurrences']}\n"
+            formatted += f"   Temporal windows:\n"
+            formatted += f"     - Immediate (0-2hr): {item['immediate_total']} occurrences\n"
+            formatted += f"     - Delayed (4-24hr): {item['delayed_total']} occurrences\n"
+            formatted += f"     - Cumulative (24hr+): {item['cumulative_total']} occurrences\n"
+            formatted += f"   Associated symptoms:\n"
+            for symptom in item.get('associated_symptoms', []):
+                formatted += f"     - {symptom['name']}: severity {symptom['severity_avg']:.1f}/10, "
+                formatted += f"frequency {symptom['frequency']}, "
+                formatted += f"avg lag {symptom['lag_hours']:.1f}hr\n"
+            formatted += "\n"
+
+        return formatted
+
+    # =========================================================================
     # HELPER METHODS
     # =========================================================================
 

@@ -41,7 +41,7 @@
             <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
             <li><a href="/meals/history" class="nav-link {% if request.path.startswith('/meals') %}active{% endif %}">Meal History</a></li>
             <li><a href="/symptoms/history" class="nav-link {% if request.path.startswith('/symptoms') %}active{% endif %}">Symptom History</a></li>
-            <li><a href="/analysis" class="nav-link {% if request.path == '/analysis' %}active{% endif %}">Analysis</a></li>
+            <li><a href="/diagnosis" class="nav-link {% if request.path.startswith('/diagnosis') %}active{% endif %}">Diagnosis</a></li>
             <li><a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">Settings</a></li>
         </ul>
     </nav>
