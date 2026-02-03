@@ -380,7 +380,6 @@ class DiagnosisService:
 
         # Minimum thresholds
         if times_eaten < self.MIN_MEALS or symptom_occurrences < self.MIN_SYMPTOM_OCCURRENCES:
-            print(f"DEBUG: INSUFFICIENT DATA - times_eaten ({times_eaten}) < MIN_MEALS ({self.MIN_MEALS}) OR symptom_occurrences ({symptom_occurrences}) < MIN_SYMPTOM_OCCURRENCES ({self.MIN_SYMPTOM_OCCURRENCES})")
             return (0.0, "insufficient_data")
 
         # 1. Statistical confidence (50% weight)
@@ -484,13 +483,8 @@ class DiagnosisService:
             user_id, date_range_start, date_range_end
         )
 
-        print(f"DEBUG: Found {len(correlations)} correlations")
-        if correlations:
-            print(f"DEBUG: All correlations: {correlations}")
-
         if not correlations:
             # No correlations found, mark as complete
-            print("DEBUG: No correlations found, returning early")
             self.db.commit()
             return diagnosis_run
 
@@ -517,8 +511,6 @@ class DiagnosisService:
                 else 0,
             )
 
-            print(f"DEBUG: Ingredient {data['ingredient_name']}: confidence={confidence_score}, level={confidence_level}, times_eaten={data['times_eaten']}, symptom_occ={data['total_symptom_occurrences']}")
-
             if confidence_level != "insufficient_data":
                 scored_ingredients.append(
                     {
@@ -531,13 +523,8 @@ class DiagnosisService:
         # Sort by confidence score descending
         scored_ingredients.sort(key=lambda x: x["confidence_score"], reverse=True)
 
-        print(f"DEBUG: Scored ingredients count: {len(scored_ingredients)}")
-        if scored_ingredients:
-            print(f"DEBUG: First scored ingredient: {scored_ingredients[0]}")
-
         # If no ingredients met confidence threshold, skip Claude API call
         if not scored_ingredients:
-            print("DEBUG: No ingredients met confidence threshold, skipping Claude API call")
             self.db.commit()
             return diagnosis_run
 
@@ -557,12 +544,13 @@ class DiagnosisService:
         for analysis in ai_analysis.get("ingredient_analyses", []):
             ingredient_name = analysis["ingredient_name"]
 
-            # Find matching scored ingredient
+            # Find matching scored ingredient (flexible matching for "raw onion" vs "onion")
             matching = next(
                 (
                     ing
                     for ing in scored_ingredients
-                    if ing["ingredient_name"].lower() == ingredient_name.lower()
+                    if ing["ingredient_name"].lower() in ingredient_name.lower()
+                    or ingredient_name.lower() in ing["ingredient_name"].lower()
                 ),
                 None,
             )

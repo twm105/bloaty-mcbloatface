@@ -2,12 +2,12 @@
 
 A meal tracking and gastro issue diagnosis application. Upload meal images, AI analyzes ingredients, log symptoms, and discover patterns between food and digestive health.
 
-**🚧 Work in Progress - ~65% MVP Complete**
+**🚧 Work in Progress - ~80% MVP Complete**
 
-**Recent Updates (Jan 31, 2026):**
-- ✅ Fixed critical UI bugs: Symptom edit page rendering, icon sizing issues
-- ✅ Dark theme implementation with improved UX and design consistency
-- ✅ All core features tested and verified with Playwright browser automation
+**Recent Updates (Feb 3, 2026):**
+- ✅ **Diagnosis feature complete**: Full ingredient-symptom correlation analysis with medical grounding
+- ✅ Test organization: Moved all test files to structured `tests/` directory
+- ✅ Documentation cleanup: Removed duplicates, applied DRY principle
 
 ## ✅ What's Working
 
@@ -29,22 +29,32 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 - **AI Elaboration**: Streaming AI-generated summaries of symptom entries
 - **Symptom History**: View, edit, and delete symptoms with tags, severity, and episode links
 
+### Diagnosis & Pattern Analysis
+- **Temporal Correlation Analysis**: SQL-based analysis across immediate/delayed/cumulative windows
+- **Confidence Scoring**: Statistical assessment of ingredient-symptom correlations
+- **Medical Grounding**: Claude Sonnet 4.5 provides scientific context with citations
+- **Citation System**: Links to NIH, PubMed, medical journals with relevance scores
+- **User Feedback**: Star ratings and comments for diagnosis quality tracking
+- **Results Dashboard**: Ingredient cards with symptoms, medical context, and recommendations
+
 ## 🚧 Not Yet Implemented
 
-- ❌ **Pattern Analysis**: Correlation dashboard not built (Phase 8)
-- ❌ **Charts & Visualizations**: No Chart.js integration yet
-- ❌ **GDPR Compliance**: Data export, privacy policy, settings pages not created
-- ❌ **Evals Framework**: AI accuracy testing not implemented
-- ❌ **Date Range Filtering**: History pages lack filtering controls
+- ❌ **Timeline Visualizations**: Chart.js integration for trend analysis
+- ❌ **GDPR Compliance**: Data export, privacy policy, settings pages
+- ❌ **Evals Framework**: AI accuracy testing for meal/symptom analysis
+- ❌ **Date Range Filtering**: History pages lack date filtering controls
+- ❌ **Test Coverage**: Unit and integration tests needed
 
-**See `IMPLEMENTATION_STATUS.md` for detailed progress and next priorities.**
+**See `STATUS.md` for detailed progress and next priorities.**
 
 ## Tech Stack
 
-- **Backend**: FastAPI, PostgreSQL, SQLAlchemy, Alembic
-- **Frontend**: htmx, Alpine.js, Pico.css
-- **AI**: Anthropic Claude Sonnet 4.5 (~$0.003/meal)
-- **Infrastructure**: Docker Compose
+**Backend**: FastAPI, PostgreSQL, SQLAlchemy, Alembic
+**Frontend**: htmx, Alpine.js, Custom CSS (dark theme)
+**AI**: Anthropic Claude Sonnet 4.5
+**Infrastructure**: Docker Compose
+
+**For architecture decisions and rationale, see `CLAUDE.md`**
 
 ## Quick Start
 
@@ -125,12 +135,12 @@ evals/                   # ❌ Not implemented yet
 tests/                   # ❌ Not implemented yet
 ```
 
-### Key Files
+### Key Documentation
 
-- `CLAUDE.md` - Original project vision & architecture decisions
-- `IMPLEMENTATION_STATUS.md` - Detailed progress tracker (read this!)
-- `app/services/prompts.py` - All AI prompts (meal, symptom, pattern analysis)
-- `app/services/ai_service.py` - Claude API integration
+- **`CLAUDE.md`** - Project vision, architecture decisions, tech stack rationale
+- **`STATUS.md`** - Detailed progress tracker with phase completion
+- **`DESIGN_PRINCIPLES.md`** - UI/UX design system and guidelines
+- **`tests/README.md`** - Test organization and coverage roadmap
 
 ### Development Commands
 
@@ -157,15 +167,9 @@ docker-compose restart web
 
 ### Database Schema
 
-**Core Models:**
-- `User` - Single-user MVP (stub for future multi-user)
-- `Meal` - name, status (draft/published), timestamp, image_path, ai_suggested_ingredients
-- `Ingredient` - Normalized ingredient names
-- `MealIngredient` - Junction table with state (raw/cooked/processed) and source (ai/manual)
-- `IngredientCategory` - Taxonomy (self-referencing tree)
-- `Symptom` - Raw description, structured type, severity, clarification_history
+**Core Models**: User, Meal, Ingredient, MealIngredient, Symptom, DiagnosisRun, DiagnosisResult
 
-**See migrations in `alembic/versions/` for full schema.**
+**For full schema details, see `CLAUDE.md` and migrations in `alembic/versions/`**
 
 ## AI Integration
 
@@ -186,11 +190,13 @@ docker-compose restart web
 
 ## Next Steps
 
-**Immediate priorities (see `IMPLEMENTATION_STATUS.md`):**
-1. Build pattern analysis dashboard (Phase 8) - the core value proposition
-2. Add GDPR compliance (data export, privacy policy, settings)
-3. Create evals framework (BBC Good Food scraper)
-4. Date range filtering for history pages
+**Priority features:**
+1. Timeline visualizations and Chart.js integration
+2. GDPR compliance (data export, privacy policy)
+3. Test coverage (unit & integration tests)
+4. Evals framework for AI accuracy
+
+**For detailed roadmap, see `STATUS.md`**
 
 ## Contributing
 

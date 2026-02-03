@@ -806,25 +806,16 @@ Remember to:
 
             response = self.client.messages.create(**request_params)
 
-            # Debug logging
-            print(f"DEBUG: Response type: {type(response)}")
-            print(f"DEBUG: Response content length: {len(response.content)}")
-            print(f"DEBUG: Response content: {response.content}")
-
             # Extract JSON from response
-            # Handle different response content types
             response_text = ""
             for content_block in response.content:
-                print(f"DEBUG: Content block type: {content_block.type}")
                 if hasattr(content_block, 'text'):
                     response_text += content_block.text
-                    print(f"DEBUG: Found text: {content_block.text[:200]}...")
 
             if not response_text:
                 raise ValueError(f"No text content in Claude response. Content blocks: {[c.type for c in response.content]}")
 
             response_text = response_text.strip()
-            print(f"DEBUG: Final response_text length: {len(response_text)}")
 
             # Prepend the opening brace from prefill (Claude continues from "{")
             response_text = "{" + response_text
@@ -833,19 +824,7 @@ Remember to:
             try:
                 result = json.loads(response_text)
             except json.JSONDecodeError as e:
-                # Log the problematic JSON for debugging
-                print(f"DEBUG: JSON parse failed at line {e.lineno}, column {e.colno}")
-                print(f"DEBUG: Error: {e.msg}")
-                print(f"DEBUG: Problematic JSON (first 500 chars): {response_text[:500]}")
-                print(f"DEBUG: Problematic JSON (last 500 chars): {response_text[-500:]}")
-                print(f"DEBUG: Problematic JSON (around error): {response_text[max(0, e.pos-200):e.pos+200]}")
-
-                # Save full response to file for inspection
-                import tempfile
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as f:
-                    f.write(response_text)
-                    print(f"DEBUG: Full JSON saved to: {f.name}")
-                raise
+                raise ValueError(f"Invalid JSON response from AI at line {e.lineno}, col {e.colno}: {e.msg}") from e
 
             # Add usage stats
             usage = response.usage

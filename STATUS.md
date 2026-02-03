@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** January 31, 2026
-**Session:** UI/UX Bug Fixes - Round 4 (Template Rendering & Icon Sizing)
-**Commit:** (pending)
+**Last Updated:** February 3, 2026
+**Overall Progress:** ~80% MVP Complete
+**Recent:** Diagnosis feature complete, project documentation reorganized
 
 ## ✅ Completed Features
 
@@ -71,6 +71,33 @@
 - ✅ Edit symptoms (dedicated edit page)
 - ⚠️ Missing: Date range filtering, meal editing UI
 
+### Phase 8: Diagnosis Feature - COMPLETE (Feb 3, 2026)
+**Goal:** Correlate ingredients with symptoms to identify potential trigger foods
+
+**Implementation:**
+- ✅ SQL temporal correlation analysis (immediate/delayed/cumulative windows)
+- ✅ Statistical confidence scoring with thresholds
+- ✅ Claude Sonnet 4.5 medical grounding with web search
+- ✅ Citation storage (NIH, PubMed, medical journals)
+- ✅ User feedback system (star ratings + comments)
+- ✅ Results UI with ingredient cards, symptoms, medical context
+- ✅ Diagnosis history tracking (runs stored in database)
+
+**Technical Solutions:**
+- JSON prefill (`{"role": "assistant", "content": "{"}`) forces clean JSON from Claude
+- Stop sequences prevent markdown wrapping
+- Word limits (300/150/100) prevent token truncation
+- Flexible ingredient name matching handles state variations ("raw onion" vs "onion")
+- Empty results check skips unnecessary API calls
+
+**API Endpoints:**
+- `/diagnosis` - View latest diagnosis results
+- `/diagnosis/analyze` - Run new analysis
+- `/diagnosis/feedback` - Submit user feedback
+- `/diagnosis/methodology` - How it works explainer
+
+**Cost:** ~$0.01-0.03 per diagnosis run (varies with data volume)
+
 ### UI/UX Redesign - Dark Theme - COMPLETE (Phase 1)
 **Goal:** Transform from Pico.css Notion aesthetic to elegant, minimal dark theme
 
@@ -129,18 +156,16 @@
 
 **Documentation:** See `/REDESIGN_SUMMARY.md` for full implementation details
 
-## 🚧 Next Priorities (From MVP Plan)
+## 🚧 Next Priorities
 
-### Phase 8: Pattern Analysis Dashboard (HIGH) - NOT STARTED
-**Goal:** Show meal-symptom correlations with charts
+### Analytics & Visualizations (MEDIUM)
+**Goal:** Enhanced data visualization beyond diagnosis results
 
 **Implementation needed:**
-1. Complete analyze_patterns() in ClaudeService (use prompt caching!)
-2. Create analysis_service.py for correlation queries
-3. Build timeline view (meals + symptoms chronologically)
-4. Add Chart.js visualizations
-5. Medical disclaimer modal before showing results
-6. Qualified language in all AI outputs
+1. Timeline view (meals + symptoms chronologically)
+2. Chart.js integration for trend analysis
+3. Date range filtering for all history pages
+4. Export functionality (CSV, PDF reports)
 
 **Files to create:**
 - `app/services/analysis_service.py` - SQL correlation queries

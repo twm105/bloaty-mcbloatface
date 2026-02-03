@@ -33,7 +33,7 @@
         <a
             href="/symptoms/{{ symptom.id }}/edit"
             class="meal-card"
-            style="text-decoration: none; color: inherit; cursor: pointer; position: relative; padding: var(--space-5);"
+            style="text-decoration: none; color: inherit; cursor: pointer; position: relative; padding: var(--space-6);"
             @click="if ($event.target.closest('.icon-button')) $event.preventDefault()"
         >
             <!-- Date and Time (TOP) -->
@@ -69,7 +69,7 @@
 
             <!-- Symptom Tags (max 2 visible, show +N) -->
             {% if symptom.tags %}
-            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; padding-bottom: var(--space-2);">
                 {% set visible_tags = symptom.tags[:2] %}
                 {% set hidden_count = symptom.tags|length - 2 %}
 
@@ -94,7 +94,7 @@
                 hx-target="closest .meal-card"
                 hx-swap="outerHTML"
                 class="icon-button danger"
-                style="position: absolute; top: var(--space-3); right: var(--space-3);"
+                style="position: absolute; top: var(--space-2); right: var(--space-2);"
                 onclick="event.preventDefault(); event.stopPropagation();"
                 @click.stop
             >
