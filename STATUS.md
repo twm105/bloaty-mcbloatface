@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 3, 2026
+**Last Updated:** February 4, 2026
 **Overall Progress:** ~80% MVP Complete
-**Recent:** Diagnosis feature complete, project documentation reorganized
+**Recent:** Minor UI polish - fixed "Add Ingredient" button icon sizing
 
 ## ✅ Completed Features
 
@@ -127,6 +127,9 @@
 - ✅ **Symptom edit page template rendering** - Fixed Jinja2/Alpine.js escaping conflicts by moving template variables to separate `<script>` tag (window.symptomInitData pattern)
 - ✅ **Icon sizing** - Fixed SVG icons rendering at intrinsic 300x150px by adding explicit `width="12" height="12" viewBox="0 0 24 24"` attributes to all `.icon-xxs` elements
 - ✅ Verified with Playwright browser testing - no console errors, correct rendering
+
+**UI Polish (Feb 4, 2026):**
+- ✅ **"Add Ingredient" button icon** - Fixed oversized/misaligned "+" icon in edit meal view by applying proper design system pattern (`icon-xxs` with explicit SVG attributes, reduced from 16px/13px to 12px)
 
 **Template Integration Pattern for Alpine.js + Jinja2:**
 ```html

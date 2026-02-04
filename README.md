@@ -4,10 +4,11 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 
 **🚧 Work in Progress - ~80% MVP Complete**
 
-**Recent Updates (Feb 3, 2026):**
-- ✅ **Diagnosis feature complete**: Full ingredient-symptom correlation analysis with medical grounding
-- ✅ Test organization: Moved all test files to structured `tests/` directory
-- ✅ Documentation cleanup: Removed duplicates, applied DRY principle
+**Recent Updates (Feb 4, 2026):**
+- ✅ **UI polish**: Fixed "Add Ingredient" button icon sizing in edit meal view
+- ✅ **Diagnosis feature complete** (Feb 3): Full ingredient-symptom correlation analysis with medical grounding
+- ✅ **Test organization** (Feb 3): Moved all test files to structured `tests/` directory
+- ✅ **Documentation cleanup** (Feb 3): Removed duplicates, applied DRY principle
 
 ## ✅ What's Working
 
