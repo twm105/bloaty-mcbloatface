@@ -215,6 +215,73 @@ background: var(--color-highlight-terra-dark);
 
 ---
 
+### Loading States & Spinners
+
+#### Standard Loading Spinner (Blue Minimal Style)
+
+Use the `spinner-small` class for all loading states (analysis buttons, processing indicators, etc.):
+
+```css
+.spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #90CAF9;      /* Light blue */
+    border-top-color: #2196F3;       /* Darker blue for rotation */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+```
+
+#### Usage in Buttons
+
+```html
+<!-- Analyzing state -->
+<button class="btn btn-primary">
+    <span x-show="!isAnalyzing">Run Analysis</span>
+    <span x-show="isAnalyzing" style="display: none; display: flex; align-items: center; gap: 0.5rem;">
+        <div class="spinner-small"></div>
+        Analyzing...
+    </span>
+</button>
+```
+
+#### Banner-Style Loading (Full-Width)
+
+For page-level loading (e.g., meal image analysis):
+
+```html
+<div style="
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    color: #1565C0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+">
+    <div class="spinner-small"></div>
+    <span>Analyzing meal image with AI...</span>
+</div>
+```
+
+**Key Principles:**
+- Always use `spinner-small` for consistency (no custom spinners)
+- Blue color scheme (#2196F3, #90CAF9) matches info/processing state
+- Spinner + text should flex with 0.5rem gap for inline buttons
+- Spinner + text should flex with 0.75rem gap for banners
+- Text should be present continuous ("Analyzing...", "Resetting...", "Processing...")
+- No custom `@keyframes spin` in individual templates - use the one in `custom.css`
+
+---
+
 ### Cards
 
 #### Default Card

@@ -57,20 +57,65 @@
             </p>
         {% endif %}
 
-        <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
-            <a href="/meals/log" class="btn btn-primary">
-                <svg class="icon icon-sm" aria-hidden="true">
-                    <use href="/static/icons/lucide-sprite.svg#plus"></use>
-                </svg>
-                Log Meal
-            </a>
-            <a href="/symptoms/log" class="btn btn-secondary">
-                <svg class="icon icon-sm" aria-hidden="true">
-                    <use href="/static/icons/lucide-sprite.svg#plus"></use>
-                </svg>
-                Log Symptom
-            </a>
-        </div>
+        {% if meals_count >= min_meals and symptoms_count >= min_symptoms %}
+            <!-- Sufficient data - show Run Analysis button -->
+            <div style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-left: 3px solid #52B788; border-radius: var(--radius-md); padding: var(--space-md); margin: var(--space-md) 0;">
+                <p class="text-base" style="color: #52B788; font-weight: 600; margin-bottom: var(--space-xs);">
+                    ✓ You have enough data to run analysis!
+                </p>
+                <p class="text-secondary text-sm">
+                    Click below to analyze your meals and symptoms for potential trigger ingredients.
+                </p>
+            </div>
+
+            <div style="margin-top: var(--space-lg);" x-data="{ isAnalyzing: false }">
+                <button
+                    class="btn btn-primary"
+                    hx-post="/diagnosis/analyze"
+                    hx-ext="json-enc"
+                    hx-vals="{}"
+                    hx-trigger="click"
+                    hx-swap="none"
+                    @click="isAnalyzing = true"
+                    :disabled="isAnalyzing"
+                    @htmx:after-request="
+                        if ($event.detail.successful) {
+                            window.location.reload();
+                        } else {
+                            isAnalyzing = false;
+                            alert('Analysis failed. Please try again.');
+                        }
+                    "
+                >
+                    <span x-show="!isAnalyzing">
+                        <svg class="icon icon-sm" aria-hidden="true">
+                            <use href="/static/icons/lucide-sprite.svg#play"></use>
+                        </svg>
+                        Run Analysis
+                    </span>
+                    <span x-show="isAnalyzing" style="display: none; display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="spinner-small"></div>
+                        Analyzing...
+                    </span>
+                </button>
+            </div>
+        {% else %}
+            <!-- Insufficient data - show Log Meal/Symptom buttons -->
+            <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
+                <a href="/meals/log" class="btn btn-primary">
+                    <svg class="icon icon-sm" aria-hidden="true">
+                        <use href="/static/icons/lucide-sprite.svg#plus"></use>
+                    </svg>
+                    Log Meal
+                </a>
+                <a href="/symptoms/log" class="btn btn-secondary">
+                    <svg class="icon icon-sm" aria-hidden="true">
+                        <use href="/static/icons/lucide-sprite.svg#plus"></use>
+                    </svg>
+                    Log Symptom
+                </a>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -95,4 +140,5 @@
         </a>
     </div>
 </div>
+
 {% endblock %}

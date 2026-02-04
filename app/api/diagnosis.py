@@ -2,8 +2,8 @@
 from datetime import datetime, timedelta
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, HTTPException, Request, Body
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
@@ -25,8 +25,8 @@ class DiagnosisRequest(BaseModel):
 
     date_range_start: datetime | None = None
     date_range_end: datetime | None = None
-    min_meals: int = 5
-    min_symptom_occurrences: int = 3
+    min_meals: int = 1  # Lowered for testing to match service defaults
+    min_symptom_occurrences: int = 1  # Lowered for testing to match service defaults
     web_search_enabled: bool = True
 
 
@@ -40,7 +40,7 @@ class DiagnosisFeedbackRequest(BaseModel):
 
 @router.post("/analyze")
 async def analyze_correlations(
-    request: DiagnosisRequest,
+    request: DiagnosisRequest = Body(...),
     db: Session = Depends(get_db),
 ):
     """
@@ -218,3 +218,79 @@ async def get_methodology(request: Request):
     return templates.TemplateResponse(
         "diagnosis/methodology.html", {"request": request}
     )
+
+
+@router.post("/reset")
+async def reset_diagnosis_data(
+    db: Session = Depends(get_db),
+):
+    """
+    Reset all diagnosis data for the user.
+
+    Deletes all DiagnosisRuns and cascades to related results, citations, and feedback.
+    This is a destructive action that cannot be undone.
+
+    Returns:
+        JSON with success message and count of deleted runs
+    """
+    try:
+        # Count runs before deletion for confirmation message
+        runs_count = (
+            db.query(DiagnosisRun)
+            .filter(DiagnosisRun.user_id == MVP_USER_ID)
+            .count()
+        )
+
+        # Delete all diagnosis runs (cascades to results, citations, feedback)
+        db.query(DiagnosisRun).filter(
+            DiagnosisRun.user_id == MVP_USER_ID
+        ).delete()
+
+        db.commit()
+
+        return {
+            "success": True,
+            "message": f"Successfully deleted {runs_count} diagnosis run(s) and all associated data.",
+            "runs_deleted": runs_count,
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to reset diagnosis data: {str(e)}"
+        )
+
+
+@router.delete("/results/{result_id}")
+async def delete_diagnosis_result(
+    result_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Delete an individual diagnosis result.
+
+    Removes one ingredient finding from a diagnosis run.
+    Cascades to citations and feedback for that result.
+
+    Returns:
+        Empty 200 response (htmx will remove card from DOM)
+    """
+    # Verify result exists and belongs to user
+    result = (
+        db.query(DiagnosisResult)
+        .join(DiagnosisRun)
+        .filter(
+            DiagnosisResult.id == result_id,
+            DiagnosisRun.user_id == MVP_USER_ID
+        )
+        .first()
+    )
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Diagnosis result not found")
+
+    # Delete result (cascades to citations and feedback)
+    db.delete(result)
+    db.commit()
+
+    return Response(status_code=200)

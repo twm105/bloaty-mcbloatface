@@ -3,24 +3,109 @@
 {% block title %}Settings - Bloaty McBloatface{% endblock %}
 
 {% block content %}
-<article>
-    <header>
-        <h1>Settings</h1>
-        <p>Manage your preferences and data.</p>
-    </header>
+<div class="page-header">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-description">Manage your preferences and data.</p>
+</div>
 
-    <section>
-        <h3>Privacy & Data</h3>
-        <ul>
-            <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/disclaimer">Medical Disclaimer</a></li>
-            <li>Data Export (coming soon)</li>
-            <li>Delete All Data (coming soon)</li>
+<!-- Privacy & Data Section -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card-header">
+        <h2 class="card-title">Privacy & Data</h2>
+    </div>
+    <div class="card-content">
+        <ul style="list-style: none; padding: 0;">
+            <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-color);">
+                <a href="/privacy" class="text-base" style="text-decoration: none; color: var(--text-primary);">Privacy Policy</a>
+            </li>
+            <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-color);">
+                <a href="/disclaimer" class="text-base" style="text-decoration: none; color: var(--text-primary);">Medical Disclaimer</a>
+            </li>
+            <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border-color);">
+                <span class="text-base text-secondary">Data Export (coming soon)</span>
+            </li>
+            <li style="padding: var(--space-3) 0;">
+                <span class="text-base text-secondary">Delete All Data (coming soon)</span>
+            </li>
         </ul>
-    </section>
+    </div>
+</div>
 
-    <section>
-        <a href="/" role="button" class="secondary">Back to Home</a>
-    </section>
-</article>
+<!-- Diagnosis & Analysis Section -->
+<div class="card" style="margin-bottom: var(--space-8);" x-data="{ isResetting: false, resetSuccess: false, resetMessage: '' }">
+    <div class="card-header">
+        <h2 class="card-title">Diagnosis & Analysis</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-6);">
+            Manage your diagnosis data and analysis history.
+        </p>
+
+        <!-- Success message -->
+        <div
+            x-show="resetSuccess"
+            x-cloak
+            style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-left: 3px solid #52B788; border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);"
+        >
+            <p class="text-base" style="color: #52B788;" x-text="resetMessage"></p>
+        </div>
+
+        <!-- Warning disclaimer -->
+        <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+            <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+            </svg>
+            <div class="disclaimer-content">
+                <div class="disclaimer-text">
+                    <strong>Warning:</strong> Resetting diagnosis data will permanently delete all analysis runs, results, citations, and feedback. This action cannot be undone.
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: var(--space-6);">
+            <button
+                class="btn"
+                style="background-color: var(--color-highlight-terra); color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: fit-content;"
+                hx-post="/diagnosis/reset"
+                hx-confirm="Are you sure you want to delete all diagnosis data? This action cannot be undone?"
+                hx-swap="none"
+                @click="isResetting = true"
+                :disabled="isResetting || resetSuccess"
+                @htmx:after-request="
+                    isResetting = false;
+                    if ($event.detail.successful) {
+                        const response = JSON.parse($event.detail.xhr.responseText);
+                        resetSuccess = true;
+                        resetMessage = response.message;
+                        setTimeout(() => { window.location.href = '/diagnosis'; }, 2000);
+                    } else {
+                        alert('Failed to reset diagnosis data. Please try again.');
+                    }
+                "
+            >
+                <span x-show="!isResetting && !resetSuccess" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5; margin-left: -2px;">
+                        <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
+                    </svg>
+                    Reset Diagnosis Data
+                </span>
+                <span x-show="isResetting" style="display: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="spinner-small"></div>
+                    Resetting...
+                </span>
+                <span x-show="resetSuccess" style="display: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
+                        <use href="/static/icons/lucide-sprite.svg#check"></use>
+                    </svg>
+                    Reset Complete
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: var(--space-8);">
+    <a href="/" class="btn btn-secondary">Back to Home</a>
+</div>
+
 {% endblock %}

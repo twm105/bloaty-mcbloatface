@@ -28,7 +28,7 @@
     <!-- Results Grid -->
     <div style="display: grid; gap: var(--space-lg);">
         {% for result in results %}
-            <div class="card">
+            <div class="card" style="position: relative;">
                 <div class="card-header" style="border-bottom: 2px solid {% if result.confidence_level == 'high' %}#52B788{% elif result.confidence_level == 'medium' %}#D4734B{% else %}#E63946{% endif %};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h2 class="card-title">
@@ -46,6 +46,20 @@
                 </div>
 
                 <div class="card-content">
+                    <!-- Delete button (absolute positioned in top right) -->
+                    <button
+                        hx-delete="/diagnosis/results/{{ result.id }}"
+                        hx-target="closest .card"
+                        hx-swap="outerHTML swap:0.3s"
+                        hx-confirm="Are you sure you want to delete this diagnosis result? This action cannot be undone."
+                        class="icon-button danger"
+                        style="position: absolute; top: var(--space-2); right: var(--space-2);"
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
+                            <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
+                        </svg>
+                    </button>
+
                     <!-- Associated Symptoms -->
                     <div style="margin-bottom: var(--space-md);">
                         <h3 style="font-size: var(--font-base); font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-primary);">Associated Symptoms</h3>
@@ -141,8 +155,31 @@
     </div>
 {% endif %}
 
-<div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md);">
-    <button class="btn btn-primary" onclick="window.location.reload()">Run New Analysis</button>
+<div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md);" x-data="{ isAnalyzing: false }">
+    <button
+        class="btn btn-primary"
+        hx-post="/diagnosis/analyze"
+        hx-ext="json-enc"
+        hx-vals="{}"
+        hx-trigger="click"
+        hx-swap="none"
+        @click="isAnalyzing = true"
+        :disabled="isAnalyzing"
+        @htmx:after-request="
+            if ($event.detail.successful) {
+                window.location.reload();
+            } else {
+                isAnalyzing = false;
+                alert('Analysis failed. Please try again.');
+            }
+        "
+    >
+        <span x-show="!isAnalyzing">Run New Analysis</span>
+        <span x-show="isAnalyzing" style="display: none; display: flex; align-items: center; gap: 0.5rem;">
+            <div class="spinner-small"></div>
+            Analyzing...
+        </span>
+    </button>
     <a href="/diagnosis/methodology" class="btn btn-secondary">How This Works</a>
 </div>
 
