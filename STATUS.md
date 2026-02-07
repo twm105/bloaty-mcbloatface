@@ -253,7 +253,23 @@
 
 ## 🚨 Known Issues / Tech Debt
 
-None currently - recent sessions fixed:
+### False Positive Correlations in Diagnosis (Priority: Medium)
+**Issue:** LLM diagnosis sometimes identifies correlations that are inflated/coincidental rather than causal. Example: chicken flagged as trigger when eaten alongside actual problematic ingredients.
+
+**Root cause:** Statistical correlation ≠ causation. Ingredients frequently eaten together show similar patterns even if only one is the true trigger.
+
+**Improvement needed:**
+- Filter ingredient-symptom pairs to include only true causation indicators
+- Consider both statistical significance AND medical plausibility
+- Possible approaches:
+  - Control for co-eaten ingredients (compare eaten together vs separately)
+  - Medical knowledge base validation (FODMAP lists, known triggers)
+  - Multi-ingredient meal analysis (detect which ingredient is actual trigger)
+  - LLM reasoning layer (explicit causation vs coincidence evaluation)
+
+**Status:** Design/architecture decisions needed before implementation
+
+### Recently Fixed
 - ✅ Inline editing cursor placement
 - ✅ Delete button UX (removed popups, fixed JSON placeholder)
 - ✅ Status indicator stacking (analyzing + complete both showing)
@@ -261,6 +277,7 @@ None currently - recent sessions fixed:
 - ✅ Symptom history showing empty (duplicate route in `routes.py` was overriding symptoms router)
 - ✅ Symptom edit page template rendering (Jinja2/Alpine.js escaping issue - fixed with script tag pattern)
 - ✅ Icon sizing (SVG elements rendering at intrinsic 300x150px - fixed with explicit width/height/viewBox attributes)
+- ✅ Incremental diagnosis analysis (skip already-analyzed ingredients on re-runs)
 
 ## 💾 Database State
 
