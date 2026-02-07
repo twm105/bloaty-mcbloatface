@@ -577,7 +577,7 @@ async def update_symptom_tags(
 
     if data.get('end_time'):
         try:
-            symptom.end_timestamp = datetime.fromisoformat(data['end_time'].replace('Z', '+00:00'))
+            symptom.end_time = datetime.fromisoformat(data['end_time'].replace('Z', '+00:00'))
         except (ValueError, AttributeError):
             pass
 

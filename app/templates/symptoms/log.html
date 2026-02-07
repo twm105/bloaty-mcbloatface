@@ -18,11 +18,11 @@
     <script>
         window.symptomInitData = {
             editing: {{ editing|default(false)|tojson }},
-            symptomId: {{ symptom_id|default(null)|tojson }},
+            symptomId: {{ symptom_id|default(none)|tojson }},
             selectedTags: {{ (symptom.tags if (editing and symptom and symptom.tags) else [])|tojson }},
-            finalNotes: {{ (symptom.notes if (editing and symptom and symptom.notes) else null)|tojson }},
+            finalNotes: {{ (symptom.notes if (editing and symptom and symptom.notes) else none)|tojson }},
             startTime: {% if editing and symptom and symptom.start_time %}{{ symptom.start_time.strftime('%Y-%m-%dT%H:%M')|tojson }}{% else %}null{% endif %},
-            endTime: {% if editing and symptom and symptom.end_timestamp %}{{ symptom.end_timestamp.strftime('%Y-%m-%dT%H:%M')|tojson }}{% else %}null{% endif %}
+            endTime: {% if editing and symptom and symptom.end_time %}{{ symptom.end_time.strftime('%Y-%m-%dT%H:%M')|tojson }}{% else %}null{% endif %}
         };
     </script>
 

@@ -54,15 +54,15 @@
             </div>
 
             <!-- Ongoing Note (if applicable) -->
-            {% if symptom.start_time and not symptom.end_timestamp %}
+            {% if symptom.start_time and not symptom.end_time %}
             <div style="margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--color-text-tertiary); font-style: italic;">
                 Ongoing or no end time logged
             </div>
-            {% elif symptom.end_timestamp %}
+            {% elif symptom.end_time %}
             <div style="margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--color-text-secondary);">
-                Ended: {{ symptom.end_timestamp.strftime('%I:%M %p') }}
+                Ended: {{ symptom.end_time.strftime('%I:%M %p') }}
                 <span style="color: var(--color-text-tertiary);">
-                    ({{ ((symptom.end_timestamp - symptom.start_time).total_seconds() / 3600) | round(1) }}h duration)
+                    ({{ ((symptom.end_time - symptom.start_time).total_seconds() / 3600) | round(1) }}h duration)
                 </span>
             </div>
             {% endif %}
