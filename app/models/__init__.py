@@ -19,6 +19,7 @@ from app.models.diagnosis_run import DiagnosisRun
 from app.models.diagnosis_result import DiagnosisResult
 from app.models.diagnosis_citation import DiagnosisCitation
 from app.models.diagnosis_feedback import DiagnosisFeedback
+from app.models.ai_usage_log import AIUsageLog
 
 __all__ = [
     "Base",
@@ -37,4 +38,5 @@ __all__ = [
     "DiagnosisResult",
     "DiagnosisCitation",
     "DiagnosisFeedback",
+    "AIUsageLog",
 ]

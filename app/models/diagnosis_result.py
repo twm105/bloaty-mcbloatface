@@ -35,8 +35,14 @@ class DiagnosisResult(Base):
     associated_symptoms = Column(JSONB, nullable=False)
     # Format: [{"name": str, "severity_avg": float, "frequency": int, "lag_hours": float}]
 
-    # AI analysis
+    # AI analysis (legacy full-text field)
     ai_analysis = Column(Text, nullable=True)  # Claude's interpretation
+
+    # Structured AI summaries (new for per-ingredient analysis)
+    diagnosis_summary = Column(Text, nullable=True)  # 3-sentence max diagnosis
+    recommendations_summary = Column(Text, nullable=True)  # 3-sentence max recommendations
+    processing_suggestions = Column(JSONB, nullable=True)  # {"cooked_vs_raw": str, "alternatives": []}
+    alternative_meals = Column(JSONB, nullable=True)  # [{"meal_id": int, "name": str, "reason": str}]
 
     # Relationships
     run = relationship("DiagnosisRun", back_populates="results")

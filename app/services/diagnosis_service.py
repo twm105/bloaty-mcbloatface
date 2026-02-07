@@ -14,14 +14,15 @@ from app.models import (
     MealIngredient,
     User,
 )
+from app.config import settings
 
 
 class DiagnosisService:
     """Service for running diagnosis analysis on meal and symptom data."""
 
-    # Minimum data thresholds
-    MIN_MEALS = 1  # Temporarily lowered for testing
-    MIN_SYMPTOM_OCCURRENCES = 1  # Temporarily lowered for testing
+    # Minimum data thresholds (loaded from central config)
+    MIN_MEALS = settings.diagnosis_min_meals
+    MIN_SYMPTOM_OCCURRENCES = settings.diagnosis_min_symptom_occurrences
 
     # Temporal lag windows (in hours)
     IMMEDIATE_LAG_MIN = 0

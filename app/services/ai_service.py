@@ -9,13 +9,17 @@ This service provides three core AI capabilities:
 
 import json
 import base64
+import asyncio
+import random
 from pathlib import Path
 from typing import Optional, Union
 from datetime import datetime
 from uuid import UUID
+from functools import wraps
 
 from anthropic import Anthropic
 import anthropic
+import httpx
 
 from app.config import settings
 from app.services.prompts import (
@@ -24,15 +28,61 @@ from app.services.prompts import (
     SYMPTOM_CLARIFICATION_SYSTEM_PROMPT,
     SYMPTOM_ELABORATION_SYSTEM_PROMPT,
     EPISODE_CONTINUATION_SYSTEM_PROMPT,
+    DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
     build_cached_analysis_context
 )
+
+
+def retry_on_connection_error(max_attempts=3, base_delay=1.0):
+    """
+    Retry decorator for API calls that may fail due to transient network issues.
+
+    Args:
+        max_attempts: Maximum retry attempts (default 3)
+        base_delay: Base delay in seconds for exponential backoff (default 1.0)
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            last_exception = None
+
+            for attempt in range(max_attempts):
+                try:
+                    return await func(*args, **kwargs)
+                except anthropic.APIConnectionError as e:
+                    last_exception = e
+
+                    if attempt < max_attempts - 1:
+                        # Exponential backoff with jitter
+                        delay = base_delay * (2 ** attempt)
+                        jitter = delay * 0.1 * (2 * random.random() - 1)  # ±10% random variance
+                        sleep_time = delay + jitter
+
+                        print(f"Connection error on attempt {attempt + 1}/{max_attempts}, retrying in {sleep_time:.1f}s...")
+                        await asyncio.sleep(sleep_time)
+                    else:
+                        print(f"All {max_attempts} attempts failed")
+
+            # All retries exhausted, raise the last exception
+            raise ServiceUnavailableError("AI service temporarily unavailable after retries") from last_exception
+
+        return wrapper
+    return decorator
 
 
 class ClaudeService:
     """Centralized Claude API integration for all AI features."""
 
     def __init__(self):
-        self.client = Anthropic(api_key=settings.anthropic_api_key)
+        # Configure client with extended timeouts for web search operations
+        timeout = httpx.Timeout(
+            timeout=settings.anthropic_timeout,  # 180 seconds total
+            connect=settings.anthropic_connect_timeout,  # 10 seconds to connect
+        )
+        self.client = Anthropic(
+            api_key=settings.anthropic_api_key,
+            timeout=timeout
+        )
         self.haiku_model = settings.haiku_model
         self.sonnet_model = settings.sonnet_model
 
@@ -713,6 +763,7 @@ class ClaudeService:
     # DIAGNOSIS - INGREDIENT-SYMPTOM CORRELATION ANALYSIS
     # =========================================================================
 
+    @retry_on_connection_error(max_attempts=3, base_delay=2.0)
     async def diagnose_correlations(
         self,
         correlation_data: list[dict],
@@ -758,6 +809,9 @@ class ClaudeService:
 
             # Build request - import DIAGNOSIS_SYSTEM_PROMPT from prompts
             from app.services.prompts import DIAGNOSIS_SYSTEM_PROMPT
+
+            # Validate request size before sending
+            self._validate_request_size(formatted_data, DIAGNOSIS_SYSTEM_PROMPT)
 
             # Prepare messages with prefill to force JSON output
             messages = [
@@ -847,6 +901,166 @@ Remember to:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON response from AI: {e}") from e
 
+    @retry_on_connection_error(max_attempts=3, base_delay=2.0)
+    async def diagnose_single_ingredient(
+        self,
+        ingredient_data: dict,
+        user_meal_history: list,
+        web_search_enabled: bool = True
+    ) -> dict:
+        """
+        Analyze a single ingredient for symptom correlations with medical grounding.
+
+        This method is used by the async worker to process ingredients in parallel.
+        Returns structured output suitable for per-ingredient result cards.
+
+        Args:
+            ingredient_data: Dict with ingredient stats and correlation data
+            user_meal_history: List of user's recent meals for alternative suggestions
+            web_search_enabled: Whether to enable web search for medical research
+
+        Returns:
+            Dict with structure:
+            {
+                "diagnosis_summary": str (3 sentences max),
+                "recommendations_summary": str (3 sentences max),
+                "processing_suggestions": {"cooked_vs_raw": str, "alternatives": []},
+                "alternative_meals": [{"meal_id": int, "name": str, "reason": str}],
+                "citations": [{"url": str, "title": str, "source_type": str, "snippet": str}],
+                "usage_stats": {"input_tokens": int, "output_tokens": int, "cached_tokens": int}
+            }
+
+        Raises:
+            ServiceUnavailableError: AI service unavailable
+            RateLimitError: Too many requests
+            ValueError: Invalid response format
+        """
+        try:
+            # Format ingredient data for the prompt
+            formatted_ingredient = self._format_single_ingredient_data(ingredient_data)
+
+            # Format meal history for context
+            meal_history_str = self._format_meal_history(user_meal_history)
+
+            # Build user message
+            user_message = f"""Analyze this ingredient for potential symptom correlations:
+
+{formatted_ingredient}
+
+USER'S RECENT MEALS (for alternative suggestions):
+{meal_history_str}
+
+Provide your analysis in the specified JSON format."""
+
+            # Prepare messages with prefill
+            messages = [
+                {"role": "user", "content": user_message},
+                {"role": "assistant", "content": "{"}
+            ]
+
+            # Build request parameters
+            request_params = {
+                "model": self.sonnet_model,
+                "max_tokens": 2048,
+                "messages": messages,
+                "stop_sequences": ["\n```", "```"],
+                "system": [
+                    {
+                        "type": "text",
+                        "text": DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ]
+            }
+
+            # Add web search if enabled
+            if web_search_enabled:
+                request_params["tools"] = [
+                    {
+                        "type": "web_search_20250305",
+                        "name": "web_search"
+                    }
+                ]
+
+            response = self.client.messages.create(**request_params)
+
+            # Extract JSON from response
+            response_text = ""
+            for content_block in response.content:
+                if hasattr(content_block, 'text'):
+                    response_text += content_block.text
+
+            if not response_text:
+                raise ValueError("No text content in Claude response")
+
+            response_text = "{" + response_text.strip()
+
+            # Parse JSON
+            try:
+                result = json.loads(response_text)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response: {e.msg}") from e
+
+            # Add usage stats
+            usage = response.usage
+            result["usage_stats"] = {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": getattr(usage, 'output_tokens', 0),
+                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
+                "cache_hit": getattr(usage, 'cache_read_input_tokens', 0) > 0
+            }
+
+            return result
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+
+    def _format_single_ingredient_data(self, ingredient_data: dict) -> str:
+        """Format single ingredient data for AI analysis."""
+        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')} ({ingredient_data.get('state', 'unknown')})
+
+STATISTICS:
+- Times eaten: {ingredient_data.get('times_eaten', 0)}
+- Symptom occurrences: {ingredient_data.get('total_symptom_occurrences', 0)}
+- Correlation rate: {ingredient_data.get('total_symptom_occurrences', 0) / max(ingredient_data.get('times_eaten', 1), 1) * 100:.1f}%
+
+TEMPORAL WINDOWS:
+- Immediate (0-2hr): {ingredient_data.get('immediate_total', 0)} occurrences
+- Delayed (4-24hr): {ingredient_data.get('delayed_total', 0)} occurrences
+- Cumulative (24hr+): {ingredient_data.get('cumulative_total', 0)} occurrences
+
+ASSOCIATED SYMPTOMS:"""
+
+        for symptom in ingredient_data.get('associated_symptoms', []):
+            formatted += f"""
+- {symptom.get('name', 'Unknown')}: severity {symptom.get('severity_avg', 0):.1f}/10, frequency {symptom.get('frequency', 0)}, avg lag {symptom.get('lag_hours', 0):.1f}hr"""
+
+        formatted += f"""
+
+CONFIDENCE: {ingredient_data.get('confidence_level', 'unknown')} ({ingredient_data.get('confidence_score', 0) * 100:.0f}%)"""
+
+        return formatted
+
+    def _format_meal_history(self, meal_history: list) -> str:
+        """Format meal history for context in AI analysis."""
+        if not meal_history:
+            return "No meal history available."
+
+        formatted = []
+        for meal in meal_history[:10]:  # Limit to 10 meals
+            ingredients = ", ".join(
+                i.get('name', 'unknown') for i in meal.get('ingredients', [])
+            )
+            formatted.append(f"- {meal.get('name', 'Meal')}: {ingredients}")
+
+        return "\n".join(formatted)
+
     def _format_correlation_data(self, correlation_data: list[dict]) -> str:
         """
         Format correlation data for AI analysis.
@@ -875,6 +1089,37 @@ Remember to:
             formatted += "\n"
 
         return formatted
+
+    def _estimate_request_tokens(self, formatted_data: str, system_prompt: str) -> int:
+        """
+        Rough estimate of request tokens.
+        Claude uses ~4 characters per token for English text.
+
+        Returns:
+            Estimated token count
+        """
+        total_chars = len(system_prompt) + len(formatted_data) + 200  # 200 for message overhead
+        return total_chars // 4
+
+    def _validate_request_size(self, formatted_data: str, system_prompt: str, max_tokens: int = 100000):
+        """
+        Validate request size before sending to API.
+
+        Args:
+            formatted_data: Formatted correlation data
+            system_prompt: System prompt text
+            max_tokens: Maximum allowed tokens (default 100k for Claude Sonnet)
+
+        Raises:
+            ValueError: If request is too large
+        """
+        estimated_tokens = self._estimate_request_tokens(formatted_data, system_prompt)
+
+        if estimated_tokens > max_tokens:
+            raise ValueError(
+                f"Request too large: ~{estimated_tokens} tokens (max {max_tokens}). "
+                f"Try reducing date range or limiting number of meals/symptoms analyzed."
+            )
 
     # =========================================================================
     # HELPER METHODS
