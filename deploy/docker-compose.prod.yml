@@ -1,0 +1,55 @@
+# Production overrides for docker-compose.yml
+# Usage: docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Don't expose PostgreSQL to host in production
+    ports: !reset []
+    restart: unless-stopped
+
+  redis:
+    # Don't expose Redis to host in production
+    ports: !reset []
+    restart: unless-stopped
+
+  web:
+    # Don't mount source code in production - use built image
+    volumes: !reset
+      - uploads:/app/uploads
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/bloaty
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+      - SESSION_COOKIE_SECURE=true
+    # Remove --reload for production
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    restart: unless-stopped
+
+  worker:
+    volumes: !reset
+      - uploads:/app/uploads
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/bloaty
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+    restart: unless-stopped
+
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./app/static:/app/static:ro
+      - uploads:/app/uploads:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads:

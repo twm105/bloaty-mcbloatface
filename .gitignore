@@ -38,3 +38,6 @@ uploads/
 
 # Eval data
 evals/data/downloaded/
+
+# Backups
+backups/
