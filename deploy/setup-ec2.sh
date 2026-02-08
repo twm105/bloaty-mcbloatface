@@ -1,5 +1,5 @@
 #!/bin/bash
-# EC2 Ubuntu 22.04 setup script for Bloaty McBloatface
+# EC2 Amazon Linux 2023 setup script for Bloaty McBloatface
 # Run as: sudo bash deploy/setup-ec2.sh
 
 set -e
@@ -8,46 +8,36 @@ echo "=== Bloaty McBloatface EC2 Setup ==="
 
 # Update system
 echo "Updating system packages..."
-apt-get update
-apt-get upgrade -y
+dnf update -y
 
 # Install Docker
 echo "Installing Docker..."
-apt-get install -y ca-certificates curl gnupg
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-chmod a+r /etc/apt/keyrings/docker.gpg
+dnf install -y docker
+systemctl start docker
+systemctl enable docker
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  tee /etc/apt/sources.list.d/docker.list > /dev/null
+# Install Docker Compose plugin
+echo "Installing Docker Compose..."
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m) \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-apt-get update
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Add ubuntu user to docker group
-usermod -aG docker ubuntu
+# Add ec2-user to docker group
+usermod -aG docker ec2-user
 
 # Install Certbot
 echo "Installing Certbot..."
-apt-get install -y certbot
+dnf install -y certbot
 
-# Install AWS CLI
-echo "Installing AWS CLI..."
-apt-get install -y awscli jq
-
-# Configure firewall
-echo "Configuring firewall..."
-ufw allow 22/tcp
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw --force enable
+# Install jq (AWS CLI is pre-installed on Amazon Linux)
+echo "Installing jq..."
+dnf install -y jq git
 
 # Create app directory structure
 echo "Setting up app directory..."
 mkdir -p /opt/bloaty/uploads
-chown -R ubuntu:ubuntu /opt/bloaty
+chown -R ec2-user:ec2-user /opt/bloaty
 
 # Create systemd service for docker-compose
 echo "Creating systemd service..."
@@ -61,9 +51,9 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/bloaty
-ExecStart=/usr/bin/docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
-ExecStop=/usr/bin/docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml down
-User=ubuntu
+ExecStart=/usr/local/lib/docker/cli-plugins/docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
+ExecStop=/usr/local/lib/docker/cli-plugins/docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml down
+User=ec2-user
 Group=docker
 
 [Install]
@@ -76,15 +66,17 @@ systemctl enable bloaty.service
 # Set up certbot auto-renewal
 echo "Configuring SSL auto-renewal..."
 cat > /etc/cron.d/certbot-renew << 'EOF'
-0 0,12 * * * root certbot renew --quiet --deploy-hook "docker compose -f /opt/bloaty/docker-compose.yml -f /opt/bloaty/deploy/docker-compose.prod.yml exec nginx nginx -s reload"
+0 0,12 * * * root certbot renew --quiet --deploy-hook "/usr/local/lib/docker/cli-plugins/docker-compose -f /opt/bloaty/docker-compose.yml -f /opt/bloaty/deploy/docker-compose.prod.yml exec nginx nginx -s reload"
 EOF
 
 echo ""
 echo "=== Setup Complete ==="
 echo ""
+echo "IMPORTANT: Log out and back in for docker group to take effect"
+echo ""
 echo "Next steps:"
 echo "1. Clone your repo to /opt/bloaty (or copy files)"
-echo "2. Run: ./deploy/fetch-secrets.sh"
+echo "2. Run: cd /opt/bloaty && ./deploy/fetch-secrets.sh"
 echo "3. Run: sudo certbot certonly --standalone -d YOUR_DOMAIN"
 echo "4. Run: docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d"
 echo ""

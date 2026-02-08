@@ -171,9 +171,9 @@ Outbound:
 
 1. Go to EC2 → Launch instance
 2. Name: `bloaty-prod`
-3. AMI: Ubuntu Server 22.04 LTS (64-bit x86)
+3. AMI: Amazon Linux 2023 (64-bit x86)
 4. Instance type: t3.small
-5. Key pair: Create new or select existing
+5. Key pair: Create new or select existing (save .pem to `~/.ssh/`, chmod 600)
 6. Network settings:
    - VPC: default
    - Auto-assign public IP: Enable
@@ -234,7 +234,7 @@ Outbound:
 
 SSH to your instance:
 ```bash
-ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP
+ssh -i ~/.ssh/your-key.pem ec2-user@YOUR_ELASTIC_IP
 ```
 
 Run the setup script:
@@ -307,7 +307,7 @@ Secret name: `bloaty/production`
 ### Updating Code
 
 ```bash
-ssh ubuntu@YOUR_DOMAIN
+ssh ec2-user@YOUR_DOMAIN
 cd /opt/bloaty
 git pull
 docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml build
@@ -365,10 +365,10 @@ docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
 aws s3 cp s3://bloaty-backups-XXXXX/db/bloaty-2024-01-15.sql.gz ./
 
 # Copy to server
-scp bloaty-2024-01-15.sql.gz ubuntu@YOUR_DOMAIN:/tmp/
+scp bloaty-2024-01-15.sql.gz ec2-user@YOUR_DOMAIN:/tmp/
 
 # SSH to server and restore
-ssh ubuntu@YOUR_DOMAIN
+ssh ec2-user@YOUR_DOMAIN
 cd /opt/bloaty
 gunzip /tmp/bloaty-2024-01-15.sql.gz
 docker-compose exec -T db psql -U postgres bloaty < /tmp/bloaty-2024-01-15.sql
