@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Account - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Account</h1>
+    <p class="page-description">Manage your account settings and data.</p>
+</div>
+
+<!-- Success/Error Messages -->
+{% if success == 'password_changed' %}
+<div style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-left: 3px solid #52B788; border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+    <p class="text-base" style="color: #52B788;">Password changed successfully.</p>
+</div>
+{% endif %}
+
+{% if error == 'passwords_mismatch' %}
+<div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+    <div class="disclaimer-text">New passwords do not match.</div>
+</div>
+{% elif error == 'password_too_short' %}
+<div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+    <div class="disclaimer-text">Password must be at least 8 characters.</div>
+</div>
+{% elif error == 'wrong_password' %}
+<div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+    <div class="disclaimer-text">Current password is incorrect.</div>
+</div>
+{% endif %}
+
+<!-- Account Info -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card-header">
+        <h2 class="card-title">Account Information</h2>
+    </div>
+    <div class="card-content">
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <div>
+                <span class="text-secondary">Email:</span>
+                <span class="text-base">{{ user.email }}</span>
+            </div>
+            <div>
+                <span class="text-secondary">Account Type:</span>
+                <span class="text-base">{% if user.is_admin %}Administrator{% else %}User{% endif %}</span>
+            </div>
+            <div>
+                <span class="text-secondary">Member Since:</span>
+                <span class="text-base">{{ user.created_at.strftime('%B %d, %Y') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password -->
+<div class="card" style="margin-bottom: var(--space-8);">
+    <div class="card-header">
+        <h2 class="card-title">Change Password</h2>
+    </div>
+    <div class="card-content">
+        <form method="POST" action="/auth/change-password" style="display: flex; flex-direction: column; gap: var(--space-4); max-width: 400px;">
+            <div class="form-group">
+                <label for="current_password" class="form-label">Current Password</label>
+                <input
+                    type="password"
+                    id="current_password"
+                    name="current_password"
+                    class="input"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="new_password" class="form-label">New Password</label>
+                <input
+                    type="password"
+                    id="new_password"
+                    name="new_password"
+                    class="input"
+                    required
+                    autocomplete="new-password"
+                    minlength="8"
+                >
+                <span class="form-hint">At least 8 characters</span>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password_confirm" class="form-label">Confirm New Password</label>
+                <input
+                    type="password"
+                    id="new_password_confirm"
+                    name="new_password_confirm"
+                    class="input"
+                    required
+                    autocomplete="new-password"
+                    minlength="8"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: fit-content;">
+                Change Password
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Diagnosis & Analysis Section -->
+<div class="card" style="margin-bottom: var(--space-8);" x-data="{ isResetting: false, resetSuccess: false, resetMessage: '' }">
+    <div class="card-header">
+        <h2 class="card-title">Diagnosis & Analysis</h2>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-6);">
+            Manage your diagnosis data and analysis history.
+        </p>
+
+        <!-- Success message -->
+        <div
+            x-show="resetSuccess"
+            x-cloak
+            style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-left: 3px solid #52B788; border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);"
+        >
+            <p class="text-base" style="color: #52B788;" x-text="resetMessage"></p>
+        </div>
+
+        <!-- Warning disclaimer -->
+        <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+            <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+            </svg>
+            <div class="disclaimer-content">
+                <div class="disclaimer-text">
+                    <strong>Warning:</strong> Resetting diagnosis data will permanently delete all analysis runs, results, citations, and feedback. This action cannot be undone.
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: var(--space-6);">
+            <button
+                class="btn"
+                style="background-color: var(--color-highlight-terra); color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: fit-content;"
+                hx-post="/diagnosis/reset"
+                hx-confirm="Are you sure you want to delete all diagnosis data? This action cannot be undone?"
+                hx-swap="none"
+                @click="isResetting = true"
+                :disabled="isResetting || resetSuccess"
+                @htmx:after-request="
+                    isResetting = false;
+                    if ($event.detail.successful) {
+                        const response = JSON.parse($event.detail.xhr.responseText);
+                        resetSuccess = true;
+                        resetMessage = response.message;
+                    } else {
+                        alert('Failed to reset diagnosis data. Please try again.');
+                    }
+                "
+            >
+                <span x-show="!isResetting && !resetSuccess" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5; margin-left: -2px;">
+                        <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
+                    </svg>
+                    Reset Diagnosis Data
+                </span>
+                <span x-show="isResetting" x-cloak style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="spinner-small"></div>
+                    Resetting...
+                </span>
+                <span x-show="resetSuccess" x-cloak style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
+                        <use href="/static/icons/lucide-sprite.svg#check"></use>
+                    </svg>
+                    Reset Complete
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if user.is_admin %}
+<!-- Invite Management (Admin Only) -->
+<div class="card" style="margin-bottom: var(--space-8);" x-data="{ inviteUrl: '', showInvite: false, isGenerating: false }">
+    <div class="card-header">
+        <h2 class="card-title">Invite Management</h2>
+        <span class="badge" style="background-color: var(--color-highlight-sage); color: var(--text-primary);">Admin</span>
+    </div>
+    <div class="card-content">
+        <p class="text-secondary" style="margin-bottom: var(--space-6);">
+            Generate invite links to allow new users to register.
+        </p>
+
+        <!-- Generate Invite Button -->
+        <button
+            class="btn btn-primary"
+            style="margin-bottom: var(--space-6);"
+            @click="
+                isGenerating = true;
+                fetch('/auth/invite', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        inviteUrl = data.invite_url;
+                        showInvite = true;
+                        isGenerating = false;
+                    })
+                    .catch(() => {
+                        alert('Failed to generate invite');
+                        isGenerating = false;
+                    });
+            "
+            :disabled="isGenerating"
+        >
+            <span x-show="!isGenerating">Generate Invite Link</span>
+            <span x-show="isGenerating" x-cloak>Generating...</span>
+        </button>
+
+        <!-- Show generated invite -->
+        <div x-show="showInvite" x-cloak style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-6);">
+            <p class="text-base" style="margin-bottom: var(--space-2);">Invite link (expires in 7 days):</p>
+            <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <input
+                    type="text"
+                    class="input"
+                    x-model="inviteUrl"
+                    readonly
+                    style="flex: 1; font-family: monospace; font-size: 12px;"
+                >
+                <button
+                    class="btn btn-secondary"
+                    @click="navigator.clipboard.writeText(inviteUrl); $el.textContent = 'Copied!'; setTimeout(() => $el.textContent = 'Copy', 2000)"
+                >
+                    Copy
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Invites -->
+        {% if invites %}
+        <h3 style="margin-bottom: var(--space-4);">Active Invites</h3>
+        <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+            {% for invite in invites %}
+            <div
+                id="invite-{{ invite.id }}"
+                style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background-color: var(--bg-secondary); border-radius: var(--radius-md);"
+            >
+                <div>
+                    <code style="font-size: 12px;">{{ invite.token[:16] }}...</code>
+                    <span class="text-secondary" style="margin-left: var(--space-2); font-size: 12px;">
+                        Expires: {{ invite.expires_at.strftime('%b %d, %H:%M') }}
+                    </span>
+                </div>
+                <button
+                    class="btn btn-sm"
+                    style="background-color: var(--color-highlight-terra); color: white; padding: 0.25rem 0.5rem; font-size: 12px;"
+                    hx-delete="/auth/invite/{{ invite.id }}"
+                    hx-target="#invite-{{ invite.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="Revoke this invite?"
+                >
+                    Revoke
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- User Management (Admin Only) -->
+<div class="card" style="margin-bottom: var(--space-8);" x-data="{ tempPassword: '', showPassword: false, resetUserId: null }">
+    <div class="card-header">
+        <h2 class="card-title">User Management</h2>
+        <span class="badge" style="background-color: var(--color-highlight-sage); color: var(--text-primary);">Admin</span>
+    </div>
+    <div class="card-content">
+        <!-- Show temp password modal -->
+        <div x-show="showPassword" x-cloak style="background-color: rgba(82, 183, 136, 0.1); border: 1px solid rgba(82, 183, 136, 0.3); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-6);">
+            <p class="text-base" style="margin-bottom: var(--space-2);">Temporary password:</p>
+            <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <input
+                    type="text"
+                    class="input"
+                    x-model="tempPassword"
+                    readonly
+                    style="flex: 1; font-family: monospace;"
+                >
+                <button
+                    class="btn btn-secondary"
+                    @click="navigator.clipboard.writeText(tempPassword); $el.textContent = 'Copied!'; setTimeout(() => $el.textContent = 'Copy', 2000)"
+                >
+                    Copy
+                </button>
+                <button class="btn btn-secondary" @click="showPassword = false; tempPassword = ''">Close</button>
+            </div>
+            <p class="text-secondary" style="margin-top: var(--space-2); font-size: 12px;">
+                Share this password securely with the user. They can change it after logging in.
+            </p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+            {% for u in all_users %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3); background-color: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div>
+                    <span class="text-base">{{ u.email }}</span>
+                    {% if u.is_admin %}
+                    <span class="badge" style="background-color: var(--color-highlight-sage); color: var(--text-primary); margin-left: var(--space-2); font-size: 10px;">Admin</span>
+                    {% endif %}
+                    {% if u.id == user.id %}
+                    <span class="text-secondary" style="margin-left: var(--space-2); font-size: 12px;">(you)</span>
+                    {% endif %}
+                </div>
+                {% if u.id != user.id %}
+                <button
+                    class="btn btn-sm btn-secondary"
+                    style="padding: 0.25rem 0.5rem; font-size: 12px;"
+                    @click="
+                        fetch('/auth/reset-password/{{ u.id }}', { method: 'POST' })
+                            .then(r => r.json())
+                            .then(data => {
+                                tempPassword = data.temp_password;
+                                showPassword = true;
+                            })
+                            .catch(() => alert('Failed to reset password'));
+                    "
+                >
+                    Reset Password
+                </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Logout -->
+<div style="margin-top: var(--space-8);">
+    <form method="POST" action="/auth/logout" style="display: inline;">
+        <button type="submit" class="btn" style="background-color: var(--color-highlight-terra); color: white;">
+            Logout
+        </button>
+    </form>
+    <a href="/" class="btn btn-secondary" style="margin-left: var(--space-2);">Back to Home</a>
+</div>
+{% endblock %}

@@ -20,6 +20,8 @@ from app.models.diagnosis_result import DiagnosisResult
 from app.models.diagnosis_citation import DiagnosisCitation
 from app.models.diagnosis_feedback import DiagnosisFeedback
 from app.models.ai_usage_log import AIUsageLog
+from app.models.session import Session
+from app.models.invite import Invite
 
 __all__ = [
     "Base",
@@ -39,4 +41,6 @@ __all__ = [
     "DiagnosisCitation",
     "DiagnosisFeedback",
     "AIUsageLog",
+    "Session",
+    "Invite",
 ]

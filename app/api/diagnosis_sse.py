@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import DiagnosisRun
+from app.models.user import User
 from app.services.sse_publisher import SSESubscriber
+from app.services.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/diagnosis", tags=["diagnosis-sse"])
 
@@ -17,6 +19,7 @@ router = APIRouter(prefix="/diagnosis", tags=["diagnosis-sse"])
 @router.get("/stream/{run_id}")
 async def stream_diagnosis_progress(
     run_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -34,10 +37,13 @@ async def stream_diagnosis_progress(
     Returns:
         EventSourceResponse with SSE stream
     """
-    # Verify run exists
+    # Verify run exists and belongs to user
     diagnosis_run = db.query(DiagnosisRun).filter(DiagnosisRun.id == run_id).first()
     if not diagnosis_run:
         raise HTTPException(status_code=404, detail="Diagnosis run not found")
+
+    if diagnosis_run.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
 
     # If already completed, return final state immediately
     if diagnosis_run.status == "completed":
@@ -99,6 +105,7 @@ async def stream_diagnosis_progress(
 @router.get("/status/{run_id}")
 async def get_diagnosis_status(
     run_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -113,6 +120,9 @@ async def get_diagnosis_status(
     diagnosis_run = db.query(DiagnosisRun).filter(DiagnosisRun.id == run_id).first()
     if not diagnosis_run:
         raise HTTPException(status_code=404, detail="Diagnosis run not found")
+
+    if diagnosis_run.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
 
     return {
         "run_id": diagnosis_run.id,

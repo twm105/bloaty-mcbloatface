@@ -44,11 +44,16 @@
     <nav class="main-nav">
         <a href="/" class="nav-logo">Bloaty McBloatface</a>
         <ul class="nav-links">
+            {% if user %}
             <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
             <li><a href="/meals/history" class="nav-link {% if request.path.startswith('/meals') %}active{% endif %}">Meal History</a></li>
             <li><a href="/symptoms/history" class="nav-link {% if request.path.startswith('/symptoms') %}active{% endif %}">Symptom History</a></li>
             <li><a href="/diagnosis" class="nav-link {% if request.path.startswith('/diagnosis') %}active{% endif %}">Diagnosis</a></li>
             <li><a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">Settings</a></li>
+            <li><a href="/auth/account" class="nav-link {% if request.path.startswith('/auth/account') %}active{% endif %}">Account</a></li>
+            {% else %}
+            <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">Login</a></li>
+            {% endif %}
         </ul>
     </nav>
 

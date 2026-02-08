@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     diagnosis_min_meals: int = 3
     diagnosis_min_symptom_occurrences: int = 3
 
+    # Auth settings
+    session_secret_key: str = ""  # Required in production
+    session_cookie_name: str = "bloaty_session"
+    session_max_age: int = 86400 * 7  # 7 days
+    session_cookie_secure: bool = False  # True in production
+
     class Config:
         env_file = ".env"
 

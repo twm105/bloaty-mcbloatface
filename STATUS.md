@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 4, 2026
-**Overall Progress:** ~80% MVP Complete
-**Recent:** Minor UI polish - fixed "Add Ingredient" button icon sizing
+**Last Updated:** February 8, 2026
+**Overall Progress:** ~85% MVP Complete
+**Recent:** Session-based authentication system implemented (invite-only registration, admin password resets)
 
 ## ✅ Completed Features
 
@@ -97,6 +97,48 @@
 - `/diagnosis/methodology` - How it works explainer
 
 **Cost:** ~$0.01-0.03 per diagnosis run (varies with data volume)
+
+### Authentication System - COMPLETE (Feb 8, 2026)
+**Goal:** Secure multi-user support before deployment
+
+**Implementation:**
+- ✅ Session-based auth with bcrypt password hashing
+- ✅ Invite-only registration (admin generates 7-day invite links)
+- ✅ Provider abstraction pattern (easy Keycloak migration path)
+- ✅ All routes protected with auth dependencies
+- ✅ Ownership verification on all data operations
+- ✅ Admin functions (password reset, invite management)
+- ✅ Account page with change password functionality
+
+**New Files:**
+- `app/models/session.py` - Session model for login sessions
+- `app/models/invite.py` - Invite model for registration links
+- `app/services/auth/` - Auth provider abstraction layer
+- `app/api/auth.py` - Login, logout, register, account routes
+- `app/templates/auth/` - Login, register, account templates
+- `app/cli.py` - Admin user creation command
+
+**Routes:**
+- `/auth/login` - Login page
+- `/auth/logout` - Logout (clears session)
+- `/auth/register?invite=TOKEN` - Invite-only registration
+- `/auth/account` - Account management (password change, invite mgmt)
+
+**Migration:** `3b4c5d6e7f8g_add_auth_tables.py`
+- Adds password_hash, is_admin to users table
+- Creates sessions table
+- Creates invites table
+
+**Security:**
+- HttpOnly, SameSite cookies
+- 7-day session expiry (configurable)
+- Generic "Invalid credentials" message (no user enumeration)
+- Token-based session with `secrets.token_urlsafe(32)`
+
+**Post-deployment:**
+1. Run migration: `alembic upgrade head`
+2. Create admin: `python -m app.cli create-admin --email admin@example.com`
+3. Set `SESSION_SECRET_KEY` environment variable
 
 ### UI/UX Redesign - Dark Theme - COMPLETE (Phase 1)
 **Goal:** Transform from Pico.css Notion aesthetic to elegant, minimal dark theme
@@ -291,6 +333,7 @@
 
 **Migrations pending:**
 - `a1b2c3d4e5f6` - Add meal image crop coordinates (NOT YET APPLIED)
+- `3b4c5d6e7f8g` - Add auth tables (sessions, invites, password_hash, is_admin)
 
 **Sample Data:**
 - 10 ingredient categories seeded
@@ -302,6 +345,7 @@
 **Required:**
 - `ANTHROPIC_API_KEY` - Set in `.env` (working)
 - `DATABASE_URL` - PostgreSQL connection (working)
+- `SESSION_SECRET_KEY` - Required for auth in production (any secure random string)
 
 **Models:**
 - `haiku_model=claude-sonnet-4-5-20250929`

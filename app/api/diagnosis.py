@@ -1,6 +1,5 @@
 """Diagnosis API endpoints for ingredient-symptom correlation analysis."""
 from datetime import datetime, timedelta
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, Response
@@ -11,17 +10,16 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models import DiagnosisRun, DiagnosisResult
+from app.models.user import User
 from app.services.diagnosis_service import DiagnosisService
 from app.services.diagnosis_queue_service import DiagnosisQueueService
 from app.services.ai_service import ServiceUnavailableError, RateLimitError
+from app.services.auth.dependencies import get_current_user
 from app.config import settings
 
 
 router = APIRouter(prefix="/diagnosis", tags=["diagnosis"])
 templates = Jinja2Templates(directory="app/templates")
-
-# MVP single-user ID
-MVP_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 
 class DiagnosisRequest(BaseModel):
@@ -46,6 +44,7 @@ class DiagnosisFeedbackRequest(BaseModel):
 @router.post("/analyze")
 async def analyze_correlations(
     request: DiagnosisRequest = Body(...),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -72,13 +71,13 @@ async def analyze_correlations(
 
     # Step 1: Check data sufficiency (fast)
     sufficient_data, meals_count, symptoms_count = diagnosis_service.check_data_sufficiency(
-        MVP_USER_ID, start_date, end_date
+        user.id, start_date, end_date
     )
 
     if not sufficient_data:
         # Create minimal run record for insufficient data
         diagnosis_run = DiagnosisRun(
-            user_id=MVP_USER_ID,
+            user_id=user.id,
             run_timestamp=datetime.utcnow(),
             status="completed",
             meals_analyzed=meals_count,
@@ -107,12 +106,12 @@ async def analyze_correlations(
 
     # Step 2: Run temporal windowing queries (fast SQL)
     correlations = diagnosis_service.get_temporal_correlations(
-        MVP_USER_ID, start_date, end_date
+        user.id, start_date, end_date
     )
 
     if not correlations:
         diagnosis_run = DiagnosisRun(
-            user_id=MVP_USER_ID,
+            user_id=user.id,
             run_timestamp=datetime.utcnow(),
             status="completed",
             meals_analyzed=meals_count,
@@ -166,7 +165,7 @@ async def analyze_correlations(
         row[0] for row in db.query(DiagnosisResult.ingredient_id)
         .join(DiagnosisRun)
         .filter(
-            DiagnosisRun.user_id == MVP_USER_ID,
+            DiagnosisRun.user_id == user.id,
             DiagnosisRun.status == "completed"
         )
         .distinct()
@@ -195,7 +194,7 @@ async def analyze_correlations(
         else:
             # No ingredients met the confidence threshold
             diagnosis_run = DiagnosisRun(
-                user_id=MVP_USER_ID,
+                user_id=user.id,
                 run_timestamp=datetime.utcnow(),
                 status="completed",
                 meals_analyzed=meals_count,
@@ -220,7 +219,7 @@ async def analyze_correlations(
 
     # Step 4: Create diagnosis run record (only for unanalyzed ingredients)
     diagnosis_run = DiagnosisRun(
-        user_id=MVP_USER_ID,
+        user_id=user.id,
         run_timestamp=datetime.utcnow(),
         status="pending",
         total_ingredients=len(unanalyzed_ingredients),
@@ -258,7 +257,7 @@ async def analyze_correlations(
         # Step 5b: Sync mode (legacy) - run full analysis
         try:
             diagnosis_run = await diagnosis_service.run_diagnosis(
-                user_id=MVP_USER_ID,
+                user_id=user.id,
                 date_range_start=start_date,
                 date_range_end=end_date,
                 web_search_enabled=request.web_search_enabled,
@@ -314,6 +313,7 @@ async def analyze_correlations(
 @router.get("", response_class=HTMLResponse)
 async def get_diagnosis(
     request: Request,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -326,7 +326,7 @@ async def get_diagnosis(
     # Get latest diagnosis run for user
     latest_run = (
         db.query(DiagnosisRun)
-        .filter(DiagnosisRun.user_id == MVP_USER_ID)
+        .filter(DiagnosisRun.user_id == user.id)
         .order_by(DiagnosisRun.run_timestamp.desc())
         .options(
             joinedload(DiagnosisRun.results)
@@ -347,13 +347,14 @@ async def get_diagnosis(
         start_date = end_date - timedelta(days=90)
 
         _, meals_count, symptoms_count = diagnosis_service.check_data_sufficiency(
-            MVP_USER_ID, start_date, end_date
+            user.id, start_date, end_date
         )
 
         return templates.TemplateResponse(
             "diagnosis/insufficient_data.html",
             {
                 "request": request,
+                "user": user,
                 "meals_count": meals_count,
                 "symptoms_count": symptoms_count,
                 "min_meals": diagnosis_service.MIN_MEALS,
@@ -374,7 +375,7 @@ async def get_diagnosis(
             row[0] for row in db.query(DiagnosisResult.ingredient_id)
             .join(DiagnosisRun)
             .filter(
-                DiagnosisRun.user_id == MVP_USER_ID,
+                DiagnosisRun.user_id == user.id,
                 DiagnosisRun.status == "completed"
             )
             .distinct()
@@ -382,7 +383,7 @@ async def get_diagnosis(
         )
 
         # Run fast SQL checks (no AI calls)
-        correlations = diagnosis_service.get_temporal_correlations(MVP_USER_ID, start_date, end_date)
+        correlations = diagnosis_service.get_temporal_correlations(user.id, start_date, end_date)
         if correlations:
             aggregated = diagnosis_service.aggregate_correlations_by_ingredient(correlations)
             # Check if any UNANALYZED ingredient meets threshold
@@ -412,7 +413,7 @@ async def get_diagnosis(
         )
         .join(DiagnosisRun)
         .filter(
-            DiagnosisRun.user_id == MVP_USER_ID,
+            DiagnosisRun.user_id == user.id,
             DiagnosisRun.status == "completed"
         )
         .group_by(DiagnosisResult.ingredient_id)
@@ -437,6 +438,7 @@ async def get_diagnosis(
         "diagnosis/results.html",
         {
             "request": request,
+            "user": user,
             "diagnosis_run": latest_run,
             "results": all_results,
             "run_id": latest_run.id,
@@ -451,6 +453,7 @@ async def get_diagnosis(
 @router.post("/feedback")
 async def submit_feedback(
     request: DiagnosisFeedbackRequest,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -469,7 +472,7 @@ async def submit_feedback(
         db.query(DiagnosisResult)
         .join(DiagnosisRun)
         .filter(
-            DiagnosisResult.id == request.result_id, DiagnosisRun.user_id == MVP_USER_ID
+            DiagnosisResult.id == request.result_id, DiagnosisRun.user_id == user.id
         )
         .first()
     )
@@ -482,7 +485,7 @@ async def submit_feedback(
         db.query(DiagnosisFeedback)
         .filter(
             DiagnosisFeedback.result_id == request.result_id,
-            DiagnosisFeedback.user_id == MVP_USER_ID,
+            DiagnosisFeedback.user_id == user.id,
         )
         .first()
     )
@@ -496,7 +499,7 @@ async def submit_feedback(
         # Create new feedback
         feedback = DiagnosisFeedback(
             result_id=request.result_id,
-            user_id=MVP_USER_ID,
+            user_id=user.id,
             rating=request.rating,
             feedback_text=request.feedback_text,
         )
@@ -508,19 +511,20 @@ async def submit_feedback(
 
 
 @router.get("/methodology", response_class=HTMLResponse)
-async def get_methodology(request: Request):
+async def get_methodology(request: Request, user: User = Depends(get_current_user)):
     """
     Show methodology explanation page.
 
     Explains how diagnosis works in plain language.
     """
     return templates.TemplateResponse(
-        "diagnosis/methodology.html", {"request": request}
+        "diagnosis/methodology.html", {"request": request, "user": user}
     )
 
 
 @router.post("/reset")
 async def reset_diagnosis_data(
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -536,13 +540,13 @@ async def reset_diagnosis_data(
         # Count runs before deletion for confirmation message
         runs_count = (
             db.query(DiagnosisRun)
-            .filter(DiagnosisRun.user_id == MVP_USER_ID)
+            .filter(DiagnosisRun.user_id == user.id)
             .count()
         )
 
         # Delete all diagnosis runs (cascades to results, citations, feedback)
         db.query(DiagnosisRun).filter(
-            DiagnosisRun.user_id == MVP_USER_ID
+            DiagnosisRun.user_id == user.id
         ).delete()
 
         db.commit()
@@ -563,6 +567,7 @@ async def reset_diagnosis_data(
 @router.delete("/results/{result_id}")
 async def delete_diagnosis_result(
     result_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -580,7 +585,7 @@ async def delete_diagnosis_result(
         .join(DiagnosisRun)
         .filter(
             DiagnosisResult.id == result_id,
-            DiagnosisRun.user_id == MVP_USER_ID
+            DiagnosisRun.user_id == user.id
         )
         .first()
     )

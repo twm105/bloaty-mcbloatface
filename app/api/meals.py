@@ -1,7 +1,6 @@
 """API endpoints for meal logging and management."""
 from datetime import datetime
 from typing import Optional
-import uuid
 
 from fastapi import APIRouter, Depends, Request, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,25 +8,24 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.user import User
 from app.models.meal_ingredient import IngredientState
 from app.services.meal_service import meal_service
 from app.services.file_service import file_service
 from app.services.ai_service import ClaudeService, ServiceUnavailableError, RateLimitError
+from app.services.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/meals", tags=["meals"])
 templates = Jinja2Templates(directory="app/templates")
-
-# MVP single-user ID
-MVP_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 # Initialize AI service
 claude_service = ClaudeService()
 
 
 @router.get("/log", response_class=HTMLResponse)
-async def meal_log_page(request: Request):
+async def meal_log_page(request: Request, user: User = Depends(get_current_user)):
     """Meal logging page."""
-    return templates.TemplateResponse("meals/log.html", {"request": request})
+    return templates.TemplateResponse("meals/log.html", {"request": request, "user": user})
 
 
 @router.post("/create")
@@ -37,6 +35,7 @@ async def create_meal(
     user_notes: Optional[str] = Form(None),
     country: Optional[str] = Form(None),
     meal_timestamp: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -65,7 +64,7 @@ async def create_meal(
     # Create meal
     meal = meal_service.create_meal(
         db=db,
-        user_id=MVP_USER_ID,
+        user_id=user.id,
         image_path=image_path,
         user_notes=user_notes,
         country=country,
@@ -83,6 +82,7 @@ async def create_meal(
 async def edit_ingredients_page(
     request: Request,
     meal_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Page for adding/editing meal ingredients."""
@@ -90,11 +90,16 @@ async def edit_ingredients_page(
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
 
+    # Verify ownership
+    if meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     return templates.TemplateResponse(
         "meals/edit_ingredients.html",
         {
             "request": request,
             "meal": meal,
+            "user": user,
             "ingredient_states": [state.value for state in IngredientState]
         }
     )
@@ -104,6 +109,7 @@ async def edit_ingredients_page(
 async def analyze_meal_image(
     request: Request,
     meal_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -117,6 +123,10 @@ async def analyze_meal_image(
     meal = meal_service.get_meal(db, meal_id)
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
+
+    # Verify ownership
+    if meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
 
     if not meal.image_path:
         raise HTTPException(status_code=400, detail="No image associated with this meal")
@@ -259,6 +269,7 @@ async def add_ingredient(
     ingredient_name: str = Form(...),
     state: str = Form(...),
     quantity: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Add an ingredient to a meal."""
@@ -266,6 +277,10 @@ async def add_ingredient(
     meal = meal_service.get_meal(db, meal_id)
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
+
+    # Verify ownership
+    if meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
 
     # Validate state
     try:
@@ -296,9 +311,15 @@ async def add_ingredient(
 async def remove_ingredient(
     meal_id: int,
     meal_ingredient_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Remove an ingredient from a meal."""
+    # Verify ownership
+    meal = meal_service.get_meal(db, meal_id)
+    if meal and meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     success = meal_service.remove_ingredient_from_meal(db, meal_ingredient_id)
     if not success:
         raise HTTPException(status_code=404, detail="Ingredient not found")
@@ -311,9 +332,15 @@ async def remove_ingredient(
 @router.post("/{meal_id}/complete")
 async def complete_meal(
     meal_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Publish meal and redirect to history."""
+    # Verify ownership before publishing
+    existing_meal = meal_service.get_meal(db, meal_id)
+    if existing_meal and existing_meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     # Publish the meal (changes status from draft to published)
     meal = meal_service.publish_meal(db, meal_id)
     if not meal:
@@ -325,15 +352,17 @@ async def complete_meal(
 @router.get("/history", response_class=HTMLResponse)
 async def meal_history_page(
     request: Request,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Meal history page."""
-    meals = meal_service.get_user_meals(db, MVP_USER_ID, limit=50)
+    meals = meal_service.get_user_meals(db, user.id, limit=50)
 
     return templates.TemplateResponse(
         "meals/history.html",
         {
             "request": request,
+            "user": user,
             "meals": meals
         }
     )
@@ -343,9 +372,15 @@ async def meal_history_page(
 async def update_meal_name(
     meal_id: int,
     name: str = Form(...),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update meal name (inline editing)."""
+    # Verify ownership
+    existing_meal = meal_service.get_meal(db, meal_id)
+    if existing_meal and existing_meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     meal = meal_service.update_meal_name(db, meal_id, name)
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
@@ -359,9 +394,15 @@ async def update_meal_metadata(
     country: Optional[str] = Form(None),
     user_notes: Optional[str] = Form(None),
     timestamp: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update meal metadata (country, notes, timestamp) - inline editing."""
+    # Verify ownership
+    existing_meal = meal_service.get_meal(db, meal_id)
+    if existing_meal and existing_meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     # Parse timestamp if provided
     parsed_timestamp = None
     if timestamp:
@@ -391,9 +432,15 @@ async def update_ingredient(
     meal_ingredient_id: int,
     ingredient_name: Optional[str] = Form(None),
     quantity: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update ingredient name or quantity (inline editing)."""
+    # Verify ownership
+    meal = meal_service.get_meal(db, meal_id)
+    if meal and meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     meal_ingredient = meal_service.update_ingredient_in_meal(
         db=db,
         meal_ingredient_id=meal_ingredient_id,
@@ -415,6 +462,7 @@ async def update_ingredient(
 async def update_ingredient_state(
     meal_ingredient_id: int,
     request: Request,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update ingredient state (raw/cooked/processed)."""
@@ -440,11 +488,17 @@ async def update_ingredient_state(
 @router.delete("/{meal_id}")
 async def delete_meal(
     meal_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Delete a meal."""
     # Get meal to delete image file
     meal = meal_service.get_meal(db, meal_id)
+
+    # Verify ownership
+    if meal and meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     if meal and meal.image_path:
         file_service.delete_file(meal.image_path)
 

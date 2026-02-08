@@ -1,7 +1,6 @@
 """API endpoints for symptom logging and management."""
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-import uuid
 import json
 import logging
 
@@ -14,15 +13,14 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.database import get_db
+from app.models.user import User
 from app.services.symptom_service import symptom_service
 from app.services.ai_service import ClaudeService
 from app.models.user_settings import UserSettings
+from app.services.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/symptoms", tags=["symptoms"])
 templates = Jinja2Templates(directory="app/templates")
-
-# MVP single-user ID
-MVP_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
 # AI service instance
 claude_service = ClaudeService()
@@ -57,7 +55,7 @@ class DetectOngoingSymptomRequest(BaseModel):
 # =============================================================================
 
 @router.get("/tags/common")
-async def get_common_tags(db: Session = Depends(get_db)):
+async def get_common_tags(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get quick-add symptom tags for the user.
 
@@ -82,8 +80,8 @@ async def get_common_tags(db: Session = Depends(get_db)):
     ]
 
     # Get recent and common tags
-    recent_tags = symptom_service.get_most_recent_symptom_tags(db, MVP_USER_ID, limit=6)
-    common_tags = symptom_service.get_most_common_symptom_tags(db, MVP_USER_ID, limit=3)
+    recent_tags = symptom_service.get_most_recent_symptom_tags(db, user.id, limit=6)
+    common_tags = symptom_service.get_most_common_symptom_tags(db, user.id, limit=3)
 
     # If no tags exist, return defaults
     if not recent_tags and not common_tags:
@@ -134,7 +132,7 @@ async def get_common_tags(db: Session = Depends(get_db)):
 
 
 @router.get("/tags/autocomplete")
-async def autocomplete_tags(q: str = Query(...), db: Session = Depends(get_db)):
+async def autocomplete_tags(q: str = Query(...), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Autocomplete search for symptom tags.
 
@@ -143,7 +141,7 @@ async def autocomplete_tags(q: str = Query(...), db: Session = Depends(get_db)):
 
     Returns: {"suggestions": ["bloating", "gas", "nausea", ...]}
     """
-    suggestions = symptom_service.search_symptom_tags(db, MVP_USER_ID, q, limit=10)
+    suggestions = symptom_service.search_symptom_tags(db, user.id, q, limit=10)
     return {"suggestions": suggestions}
 
 
@@ -241,6 +239,7 @@ async def elaborate_tags_stream(request: ElaborateRequest):
 @router.post("/detect-ongoing")
 async def detect_ongoing_symptom(
     request: DetectOngoingSymptomRequest,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -262,7 +261,7 @@ async def detect_ongoing_symptom(
         # Search for similar symptom by name (3-day window)
         previous_symptom = symptom_service.detect_ongoing_symptom_by_name(
             db=db,
-            user_id=MVP_USER_ID,
+            user_id=user.id,
             symptom_name=request.symptom_name,
             lookback_hours=72  # 3 days
         )
@@ -326,7 +325,7 @@ async def detect_ongoing_symptom(
 
 
 @router.post("/detect-episode")
-async def detect_episode(request: DetectEpisodeRequest, db: Session = Depends(get_db)):
+async def detect_episode(request: DetectEpisodeRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Detect if current symptoms are continuation of recent episode.
 
@@ -353,7 +352,7 @@ async def detect_episode(request: DetectEpisodeRequest, db: Session = Depends(ge
 
         # Detect similar recent symptoms
         previous_symptom = symptom_service.detect_similar_recent_symptoms(
-            db, MVP_USER_ID, tags_dict, lookback_hours=48
+            db, user.id, tags_dict, lookback_hours=48
         )
 
         if not previous_symptom:
@@ -399,6 +398,7 @@ async def create_tagged_symptom(
     tags_json: str = Form(...),
     ai_generated_text: Optional[str] = Form(None),
     final_notes: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -422,7 +422,7 @@ async def create_tagged_symptom(
         # Create symptom (service method now handles per-symptom times)
         symptom = symptom_service.create_symptom_with_tags(
             db=db,
-            user_id=MVP_USER_ID,
+            user_id=user.id,
             tags=tags,
             ai_generated_text=ai_generated,
             final_notes=final
@@ -446,16 +446,17 @@ async def create_tagged_symptom(
 # =============================================================================
 
 @router.get("/log", response_class=HTMLResponse)
-async def symptom_log_page(request: Request, db: Session = Depends(get_db)):
+async def symptom_log_page(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Symptom logging page."""
     # Get user settings for AI elaboration preference
-    user_settings = db.query(UserSettings).filter(UserSettings.user_id == MVP_USER_ID).first()
+    user_settings = db.query(UserSettings).filter(UserSettings.user_id == user.id).first()
     ai_elaborate_default = user_settings.ai_elaborate_symptoms if user_settings else True
 
     return templates.TemplateResponse(
         "symptoms/log.html",
         {
             "request": request,
+            "user": user,
             "ai_elaborate_default": ai_elaborate_default
         }
     )
@@ -469,6 +470,7 @@ async def create_symptom(
     severity: int = Form(...),
     notes: Optional[str] = Form(None),
     symptom_timestamp: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -493,7 +495,7 @@ async def create_symptom(
     # Create symptom
     symptom = symptom_service.create_symptom(
         db=db,
-        user_id=MVP_USER_ID,
+        user_id=user.id,
         raw_description=description,
         structured_type=symptom_type,
         severity=severity,
@@ -512,15 +514,17 @@ async def create_symptom(
 async def symptom_history_page(
     request: Request,
     success: bool = False,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Symptom history page."""
-    symptoms = symptom_service.get_user_symptoms(db, MVP_USER_ID, limit=50)
+    symptoms = symptom_service.get_user_symptoms(db, user.id, limit=50)
 
     return templates.TemplateResponse(
         "symptoms/history.html",
         {
             "request": request,
+            "user": user,
             "symptoms": symptoms,
             "success": success
         }
@@ -531,6 +535,7 @@ async def symptom_history_page(
 async def edit_symptom_page(
     request: Request,
     symptom_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Reuse log page for editing (same pattern as meals)."""
@@ -538,10 +543,15 @@ async def edit_symptom_page(
     if not symptom:
         raise HTTPException(status_code=404, detail="Symptom not found")
 
+    # Verify ownership
+    if symptom.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     return templates.TemplateResponse(
         "symptoms/log.html",
         {
             "request": request,
+            "user": user,
             "editing": True,
             "symptom": symptom,
             "symptom_id": symptom_id
@@ -553,6 +563,7 @@ async def edit_symptom_page(
 async def update_symptom_tags(
     symptom_id: int,
     request: Request,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update symptom with tag-based data."""
@@ -563,6 +574,10 @@ async def update_symptom_tags(
     symptom = symptom_service.get_symptom(db, symptom_id)
     if not symptom:
         raise HTTPException(status_code=404, detail="Symptom not found")
+
+    # Verify ownership
+    if symptom.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
 
     # Update symptom
     symptom.tags = data.get('tags', [])
@@ -593,9 +608,15 @@ async def update_symptom(
     severity: int = Form(...),
     notes: Optional[str] = Form(None),
     symptom_timestamp: Optional[str] = Form(None),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update a symptom."""
+    # Verify ownership first
+    existing = symptom_service.get_symptom(db, symptom_id)
+    if existing and existing.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     # Parse timestamp
     timestamp = None
     if symptom_timestamp:
@@ -626,17 +647,17 @@ async def update_symptom(
 
 
 @router.get("/debug/count")
-async def debug_symptom_count(db: Session = Depends(get_db)):
+async def debug_symptom_count(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Debug endpoint to check symptom count."""
     from app.models.symptom import Symptom
     total = db.query(Symptom).count()
-    for_user = db.query(Symptom).filter(Symptom.user_id == MVP_USER_ID).count()
-    symptoms_direct = db.query(Symptom).filter(Symptom.user_id == MVP_USER_ID).all()
-    symptoms_service = symptom_service.get_user_symptoms(db, MVP_USER_ID, limit=50)
+    for_user = db.query(Symptom).filter(Symptom.user_id == user.id).count()
+    symptoms_direct = db.query(Symptom).filter(Symptom.user_id == user.id).all()
+    symptoms_service = symptom_service.get_user_symptoms(db, user.id, limit=50)
     return {
         "total_symptoms": total,
-        "mvp_user_symptoms": for_user,
-        "mvp_user_id": str(MVP_USER_ID),
+        "user_symptoms": for_user,
+        "user_id": str(user.id),
         "direct_query_count": len(symptoms_direct),
         "service_query_count": len(symptoms_service),
         "first_3_ids_direct": [s.id for s in symptoms_direct[:3]],
@@ -646,9 +667,15 @@ async def debug_symptom_count(db: Session = Depends(get_db)):
 @router.delete("/{symptom_id}")
 async def delete_symptom(
     symptom_id: int,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Delete a symptom."""
+    # Verify ownership first
+    symptom = symptom_service.get_symptom(db, symptom_id)
+    if symptom and symptom.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
     success = symptom_service.delete_symptom(db, symptom_id)
     if not success:
         raise HTTPException(status_code=404, detail="Symptom not found")

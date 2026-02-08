@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 4rem auto;">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title" style="text-align: center;">Create Account</h1>
+        </div>
+        <div class="card-content">
+            {% if not invite_valid %}
+            <!-- No valid invite -->
+            <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+                <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#lock"></use>
+                </svg>
+                <div class="disclaimer-content">
+                    <div class="disclaimer-title">Registration requires an invite</div>
+                    <div class="disclaimer-text">
+                        {% if invite %}
+                        This invite link is invalid or has expired.
+                        {% else %}
+                        Ask an existing user to send you an invite link.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: var(--space-6);">
+                <a href="/auth/login" class="btn btn-secondary">Back to Login</a>
+            </div>
+            {% else %}
+            <!-- Valid invite - show registration form -->
+            {% if error == 'passwords_mismatch' %}
+            <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+                <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+                </svg>
+                <div class="disclaimer-content">
+                    <div class="disclaimer-text">Passwords do not match.</div>
+                </div>
+            </div>
+            {% elif error == 'password_too_short' %}
+            <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+                <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+                </svg>
+                <div class="disclaimer-content">
+                    <div class="disclaimer-text">Password must be at least 8 characters.</div>
+                </div>
+            </div>
+            {% elif error == 'email_exists' %}
+            <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+                <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+                </svg>
+                <div class="disclaimer-content">
+                    <div class="disclaimer-text">An account with this email already exists.</div>
+                </div>
+            </div>
+            {% elif error == 'invalid_invite' %}
+            <div class="disclaimer" style="background-color: rgba(212, 115, 75, 0.08); border: 1px solid rgba(212, 115, 75, 0.3); border-left: 3px solid var(--color-highlight-terra); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-6);">
+                <svg class="disclaimer-icon icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#alert-triangle"></use>
+                </svg>
+                <div class="disclaimer-content">
+                    <div class="disclaimer-text">This invite link is invalid or has expired.</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/auth/register" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <input type="hidden" name="invite" value="{{ invite }}">
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="input"
+                        required
+                        autocomplete="email"
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="input"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                    >
+                    <span class="form-hint">At least 8 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm" class="form-label">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="password_confirm"
+                        name="password_confirm"
+                        class="input"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--space-2);">
+                    Create Account
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: var(--space-6);">
+                <span class="text-secondary">Already have an account?</span>
+                <a href="/auth/login">Login</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
