@@ -358,14 +358,21 @@ async def update_meal_metadata(
     meal_id: int,
     country: Optional[str] = Form(None),
     user_notes: Optional[str] = Form(None),
+    timestamp: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    """Update meal metadata (country, notes) - inline editing."""
+    """Update meal metadata (country, notes, timestamp) - inline editing."""
+    # Parse timestamp if provided
+    parsed_timestamp = None
+    if timestamp:
+        parsed_timestamp = datetime.fromisoformat(timestamp)
+
     meal = meal_service.update_meal(
         db=db,
         meal_id=meal_id,
         country=country,
-        user_notes=user_notes
+        user_notes=user_notes,
+        timestamp=parsed_timestamp
     )
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
@@ -373,7 +380,8 @@ async def update_meal_metadata(
     return {
         "status": "updated",
         "country": meal.country,
-        "user_notes": meal.user_notes
+        "user_notes": meal.user_notes,
+        "timestamp": meal.timestamp.isoformat() if meal.timestamp else None
     }
 
 

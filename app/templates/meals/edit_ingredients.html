@@ -185,7 +185,25 @@
                 ">
                     When
                 </small>
-                <span style="font-size: var(--text-sm); color: var(--color-text-primary);">
+                <span
+                    id="timestamp-{{ meal.id }}"
+                    data-timestamp="{{ meal.timestamp.strftime('%Y-%m-%dT%H:%M') }}"
+                    onclick="makeEditableTimestamp(this, {{ meal.id }})"
+                    style="
+                        cursor: pointer;
+                        padding: var(--space-2) var(--space-3);
+                        border-radius: var(--radius-sm);
+                        background: rgba(255, 255, 255, 0.03);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        display: inline-block;
+                        transition: all var(--transition-base);
+                        color: var(--color-text-primary);
+                        font-size: var(--text-sm);
+                    "
+                    onmouseover="this.style.borderColor='rgba(255, 255, 255, 0.15)'"
+                    onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.08)'"
+                    title="Click to edit date/time"
+                >
                     {{ meal.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
                 </span>
             </div>
@@ -386,6 +404,94 @@ function makeEditableMetadata(element, mealId, field) {
             element.blur();
         }
     }, { once: true });
+}
+
+// Helper function for inline editing timestamp with datetime-local input
+function makeEditableTimestamp(element, mealId) {
+    const currentTimestamp = element.dataset.timestamp;
+    const originalDisplay = element.textContent;
+    const originalStyles = element.style.cssText;
+
+    // Create datetime-local input
+    const input = document.createElement('input');
+    input.type = 'datetime-local';
+    input.value = currentTimestamp;
+    input.style.cssText = `
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-sm);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--color-accent);
+        color: var(--color-text-primary);
+        font-size: var(--text-sm);
+        font-family: inherit;
+        outline: none;
+    `;
+
+    // Replace span with input
+    element.replaceWith(input);
+    input.focus();
+
+    function restoreDisplay(displayText, timestamp) {
+        const span = document.createElement('span');
+        span.id = `timestamp-${mealId}`;
+        span.dataset.timestamp = timestamp;
+        span.onclick = () => makeEditableTimestamp(span, mealId);
+        span.style.cssText = originalStyles;
+        span.onmouseover = function() { this.style.borderColor = 'rgba(255, 255, 255, 0.15)'; };
+        span.onmouseout = function() { this.style.borderColor = 'rgba(255, 255, 255, 0.08)'; };
+        span.title = 'Click to edit date/time';
+        span.textContent = displayText;
+        input.replaceWith(span);
+    }
+
+    function saveTimestamp() {
+        const newValue = input.value;
+
+        if (!newValue || newValue === currentTimestamp) {
+            restoreDisplay(originalDisplay, currentTimestamp);
+            return;
+        }
+
+        // Save to server
+        fetch(`/meals/${mealId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ timestamp: newValue })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'updated') {
+                // Format the new date for display
+                const date = new Date(newValue);
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                };
+                const formattedDate = date.toLocaleDateString('en-US', options).replace(',', ' at');
+                restoreDisplay(formattedDate, newValue);
+            } else {
+                restoreDisplay(originalDisplay, currentTimestamp);
+            }
+        })
+        .catch(error => {
+            console.error('Save failed:', error);
+            restoreDisplay(originalDisplay, currentTimestamp);
+        });
+    }
+
+    input.addEventListener('blur', saveTimestamp);
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        } else if (e.key === 'Escape') {
+            restoreDisplay(originalDisplay, currentTimestamp);
+        }
+    });
 }
 
 // Helper function for inline editing
