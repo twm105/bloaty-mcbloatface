@@ -9,7 +9,7 @@ set -e
 APP_DIR="/opt/bloaty"
 BACKUP_DIR="/opt/bloaty/backups"
 S3_BUCKET="${BACKUP_S3_BUCKET:-bloaty-backups-XXXXX}"
-REGION="${AWS_REGION:-us-east-1}"
+REGION="${AWS_REGION:-eu-north-1}"
 DATE=$(date +%Y-%m-%d)
 RETENTION_DAYS=7
 
