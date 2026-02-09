@@ -1,8 +1,34 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026
 **Overall Progress:** ~85% MVP Complete
-**Recent:** Session-based authentication system implemented (invite-only registration, admin password resets)
+**Recent:** AWS deployment complete (EC2, Route 53, Let's Encrypt SSL)
+
+## 🚀 Production Deployment - COMPLETE (Feb 9, 2026)
+
+**Status:** App is live at https://bloaty-app.com
+
+**Infrastructure:**
+- EC2 t3.small (Amazon Linux 2023)
+- Route 53 DNS
+- Let's Encrypt SSL via Certbot
+- Secrets Manager for credentials
+- S3 bucket for backups (not yet automated)
+
+**Known Issue - Images Not Rendering:**
+- Meal photos upload and AI analysis works correctly
+- Images fail to render in the UI (broken image icon)
+- Root cause: Volume mount conflict between base and prod docker-compose files
+  - Base uses `./uploads:/app/uploads:ro` (local path)
+  - Prod uses `uploads:/app/uploads:ro` (named volume)
+  - Both get merged, web container writes to named volume, nginx reads from local path
+- Attempted fix with `!reset` on nginx volumes broke nginx entirely (no volumes mounted)
+- **TODO:** Fix volume mount so nginx can read from the same named volume as web
+
+**Files:**
+- `DEVOPS.md` - Full deployment guide
+- `deploy/` - Production scripts and configs
+- `nginx/conf.d/ssl.conf` - HTTPS configuration
 
 ## ✅ Completed Features
 
