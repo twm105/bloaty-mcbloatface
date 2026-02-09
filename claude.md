@@ -23,6 +23,27 @@ A containerized web application for meal tracking and gastro issue diagnosis. Us
 - **Tailwind CSS** or **Pico.css**: Styling (TBD)
 - **Chart.js**: Analytics visualizations
 
+#### Icon Sizing (IMPORTANT)
+Icons use Lucide sprite SVGs. **Always specify explicit dimensions** to prevent oversized rendering:
+```html
+<!-- Correct: explicit width/height + viewBox + overflow -->
+<svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-sm" style="overflow: visible;">
+    <use href="/static/icons/lucide-sprite.svg#icon-name"></use>
+</svg>
+
+<!-- Wrong: relying only on CSS class - may render too large -->
+<svg class="icon icon-sm">
+    <use href="/static/icons/lucide-sprite.svg#icon-name"></use>
+</svg>
+```
+Size reference (match to context):
+- **12x12**: Tiny inline icons (trash buttons in cards)
+- **14x14**: Small inline icons (checkmarks, status indicators)
+- **16x16**: Standard icons (alerts, buttons, navigation)
+- **20x20+**: Large feature icons (page headers)
+
+Always add `overflow: visible` to prevent clipping if viewBox doesn't align perfectly.
+
 ### AI/ML
 - **Anthropic Claude API**:
   - Haiku: Image analysis (meal → ingredients)
