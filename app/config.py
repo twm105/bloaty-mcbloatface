@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"  # Allow extra env vars (e.g., POSTGRES_PASSWORD, BACKUP_S3_BUCKET)
 
 
 settings = Settings()
