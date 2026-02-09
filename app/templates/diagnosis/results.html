@@ -59,7 +59,7 @@
     {% else %}
     <!-- Show no new data message -->
     <div class="ai-analyzing-banner" style="background: rgba(107, 114, 128, 0.1); border-left-color: #6B7280; color: #9CA3AF;">
-        <svg class="icon icon-sm" style="flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-sm" style="flex-shrink: 0; overflow: visible;">
             <use href="/static/icons/lucide-sprite.svg#info"></use>
         </svg>
         <div>
@@ -225,31 +225,12 @@
                 {% endif %}
 
                 <!-- User Feedback -->
-                <div class="diagnosis-section feedback-section" x-data="{ rating: 0, feedback: '', submitted: false }">
-                    <h4 class="section-title">Rate this result</h4>
-                    <div class="rating-stars">
-                        <template x-for="i in [1,2,3,4,5]" :key="i">
-                            <button @click="rating = i" class="star-btn" :class="{ 'active': rating >= i }">
-                                <svg class="icon icon-sm" aria-hidden="true">
-                                    <use href="/static/icons/lucide-sprite.svg#star"></use>
-                                </svg>
-                            </button>
-                        </template>
-                    </div>
-                    <textarea
-                        x-model="feedback"
-                        placeholder="Optional: Share your thoughts..."
-                        class="feedback-textarea"
-                    ></textarea>
-                    <button
-                        @click="submitFeedback({{ result.id }}, rating, feedback).then(() => submitted = true)"
-                        :disabled="rating === 0 || submitted"
-                        class="btn btn-sm"
-                        :class="submitted ? 'btn-secondary' : 'btn-primary'"
-                    >
-                        <span x-text="submitted ? 'Submitted' : 'Submit Feedback'"></span>
-                    </button>
-                </div>
+                {% set entity_type = 'diagnosis' %}
+                {% set entity_id = result.id %}
+                {% set endpoint_url = '/diagnosis/feedback' %}
+                {% set existing_rating = result.feedback[0].rating if result.feedback else 0 %}
+                {% set existing_feedback = result.feedback[0].feedback_text if result.feedback and result.feedback[0].feedback_text else '' %}
+                {% include 'components/_feedback_rating.html' %}
             </div>
         </div>
         {% endfor %}
@@ -325,6 +306,58 @@
                                     <span class="badge badge-secondary" x-text="citation.source_type"></span>
                                 </a>
                             </template>
+                        </div>
+                    </div>
+
+                    <!-- User Feedback (SSE-rendered) -->
+                    <div class="diagnosis-section feedback-section"
+                         x-data="feedbackRating({
+                             entityType: 'diagnosis',
+                             entityId: result.id,
+                             endpoint: '/diagnosis/feedback',
+                             idField: 'result_id',
+                             existingRating: 0,
+                             existingFeedback: ''
+                         })">
+                        <h4 class="section-title">Rate this Diagnosis</h4>
+
+                        <div class="rating-stars">
+                            <template x-for="i in [1,2,3,4,5]" :key="i">
+                                <button
+                                    @click="submitRating(i)"
+                                    class="star-btn"
+                                    :class="{ 'active': rating >= i }"
+                                >
+                                    <svg class="icon icon-sm" aria-hidden="true">
+                                        <use href="/static/icons/lucide-sprite.svg#star"></use>
+                                    </svg>
+                                </button>
+                            </template>
+                            <span x-show="submitting" class="rating-saving">
+                                <span class="spinner-tiny"></span>
+                            </span>
+                            <span x-show="hasRated && !submitting" class="rating-saved" x-cloak>
+                                <svg width="14" height="14" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true" style="color: var(--color-accent-green); overflow: visible;">
+                                    <use href="/static/icons/lucide-sprite.svg#check"></use>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div x-show="hasRated" x-collapse x-cloak class="feedback-form">
+                            <textarea
+                                x-model="feedback"
+                                placeholder="Optional: Share your thoughts..."
+                                class="feedback-textarea"
+                            ></textarea>
+                            <button
+                                @click="submitComment()"
+                                :disabled="!feedback.trim() || commentSubmitting || !commentDirty"
+                                class="btn btn-sm"
+                                :class="commentDirty ? 'btn-primary' : 'btn-secondary'"
+                            >
+                                <span x-show="commentSubmitting" class="spinner-tiny" style="margin-right: 0.5rem;"></span>
+                                <span x-text="commentButtonText"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -438,6 +471,87 @@ function diagnosisResults() {
                     feedback_text: feedback
                 })
             });
+        }
+    };
+}
+
+// Reusable feedback rating component
+function feedbackRating(config) {
+    return {
+        entityType: config.entityType || 'diagnosis',
+        entityId: config.entityId,
+        endpoint: config.endpoint || '/diagnosis/feedback',
+        idField: config.idField || 'result_id',
+        rating: config.existingRating || 0,
+        feedback: config.existingFeedback || '',
+        savedFeedback: config.existingFeedback || '',  // Track last saved comment
+        hasRated: config.existingRating > 0,
+        submitting: false,
+        commentSubmitting: false,
+
+        // Check if comment has unsaved changes
+        get commentDirty() {
+            return this.feedback.trim() !== this.savedFeedback.trim();
+        },
+
+        // Button text based on state
+        get commentButtonText() {
+            if (this.savedFeedback) {
+                return this.commentDirty ? 'Update Comment' : 'Comment Saved';
+            }
+            return 'Add Comment';
+        },
+
+        async submitRating(stars) {
+            this.rating = stars;
+            this.submitting = true;
+
+            try {
+                const body = {
+                    rating: stars,
+                    // Preserve existing comment when updating rating
+                    feedback_text: this.savedFeedback || null
+                };
+                body[this.idField] = this.entityId;
+
+                await fetch(this.endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                this.hasRated = true;
+            } catch (err) {
+                console.error('Failed to submit rating:', err);
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        async submitComment() {
+            if (!this.feedback.trim() || !this.commentDirty) return;
+
+            this.commentSubmitting = true;
+
+            try {
+                const body = {
+                    rating: this.rating,
+                    feedback_text: this.feedback
+                };
+                body[this.idField] = this.entityId;
+
+                await fetch(this.endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                this.savedFeedback = this.feedback;  // Update saved state
+            } catch (err) {
+                console.error('Failed to submit comment:', err);
+            } finally {
+                this.commentSubmitting = false;
+            }
         }
     };
 }
@@ -690,6 +804,27 @@ function diagnosisResults() {
     font-size: var(--text-sm);
     margin-bottom: var(--space-2);
     resize: vertical;
+}
+
+.feedback-form {
+    margin-top: var(--space-3);
+}
+
+.rating-saving,
+.rating-saved {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--space-2);
+}
+
+.spinner-tiny {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--color-accent-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
 }
 
 /* Spinner styles - matches meal analysis */

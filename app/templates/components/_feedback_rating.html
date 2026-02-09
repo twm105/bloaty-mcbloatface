@@ -1,0 +1,71 @@
+{#
+  Reusable Feedback Rating Component
+
+  Usage:
+    {% include 'components/_feedback_rating.html' with context %}
+
+  Required variables:
+    - entity_type: 'diagnosis', 'symptom', or 'meal'
+    - entity_id: ID of the entity being rated
+    - endpoint_url: API endpoint for submitting feedback (default: '/diagnosis/feedback')
+
+  Optional variables:
+    - existing_rating: Pre-existing rating value (0-5)
+    - existing_feedback: Pre-existing feedback text
+#}
+
+{% set endpoint = endpoint_url|default('/diagnosis/feedback') %}
+{% set id_field = 'result_id' if entity_type == 'diagnosis' else entity_type + '_id' %}
+
+<div class="diagnosis-section feedback-section"
+     x-data="feedbackRating({
+         entityType: '{{ entity_type }}',
+         entityId: {{ entity_id }},
+         endpoint: '{{ endpoint }}',
+         idField: '{{ id_field }}',
+         existingRating: {{ existing_rating|default(0) }},
+         existingFeedback: '{{ existing_feedback|default('')|e }}'
+     })">
+    <h4 class="section-title">Rate this {{ entity_type|title }}</h4>
+
+    <!-- Star Rating -->
+    <div class="rating-stars">
+        <template x-for="i in [1,2,3,4,5]" :key="i">
+            <button
+                @click="submitRating(i)"
+                class="star-btn"
+                :class="{ 'active': rating >= i }"
+            >
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#star"></use>
+                </svg>
+            </button>
+        </template>
+        <span x-show="submitting" class="rating-saving">
+            <span class="spinner-tiny"></span>
+        </span>
+        <span x-show="hasRated && !submitting" class="rating-saved" x-cloak>
+            <svg width="14" height="14" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true" style="color: var(--color-accent-green); overflow: visible;">
+                <use href="/static/icons/lucide-sprite.svg#check"></use>
+            </svg>
+        </span>
+    </div>
+
+    <!-- Feedback textarea (shown after rating) -->
+    <div x-show="hasRated" x-collapse x-cloak class="feedback-form">
+        <textarea
+            x-model="feedback"
+            placeholder="Optional: Share your thoughts..."
+            class="feedback-textarea"
+        ></textarea>
+        <button
+            @click="submitComment()"
+            :disabled="!feedback.trim() || commentSubmitting || !commentDirty"
+            class="btn btn-sm"
+            :class="commentDirty ? 'btn-primary' : 'btn-secondary'"
+        >
+            <span x-show="commentSubmitting" class="spinner-tiny" style="margin-right: 0.5rem;"></span>
+            <span x-text="commentButtonText"></span>
+        </button>
+    </div>
+</div>
