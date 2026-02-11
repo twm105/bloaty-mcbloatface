@@ -13,7 +13,7 @@ import json
 # Import broker setup (must be before actor definitions)
 from app.workers import redis_broker
 from app.database import SessionLocal
-from app.models import DiagnosisRun, DiagnosisResult, DiagnosisCitation
+from app.models import DiagnosisRun, DiagnosisResult, DiagnosisCitation, DiscountedIngredient
 from app.services.sse_publisher import SSEPublisher
 from app.services.ai_usage_service import AIUsageService
 
@@ -63,10 +63,107 @@ def analyze_ingredient(
             raise ValueError(f"DiagnosisRun {run_id} not found")
 
         ingredient_name = ingredient_data.get("ingredient_name", "unknown")
+        cooccurrence_data = ingredient_data.get("cooccurrence", [])
 
-        # Call Claude API for single-ingredient analysis
         claude_service = ClaudeService()
 
+        # Step 1: Always run classification to check if ingredient is a real trigger or bystander
+        # This catches both co-occurrence confounders AND medically implausible triggers
+        is_confounder = False
+        confounder_result = None
+
+        try:
+            confounder_result = run_async(claude_service.classify_root_cause(
+                ingredient_data=ingredient_data,
+                cooccurrence_data=cooccurrence_data,
+                medical_grounding="",  # Will use web search
+                web_search_enabled=web_search_enabled
+            ))
+            is_confounder = not confounder_result.get("root_cause", True)
+        except Exception as e:
+            # On classification error, treat as root cause (don't discard)
+            print(f"Root cause classification error for {ingredient_name}: {e}")
+            is_confounder = False
+
+        # Step 2: If confounder, store as DiscountedIngredient and skip normal analysis
+        if is_confounder and confounder_result:
+            # Find confounded_by ingredient ID
+            confounded_by_name = confounder_result.get("confounded_by")
+            confounded_by_id = None
+            if confounded_by_name:
+                for cooc in cooccurrence_data:
+                    if cooc.get("with_ingredient_name", "").lower() == confounded_by_name.lower():
+                        confounded_by_id = cooc.get("with_ingredient_id")
+                        break
+
+            # Get first co-occurrence record for stats
+            cooc = cooccurrence_data[0] if cooccurrence_data else {}
+
+            discounted = DiscountedIngredient(
+                run_id=run_id,
+                ingredient_id=ingredient_data["ingredient_id"],
+                discard_justification=confounder_result.get("discard_justification", "Confounded by co-occurring ingredient"),
+                confounded_by_ingredient_id=confounded_by_id,
+                # Original correlation data
+                original_confidence_score=ingredient_data.get("confidence_score"),
+                original_confidence_level=ingredient_data.get("confidence_level"),
+                times_eaten=ingredient_data.get("times_eaten"),
+                times_followed_by_symptoms=ingredient_data.get("total_symptom_occurrences"),
+                immediate_correlation=ingredient_data.get("immediate_total"),
+                delayed_correlation=ingredient_data.get("delayed_total"),
+                cumulative_correlation=ingredient_data.get("cumulative_total"),
+                associated_symptoms=ingredient_data.get("associated_symptoms"),
+                # Co-occurrence data
+                conditional_probability=cooc.get("conditional_probability"),
+                reverse_probability=cooc.get("reverse_probability"),
+                lift=cooc.get("lift"),
+                cooccurrence_meals_count=cooc.get("cooccurrence_meals"),
+                # Medical grounding
+                medical_grounding_summary=confounder_result.get("medical_reasoning"),
+            )
+            db.add(discounted)
+
+            # Increment completed count
+            from sqlalchemy import text
+            db.execute(
+                text("UPDATE diagnosis_runs SET completed_ingredients = completed_ingredients + 1 WHERE id = :run_id"),
+                {"run_id": run_id}
+            )
+            db.commit()
+            db.refresh(diagnosis_run)
+
+            # Publish SSE progress (ingredient analyzed but discounted)
+            sse_publisher.publish_progress(
+                run_id=run_id,
+                completed=diagnosis_run.completed_ingredients,
+                total=diagnosis_run.total_ingredients or 0,
+                ingredient=f"{ingredient_name} (discounted)"
+            )
+
+            # Publish discounted ingredient data for real-time UI update
+            sse_publisher.publish_discounted(run_id, {
+                "id": discounted.id,
+                "ingredient_id": discounted.ingredient_id,
+                "ingredient_name": ingredient_name,
+                "discard_justification": discounted.discard_justification,
+                "confounded_by_name": confounded_by_name,
+                "original_confidence_level": discounted.original_confidence_level,
+                "times_eaten": discounted.times_eaten,
+                "times_followed_by_symptoms": discounted.times_followed_by_symptoms,
+                "medical_grounding_summary": discounted.medical_grounding_summary,
+            })
+
+            # Check if this was the last ingredient
+            if diagnosis_run.completed_ingredients >= (diagnosis_run.total_ingredients or 0):
+                diagnosis_run.status = "completed"
+                diagnosis_run.completed_at = datetime.utcnow()
+                db.commit()
+                total_results = len(diagnosis_run.results) if diagnosis_run.results else 0
+                sse_publisher.publish_complete(run_id, total_results)
+
+            return  # Exit early - don't do full analysis for confounders
+
+        # Step 3: Call Claude API for single-ingredient analysis (not a confounder)
         try:
             result = run_async(claude_service.diagnose_single_ingredient(
                 ingredient_data=ingredient_data,

@@ -42,6 +42,7 @@ class DiagnosisRun(Base):
     # Relationships
     user = relationship("User", back_populates="diagnosis_runs")
     results = relationship("DiagnosisResult", back_populates="run", cascade="all, delete-orphan")
+    discounted_ingredients = relationship("DiscountedIngredient", back_populates="run", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<DiagnosisRun(id={self.id}, user_id={self.user_id}, status={self.status})>"

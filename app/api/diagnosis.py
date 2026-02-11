@@ -5,11 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models import DiagnosisRun, DiagnosisResult
+from app.models import DiagnosisRun, DiagnosisResult, DiscountedIngredient
 from app.models.user import User
 from app.services.diagnosis_service import DiagnosisService
 from app.services.diagnosis_queue_service import DiagnosisQueueService
@@ -50,15 +49,16 @@ async def analyze_correlations(
     """
     Run diagnosis analysis on user's meal and symptom data.
 
-    In async mode (default), this returns immediately with a run_id
-    and the client should connect to the SSE stream for updates.
+    Uses HOLISTIC per-ingredient analysis: gathers ALL data for each ingredient
+    (windowed by max occurrences) to make a comprehensive classification decision.
 
-    In sync mode, this blocks until analysis is complete (legacy behavior).
+    Each analysis run clears previous results for a fresh start, then analyzes
+    each correlated ingredient with its full context including co-occurrence data.
 
     Returns:
         JSON with run_id, status, and counts
     """
-    # Default date ranges: last 90 days
+    # Default date ranges: last 90 days (used for data sufficiency check only)
     end_date = request.date_range_end or datetime.utcnow()
     start_date = request.date_range_start or (end_date - timedelta(days=90))
 
@@ -104,12 +104,11 @@ async def analyze_correlations(
             ),
         }
 
-    # Step 2: Run temporal windowing queries (fast SQL)
-    correlations = diagnosis_service.get_temporal_correlations(
-        user.id, start_date, end_date
-    )
+    # Step 2: Find all ingredients with meaningful correlations (holistic approach)
+    # This uses ALL data windowed by max occurrences, not date-filtered
+    correlated_ingredient_ids = diagnosis_service.get_correlated_ingredient_ids(user.id)
 
-    if not correlations:
+    if not correlated_ingredient_ids:
         diagnosis_run = DiagnosisRun(
             user_id=user.id,
             run_timestamp=datetime.utcnow(),
@@ -134,95 +133,52 @@ async def analyze_correlations(
             "message": "No ingredient-symptom correlations found in your data.",
         }
 
-    # Step 3: Aggregate and calculate confidence scores (fast)
-    aggregated = diagnosis_service.aggregate_correlations_by_ingredient(correlations)
+    # Step 3: Clear previous diagnosis data for fresh holistic analysis
+    # This ensures each run starts clean - no deduplication complexity
+    db.query(DiagnosisRun).filter(DiagnosisRun.user_id == user.id).delete()
+    db.commit()
 
-    scored_ingredients = []
-    for key, data in aggregated.items():
-        confidence_score, confidence_level = diagnosis_service.calculate_confidence(
-            times_eaten=data["times_eaten"],
-            symptom_occurrences=data["total_symptom_occurrences"],
-            immediate_count=data["immediate_total"],
-            delayed_count=data["delayed_total"],
-            cumulative_count=data["cumulative_total"],
-            avg_severity=sum(s["severity_avg"] for s in data["associated_symptoms"])
-            / len(data["associated_symptoms"])
-            if data["associated_symptoms"]
-            else 0,
+    # Step 4: Gather holistic data for each correlated ingredient
+    holistic_ingredients = []
+    for ingredient_id in correlated_ingredient_ids:
+        ingredient_data = diagnosis_service.get_holistic_ingredient_data(user.id, ingredient_id)
+        if ingredient_data and ingredient_data.get("confidence_level") != "insufficient_data":
+            holistic_ingredients.append(ingredient_data)
+
+    # Sort by confidence score
+    holistic_ingredients.sort(key=lambda x: x["confidence_score"], reverse=True)
+
+    if not holistic_ingredients:
+        diagnosis_run = DiagnosisRun(
+            user_id=user.id,
+            run_timestamp=datetime.utcnow(),
+            status="completed",
+            meals_analyzed=meals_count,
+            symptoms_analyzed=symptoms_count,
+            date_range_start=start_date,
+            date_range_end=end_date,
+            sufficient_data=True,
+            web_search_enabled=request.web_search_enabled,
         )
+        db.add(diagnosis_run)
+        db.commit()
 
-        if confidence_level != "insufficient_data":
-            scored_ingredients.append({
-                **data,
-                "confidence_score": confidence_score,
-                "confidence_level": confidence_level,
-            })
+        return {
+            "run_id": diagnosis_run.id,
+            "status": "completed",
+            "sufficient_data": True,
+            "meals_analyzed": meals_count,
+            "symptoms_analyzed": symptoms_count,
+            "total_ingredients": 0,
+            "message": "No ingredients met the confidence threshold for analysis.",
+        }
 
-    scored_ingredients.sort(key=lambda x: x["confidence_score"], reverse=True)
-
-    # Step 3.5: Filter out ingredients that already have results from previous runs
-    existing_ingredient_ids = set(
-        row[0] for row in db.query(DiagnosisResult.ingredient_id)
-        .join(DiagnosisRun)
-        .filter(
-            DiagnosisRun.user_id == user.id,
-            DiagnosisRun.status == "completed"
-        )
-        .distinct()
-        .all()
-    )
-
-    # Filter to only unanalyzed ingredients
-    unanalyzed_ingredients = [
-        ing for ing in scored_ingredients
-        if ing["ingredient_id"] not in existing_ingredient_ids
-    ]
-
-    if not unanalyzed_ingredients:
-        # Distinguish between "no ingredients meet threshold" vs "all already analyzed"
-        if scored_ingredients:
-            # All ingredients that meet threshold have already been analyzed
-            return {
-                "run_id": None,
-                "status": "completed",
-                "sufficient_data": True,
-                "meals_analyzed": meals_count,
-                "symptoms_analyzed": symptoms_count,
-                "total_ingredients": 0,
-                "message": "All ingredients have already been analyzed. Delete individual results to re-analyze them.",
-            }
-        else:
-            # No ingredients met the confidence threshold
-            diagnosis_run = DiagnosisRun(
-                user_id=user.id,
-                run_timestamp=datetime.utcnow(),
-                status="completed",
-                meals_analyzed=meals_count,
-                symptoms_analyzed=symptoms_count,
-                date_range_start=start_date,
-                date_range_end=end_date,
-                sufficient_data=True,
-                web_search_enabled=request.web_search_enabled,
-            )
-            db.add(diagnosis_run)
-            db.commit()
-
-            return {
-                "run_id": diagnosis_run.id,
-                "status": "completed",
-                "sufficient_data": True,
-                "meals_analyzed": meals_count,
-                "symptoms_analyzed": symptoms_count,
-                "total_ingredients": 0,
-                "message": "No ingredients met the confidence threshold for analysis.",
-            }
-
-    # Step 4: Create diagnosis run record (only for unanalyzed ingredients)
+    # Step 5: Create diagnosis run record
     diagnosis_run = DiagnosisRun(
         user_id=user.id,
         run_timestamp=datetime.utcnow(),
         status="pending",
-        total_ingredients=len(unanalyzed_ingredients),
+        total_ingredients=len(holistic_ingredients),
         completed_ingredients=0,
         meals_analyzed=meals_count,
         symptoms_analyzed=symptoms_count,
@@ -236,11 +192,11 @@ async def analyze_correlations(
     db.refresh(diagnosis_run)
 
     if request.async_mode:
-        # Step 5a: Enqueue async tasks (returns immediately)
+        # Step 6: Enqueue async tasks with holistic data (returns immediately)
         queue_service = DiagnosisQueueService(db)
         tasks_enqueued = queue_service.enqueue_diagnosis(
             diagnosis_run=diagnosis_run,
-            scored_ingredients=unanalyzed_ingredients,
+            scored_ingredients=holistic_ingredients,
             web_search_enabled=request.web_search_enabled,
         )
 
@@ -250,11 +206,11 @@ async def analyze_correlations(
             "sufficient_data": True,
             "meals_analyzed": meals_count,
             "symptoms_analyzed": symptoms_count,
-            "total_ingredients": len(unanalyzed_ingredients),
-            "message": f"Analysis started. Analyzing {len(unanalyzed_ingredients)} potential trigger ingredients.",
+            "total_ingredients": len(holistic_ingredients),
+            "message": f"Analysis started. Analyzing {len(holistic_ingredients)} potential trigger ingredients.",
         }
     else:
-        # Step 5b: Sync mode (legacy) - run full analysis
+        # Sync mode (legacy) - run full analysis
         try:
             diagnosis_run = await diagnosis_service.run_diagnosis(
                 user_id=user.id,
@@ -319,11 +275,10 @@ async def get_diagnosis(
     """
     Show diagnosis results page.
 
-    If sufficient data exists, shows latest diagnosis results.
-    If a run is in progress, shows progress UI with SSE connection.
-    Otherwise, shows insufficient data page with progress indicators.
+    With holistic analysis, each run clears previous data, so we simply
+    show the single latest run's results (no deduplication needed).
     """
-    # Get latest diagnosis run for user
+    # Get latest diagnosis run for user with all related data
     latest_run = (
         db.query(DiagnosisRun)
         .filter(DiagnosisRun.user_id == user.id)
@@ -335,13 +290,16 @@ async def get_diagnosis(
             .joinedload(DiagnosisResult.citations),
             joinedload(DiagnosisRun.results)
             .joinedload(DiagnosisResult.feedback),
+            joinedload(DiagnosisRun.discounted_ingredients)
+            .joinedload(DiscountedIngredient.ingredient),
+            joinedload(DiagnosisRun.discounted_ingredients)
+            .joinedload(DiscountedIngredient.confounded_by),
         )
         .first()
     )
 
     # If no diagnosis run or insufficient data, show insufficient data page
     if not latest_run or not latest_run.sufficient_data:
-        # Get current counts for progress indicators
         diagnosis_service = DiagnosisService(db)
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=90)
@@ -362,76 +320,15 @@ async def get_diagnosis(
             },
         )
 
-    # Check if new data is available for analysis
-    has_new_data = False
-    diagnosis_service = DiagnosisService(db)
-    end_date = datetime.utcnow()
-    start_date = end_date - timedelta(days=90)
-
-    # Only check for new data if the run is completed (not still processing)
-    if latest_run.status == "completed" and latest_run.sufficient_data:
-        # Get existing analyzed ingredient IDs from all completed runs
-        existing_ingredient_ids = set(
-            row[0] for row in db.query(DiagnosisResult.ingredient_id)
-            .join(DiagnosisRun)
-            .filter(
-                DiagnosisRun.user_id == user.id,
-                DiagnosisRun.status == "completed"
-            )
-            .distinct()
-            .all()
-        )
-
-        # Run fast SQL checks (no AI calls)
-        correlations = diagnosis_service.get_temporal_correlations(user.id, start_date, end_date)
-        if correlations:
-            aggregated = diagnosis_service.aggregate_correlations_by_ingredient(correlations)
-            # Check if any UNANALYZED ingredient meets threshold
-            for key, data in aggregated.items():
-                ingredient_id = data["ingredient_id"]
-                if ingredient_id in existing_ingredient_ids:
-                    continue  # Skip already analyzed
-
-                confidence_score, confidence_level = diagnosis_service.calculate_confidence(
-                    times_eaten=data["times_eaten"],
-                    symptom_occurrences=data["total_symptom_occurrences"],
-                    immediate_count=data["immediate_total"],
-                    delayed_count=data["delayed_total"],
-                    cumulative_count=data["cumulative_total"],
-                    avg_severity=sum(s["severity_avg"] for s in data["associated_symptoms"]) / len(data["associated_symptoms"]) if data["associated_symptoms"] else 0,
-                )
-                if confidence_level != "insufficient_data":
-                    has_new_data = True
-                    break
-
-    # Aggregate results from all completed runs - get most recent result per ingredient
-    # Subquery to find the max result ID per ingredient (most recent)
-    max_result_subq = (
-        db.query(
-            DiagnosisResult.ingredient_id,
-            func.max(DiagnosisResult.id).label("max_id")
-        )
-        .join(DiagnosisRun)
-        .filter(
-            DiagnosisRun.user_id == user.id,
-            DiagnosisRun.status == "completed"
-        )
-        .group_by(DiagnosisResult.ingredient_id)
-        .subquery()
+    # Get results and discounted ingredients directly from the run
+    # No deduplication needed since each analysis clears previous data
+    results = sorted(
+        latest_run.results or [],
+        key=lambda r: r.confidence_score,
+        reverse=True
     )
 
-    # Get the actual results matching those max IDs
-    all_results = (
-        db.query(DiagnosisResult)
-        .join(max_result_subq, DiagnosisResult.id == max_result_subq.c.max_id)
-        .options(
-            joinedload(DiagnosisResult.ingredient),
-            joinedload(DiagnosisResult.citations),
-            joinedload(DiagnosisResult.feedback),
-        )
-        .order_by(DiagnosisResult.confidence_score.desc())
-        .all()
-    )
+    discounted = latest_run.discounted_ingredients or []
 
     # Show results page with run_id for SSE streaming
     return templates.TemplateResponse(
@@ -440,12 +337,13 @@ async def get_diagnosis(
             "request": request,
             "user": user,
             "diagnosis_run": latest_run,
-            "results": all_results,
+            "results": results,
+            "discounted": discounted,
             "run_id": latest_run.id,
             "run_status": latest_run.status,
             "total_ingredients": latest_run.total_ingredients,
             "completed_ingredients": latest_run.completed_ingredients,
-            "has_new_data": has_new_data,
+            "has_new_data": False,  # Holistic analysis always starts fresh
         },
     )
 

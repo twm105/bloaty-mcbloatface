@@ -29,6 +29,7 @@ from app.services.prompts import (
     SYMPTOM_ELABORATION_SYSTEM_PROMPT,
     EPISODE_CONTINUATION_SYSTEM_PROMPT,
     DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
+    ROOT_CAUSE_CLASSIFICATION_PROMPT,
     build_cached_analysis_context
 )
 
@@ -1021,29 +1022,199 @@ Provide your analysis in the specified JSON format."""
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
 
-    def _format_single_ingredient_data(self, ingredient_data: dict) -> str:
-        """Format single ingredient data for AI analysis."""
-        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')} ({ingredient_data.get('state', 'unknown')})
+    @retry_on_connection_error(max_attempts=3, base_delay=2.0)
+    async def classify_root_cause(
+        self,
+        ingredient_data: dict,
+        cooccurrence_data: list,
+        medical_grounding: str,
+        web_search_enabled: bool = True
+    ) -> dict:
+        """
+        Classify whether an ingredient is a root cause or confounder.
 
-STATISTICS:
-- Times eaten: {ingredient_data.get('times_eaten', 0)}
-- Symptom occurrences: {ingredient_data.get('total_symptom_occurrences', 0)}
-- Correlation rate: {ingredient_data.get('total_symptom_occurrences', 0) / max(ingredient_data.get('times_eaten', 1), 1) * 100:.1f}%
+        This method evaluates correlation data alongside co-occurrence statistics
+        and medical knowledge to determine if an ingredient is truly causing
+        symptoms or merely appearing alongside actual triggers.
 
-TEMPORAL WINDOWS:
-- Immediate (0-2hr): {ingredient_data.get('immediate_total', 0)} occurrences
-- Delayed (4-24hr): {ingredient_data.get('delayed_total', 0)} occurrences
-- Cumulative (24hr+): {ingredient_data.get('cumulative_total', 0)} occurrences
+        Args:
+            ingredient_data: Dict with ingredient stats and correlation data
+            cooccurrence_data: List of co-occurrence records for this ingredient
+            medical_grounding: Medical context from web search (or empty string)
+            web_search_enabled: Whether to enable web search for additional context
 
-ASSOCIATED SYMPTOMS:"""
+        Returns:
+            Dict with structure:
+            {
+                "root_cause": bool,
+                "discard_justification": str or None,
+                "confounded_by": str or None,
+                "medical_reasoning": str,
+                "usage_stats": {"input_tokens": int, "output_tokens": int}
+            }
+
+        Raises:
+            ServiceUnavailableError: AI service unavailable
+            RateLimitError: Too many requests
+            ValueError: Invalid response format
+        """
+        try:
+            # Format the input data for Claude
+            formatted_input = self._format_root_cause_input(
+                ingredient_data, cooccurrence_data, medical_grounding
+            )
+
+            # Prepare messages with prefill
+            messages = [
+                {"role": "user", "content": formatted_input},
+                {"role": "assistant", "content": "{"}
+            ]
+
+            # Build request parameters
+            request_params = {
+                "model": self.sonnet_model,
+                "max_tokens": 1024,
+                "messages": messages,
+                "stop_sequences": ["\n```", "```"],
+                "system": [
+                    {
+                        "type": "text",
+                        "text": ROOT_CAUSE_CLASSIFICATION_PROMPT,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ]
+            }
+
+            # Add web search if enabled and no medical grounding provided
+            if web_search_enabled and not medical_grounding:
+                request_params["tools"] = [
+                    {
+                        "type": "web_search_20250305",
+                        "name": "web_search"
+                    }
+                ]
+
+            response = self.client.messages.create(**request_params)
+
+            # Extract JSON from response
+            response_text = ""
+            for content_block in response.content:
+                if hasattr(content_block, 'text'):
+                    response_text += content_block.text
+
+            if not response_text:
+                raise ValueError("No text content in Claude response")
+
+            # Reconstruct JSON with prefilled opening brace
+            json_text = "{" + response_text.strip()
+
+            # Handle trailing commas (common JSON error)
+            import re
+            json_text = re.sub(r',\s*}', '}', json_text)
+            json_text = re.sub(r',\s*]', ']', json_text)
+
+            # Parse JSON
+            try:
+                result = json.loads(json_text)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response: {e.msg}") from e
+
+            # Add usage stats
+            usage = response.usage
+            result["usage_stats"] = {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": getattr(usage, 'output_tokens', 0),
+                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
+            }
+
+            return result
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+
+    def _format_root_cause_input(
+        self,
+        ingredient_data: dict,
+        cooccurrence_data: list,
+        medical_grounding: str
+    ) -> str:
+        """Format input data for root cause classification."""
+        times_eaten = ingredient_data.get('times_eaten', 0)
+        symptom_count = ingredient_data.get('total_symptom_occurrences', 0)
+
+        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')}
+
+=== SYMPTOM PATTERN ===
+- Eaten {times_eaten} times, symptoms followed {symptom_count} times
+- Confidence level: {ingredient_data.get('confidence_level', 'unknown')}
+
+Symptoms reported:"""
 
         for symptom in ingredient_data.get('associated_symptoms', []):
+            formatted += f"\n- {symptom.get('name', 'Unknown')}: {symptom.get('frequency', 0)} times"
+
+        formatted += "\n\n=== FOODS IT APPEARS WITH ==="
+        if cooccurrence_data:
+            for cooc in cooccurrence_data:
+                prob = cooc.get('conditional_probability', 0) * 100
+                meals = cooc.get('cooccurrence_meals', 0)
+                other = cooc.get('with_ingredient_name', 'Unknown')
+
+                # Convert probability to plain English
+                if prob >= 90:
+                    freq_desc = "almost always"
+                elif prob >= 70:
+                    freq_desc = "usually"
+                elif prob >= 50:
+                    freq_desc = "often"
+                else:
+                    freq_desc = "sometimes"
+
+                formatted += f"\n- {freq_desc} eaten with {other} ({meals} meals together)"
+        else:
+            formatted += "\nThis food doesn't frequently appear with other specific foods."
+
+        formatted += "\n\n=== MEDICAL CONTEXT ==="
+        if medical_grounding:
+            formatted += f"\n{medical_grounding}"
+        else:
+            formatted += "\nPlease search for medical information about whether this food commonly causes digestive issues."
+
+        formatted += "\n\nQUESTION: Is this food likely a real trigger, or is it just appearing alongside actual trigger foods?"
+
+        return formatted
+
+    def _format_single_ingredient_data(self, ingredient_data: dict) -> str:
+        """Format single ingredient data for AI analysis."""
+        times_eaten = ingredient_data.get('times_eaten', 0)
+        symptom_count = ingredient_data.get('total_symptom_occurrences', 0)
+        confidence_level = ingredient_data.get('confidence_level', 'unknown')
+
+        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')} ({ingredient_data.get('state', 'unknown')})
+
+PATTERN SUMMARY:
+- This food was eaten {times_eaten} times in the analysis period
+- Symptoms occurred after eating it {symptom_count} times
+- Confidence level: {confidence_level}
+
+TIMING OF SYMPTOMS:
+- Within 2 hours: {ingredient_data.get('immediate_total', 0)} times
+- 4-24 hours later: {ingredient_data.get('delayed_total', 0)} times
+- More than 24 hours later: {ingredient_data.get('cumulative_total', 0)} times
+
+SYMPTOMS EXPERIENCED:"""
+
+        for symptom in ingredient_data.get('associated_symptoms', []):
+            severity = symptom.get('severity_avg', 0)
+            severity_desc = "mild" if severity < 4 else "moderate" if severity < 7 else "severe"
             formatted += f"""
-- {symptom.get('name', 'Unknown')}: severity {symptom.get('severity_avg', 0):.1f}/10, frequency {symptom.get('frequency', 0)}, avg lag {symptom.get('lag_hours', 0):.1f}hr"""
-
-        formatted += f"""
-
-CONFIDENCE: {ingredient_data.get('confidence_level', 'unknown')} ({ingredient_data.get('confidence_score', 0) * 100:.0f}%)"""
+- {symptom.get('name', 'Unknown')}: {symptom.get('frequency', 0)} times, typically {severity_desc}, usually {symptom.get('lag_hours', 0):.0f} hours after eating"""
 
         return formatted
 

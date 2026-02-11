@@ -117,7 +117,7 @@
                 </div>
                 <div class="diagnosis-card-actions">
                     <span class="confidence-badge confidence-{{ result.confidence_level }}">
-                        {{ (result.confidence_score * 100)|round|int }}%
+                        {{ result.confidence_level|capitalize }}
                     </span>
                     <button
                         class="icon-button danger"
@@ -251,7 +251,7 @@
                     </div>
                     <div class="diagnosis-card-actions">
                         <span class="confidence-badge" :class="'confidence-' + result.confidence_level">
-                            <span x-text="(result.confidence_score * 100).toFixed(0) + '%'"></span>
+                            <span x-text="result.confidence_level.charAt(0).toUpperCase() + result.confidence_level.slice(1)"></span>
                         </span>
                         <button
                             class="icon-button danger"
@@ -365,14 +365,158 @@
         </template>
     </div>
 
-    <!-- Empty state -->
-    <div x-show="!isProcessing && !errorMessage && results.length === 0 && sseResults.length === 0" x-cloak class="card">
+    <!-- Empty state (only shown when no server results AND no SSE results) -->
+    {% if not results %}
+    <div x-show="!isProcessing && !errorMessage && sseResults.length === 0" x-cloak class="card">
         <div class="card-content">
             <p class="text-secondary">No potential trigger ingredients identified in this analysis period. Try expanding the date range or continue logging meals and symptoms.</p>
         </div>
     </div>
+    {% endif %}
 
-</div>
+<!-- Discounted Ingredients Section -->
+<!-- Discarded ingredients section - shown when server-rendered OR SSE items exist -->
+<details class="discarded-section" style="margin-top: var(--space-6);"
+         x-show="{{ discounted|length }} > 0 || sseDiscounted.length > 0" x-cloak>
+    <summary class="discarded-summary">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-sm" style="overflow: visible;">
+            <use href="/static/icons/lucide-sprite.svg#eye-off"></use>
+        </svg>
+        <span>Discarded Ingredients (<span x-text="{{ discounted|length }} + sseDiscounted.length"></span>)</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" class="chevron-icon icon icon-sm" style="overflow: visible; margin-left: auto;">
+            <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
+        </svg>
+    </summary>
+
+    <div class="discarded-content">
+        <p class="discarded-explainer">
+            These ingredients showed statistical correlation but were likely confounded by other trigger ingredients.
+            They have been excluded from the main results to avoid false positives.
+        </p>
+
+        <div class="discarded-list">
+            <!-- Server-rendered discounted items -->
+            {% for di in discounted %}
+            <details class="discarded-card">
+                <summary class="discarded-card-summary">
+                    <span class="ingredient-name">{{ di.ingredient.normalized_name.replace('_', ' ') }}</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" class="arrow-icon icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5; overflow: visible;">
+                        <use href="/static/icons/lucide-sprite.svg#arrow-right"></use>
+                    </svg>
+                    <span class="confounded-by">{{ di.confounded_by.normalized_name.replace('_', ' ') if di.confounded_by else 'medically unlikely' }}</span>
+                    <span class="badge confidence-discarded">Discarded</span>
+                </summary>
+
+                <div class="discarded-card-body">
+                    <!-- Primary justification -->
+                    <div class="diagnosis-section">
+                        <h4 class="section-title">Why Discarded</h4>
+                        <p class="section-content">{{ di.discard_justification }}</p>
+                    </div>
+
+                    <!-- Original analysis data (nested collapsible) -->
+                    <details class="original-analysis">
+                        <summary class="original-analysis-summary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" class="icon icon-xs" style="overflow: visible;">
+                                <use href="/static/icons/lucide-sprite.svg#file-text"></use>
+                            </svg>
+                            View original analysis data
+                        </summary>
+
+                        <div class="original-analysis-content">
+                            <!-- Correlation stats -->
+                            <div class="analysis-section">
+                                <h5 class="subsection-title">Correlation Analysis</h5>
+                                <ul class="analysis-list">
+                                    <li>Confidence: {{ di.original_confidence_level|capitalize if di.original_confidence_level else 'N/A' }}</li>
+                                    <li>Eaten {{ di.times_eaten or 0 }} times, symptoms followed {{ di.times_followed_by_symptoms or 0 }} times</li>
+                                    <li>Timing: {{ di.immediate_correlation or 0 }} immediate, {{ di.delayed_correlation or 0 }} delayed, {{ di.cumulative_correlation or 0 }} cumulative</li>
+                                </ul>
+                                {% if di.associated_symptoms %}
+                                <p class="symptoms-text">Symptoms: {% for s in di.associated_symptoms %}{{ s.name }} ({{ s.frequency }}x){% if not loop.last %}, {% endif %}{% endfor %}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Co-occurrence stats -->
+                            {% if di.confounded_by %}
+                            <div class="analysis-section">
+                                <h5 class="subsection-title">Co-occurrence with {{ di.confounded_by.normalized_name.replace('_', ' ') }}</h5>
+                                <ul class="analysis-list">
+                                    <li>P({{ di.ingredient.normalized_name.replace('_', ' ') }} | {{ di.confounded_by.normalized_name.replace('_', ' ') }}) = {{ (di.conditional_probability * 100)|round|int if di.conditional_probability else 0 }}%</li>
+                                    <li>Lift: {{ di.lift|round(1) if di.lift else 0 }}x</li>
+                                    <li>Appeared together in {{ di.cooccurrence_meals_count or 0 }} meals</li>
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            <!-- Medical grounding -->
+                            {% if di.medical_grounding_summary %}
+                            <div class="analysis-section">
+                                <h5 class="subsection-title">Medical Context</h5>
+                                <p class="section-content">{{ di.medical_grounding_summary }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </details>
+                </div>
+            </details>
+            {% endfor %}
+
+            <!-- Dynamically added discounted items from SSE -->
+            <template x-for="di in sseDiscounted" :key="di.id">
+                <details class="discarded-card">
+                    <summary class="discarded-card-summary">
+                        <span class="ingredient-name" x-text="formatIngredientName(di.ingredient_name)"></span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" class="arrow-icon icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5; overflow: visible;">
+                            <use href="/static/icons/lucide-sprite.svg#arrow-right"></use>
+                        </svg>
+                        <span class="confounded-by" x-text="di.confounded_by_name || 'medically unlikely'"></span>
+                        <span class="badge confidence-discarded">Discarded</span>
+                    </summary>
+
+                    <div class="discarded-card-body">
+                        <!-- Primary justification -->
+                        <div class="diagnosis-section">
+                            <h4 class="section-title">Why Discarded</h4>
+                            <p class="section-content" x-text="di.discard_justification"></p>
+                        </div>
+
+                        <!-- Original analysis data (nested collapsible) -->
+                        <details class="original-analysis">
+                            <summary class="original-analysis-summary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" class="icon icon-xs" style="overflow: visible;">
+                                    <use href="/static/icons/lucide-sprite.svg#file-text"></use>
+                                </svg>
+                                View original analysis data
+                            </summary>
+
+                            <div class="original-analysis-content">
+                                <!-- Correlation stats -->
+                                <div class="analysis-section">
+                                    <h5 class="subsection-title">Correlation Analysis</h5>
+                                    <ul class="analysis-list">
+                                        <li>Confidence: <span x-text="di.original_confidence_level ? di.original_confidence_level.charAt(0).toUpperCase() + di.original_confidence_level.slice(1) : 'N/A'"></span></li>
+                                        <li>Eaten <span x-text="di.times_eaten || 0"></span> times, symptoms followed <span x-text="di.times_followed_by_symptoms || 0"></span> times</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Medical grounding -->
+                                <template x-if="di.medical_grounding_summary">
+                                    <div class="analysis-section">
+                                        <h5 class="subsection-title">Medical Context</h5>
+                                        <p class="section-content" x-text="di.medical_grounding_summary"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </details>
+                    </div>
+                </details>
+            </template>
+        </div>
+    </div>
+</details>
+
+</div> <!-- Close x-data="diagnosisResults()" scope -->
 
 <script>
 function diagnosisResults() {
@@ -382,6 +526,7 @@ function diagnosisResults() {
         total: 0,
         currentIngredient: '',
         sseResults: [],
+        sseDiscounted: [],
         errorMessage: '',
         eventSource: null,
 
@@ -411,6 +556,11 @@ function diagnosisResults() {
             this.eventSource.addEventListener('result', (e) => {
                 const result = JSON.parse(e.data);
                 this.sseResults.push(result);
+            });
+
+            this.eventSource.addEventListener('discounted', (e) => {
+                const discounted = JSON.parse(e.data);
+                this.sseDiscounted.push(discounted);
             });
 
             this.eventSource.addEventListener('complete', (e) => {
@@ -853,6 +1003,158 @@ button .spinner-small {
 .disclaimer-error {
     background-color: rgba(230, 57, 70, 0.1);
     border-left: 3px solid #E63946;
+}
+
+/* Discarded Ingredients Section */
+.discarded-section {
+    background: var(--color-bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.discarded-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-medium);
+    transition: background-color var(--transition-base);
+}
+
+.discarded-summary:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.discarded-section[open] .discarded-summary .chevron-icon {
+    transform: rotate(180deg);
+}
+
+.discarded-content {
+    padding: 0 var(--space-4) var(--space-4);
+}
+
+.discarded-explainer {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+    line-height: 1.5;
+}
+
+.discarded-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.discarded-card {
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px solid rgba(107, 114, 128, 0.2);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.discarded-card-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.discarded-card-summary:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.discarded-card-summary .ingredient-name {
+    font-weight: var(--font-medium);
+    color: var(--color-text-secondary);
+}
+
+.discarded-card-summary .confounded-by {
+    color: var(--color-text-tertiary);
+}
+
+.discarded-card-summary .arrow-icon {
+    color: var(--color-text-tertiary);
+}
+
+.confidence-discarded {
+    background-color: #6c757d;
+    color: white;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    margin-left: auto;
+}
+
+.discarded-card-body {
+    padding: var(--space-3);
+    border-top: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.original-analysis {
+    margin-top: var(--space-3);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-sm);
+}
+
+.original-analysis-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.original-analysis-summary:hover {
+    color: var(--color-text-secondary);
+}
+
+.original-analysis-content {
+    padding: var(--space-3);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analysis-section {
+    margin-bottom: var(--space-3);
+}
+
+.analysis-section:last-child {
+    margin-bottom: 0;
+}
+
+.subsection-title {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.analysis-list {
+    list-style: disc;
+    padding-left: var(--space-4);
+    margin: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.analysis-list li {
+    margin-bottom: var(--space-1);
+}
+
+.symptoms-text {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
 }
 </style>
 

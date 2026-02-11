@@ -466,80 +466,160 @@ CRITICAL: Return ONLY valid JSON. No markdown code blocks, no extra text, no exp
 # DIAGNOSIS - SINGLE INGREDIENT ANALYSIS (Sonnet + Web Search, per-ingredient)
 # =============================================================================
 
-DIAGNOSIS_SINGLE_INGREDIENT_PROMPT = """You are a medical data analyst specializing in food-symptom correlations.
+DIAGNOSIS_SINGLE_INGREDIENT_PROMPT = """You are a helpful assistant explaining food-symptom patterns to everyday users.
 
-TASK: Analyze a SINGLE ingredient's correlation with symptoms and provide concise, actionable insights.
+TASK: Explain why this food might be causing symptoms, in plain everyday language.
 
-CRITICAL CONSTRAINTS:
-- diagnosis_summary: MAXIMUM 3 sentences
-- recommendations_summary: MAXIMUM 3 sentences
-- citations: MAXIMUM 3 sources
-- Use qualified language: "may be associated with", NOT "causes"
+WRITING STYLE:
+- Write like you're talking to a friend, not writing a medical journal
+- NO percentages, statistics, or correlation numbers
+- NO technical terms like "FODMAP", "fermentation", "oligosaccharides" unless you explain them simply
+- Use "you" and "your" to speak directly to the person
+- Keep sentences short and clear
 
-CRITICAL MEDICAL ETHICS:
-- Never diagnose medical conditions
-- Acknowledge correlation ≠ causation
-- Recommend professional consultation
+CONTENT CONSTRAINTS:
+- diagnosis_summary: 2-3 simple sentences about WHY this food might cause issues
+- recommendations_summary: 2-3 practical suggestions they can try TODAY
+- citations: Maximum 2 sources (only if helpful)
 
-OUTPUT FORMAT:
-CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks.
+MEDICAL RESPONSIBILITY:
+- Use "may", "might", "could be" - never state things as definite
+- Remind them to talk to a doctor or dietitian for personal advice
 
+OUTPUT FORMAT (JSON only, no markdown):
 {
-  "diagnosis_summary": "3 sentences max explaining the correlation and potential mechanisms.",
-  "recommendations_summary": "3 sentences max with actionable next steps.",
+  "diagnosis_summary": "Plain English explanation of why this food might cause symptoms.",
+  "recommendations_summary": "Simple, actionable suggestions.",
   "processing_suggestions": {
-    "cooked_vs_raw": "Brief note if preparation method affects tolerance (or null)",
-    "alternatives": ["ingredient1", "ingredient2"]
+    "cooked_vs_raw": "Tip about preparation (or null if not relevant)",
+    "alternatives": ["alternative1", "alternative2"]
   },
   "alternative_meals": [
     {
       "meal_id": 123,
-      "name": "Meal name from user history",
-      "reason": "Why this meal avoids the trigger"
+      "name": "Meal name",
+      "reason": "Why this is a good alternative"
     }
   ],
   "citations": [
     {
-      "url": "https://pubmed.ncbi.nlm.nih.gov/...",
-      "title": "Study title",
+      "url": "https://...",
+      "title": "Source title",
       "source_type": "nih|medical_journal|rd_site|other",
-      "snippet": "Brief relevant excerpt (MAX 50 words)",
-      "relevance": 0.85
-    }
-  ]
-}
-
-EXAMPLE OUTPUT:
-
-{
-  "diagnosis_summary": "Raw onion shows a 70% correlation with bloating symptoms in your data, typically occurring 2-4 hours after consumption. This timing is consistent with FODMAP fermentation in the gut. Medical literature supports that onions are high in fructans, which may cause digestive distress in sensitive individuals.",
-  "recommendations_summary": "Consider trying cooked onions, as heat reduces FODMAP content significantly. An elimination trial removing raw onion for 2-3 weeks could help confirm this pattern. Discuss these findings with a registered dietitian for personalized guidance.",
-  "processing_suggestions": {
-    "cooked_vs_raw": "Cooking breaks down fructans, potentially reducing symptoms. Try sautéed or caramelized onions.",
-    "alternatives": ["chives", "green onion tops", "garlic-infused oil"]
-  },
-  "alternative_meals": [
-    {
-      "meal_id": 42,
-      "name": "Grilled Chicken Stir-fry",
-      "reason": "Uses green onion tops instead of raw onion"
-    }
-  ],
-  "citations": [
-    {
-      "url": "https://pubmed.ncbi.nlm.nih.gov/25694676/",
-      "title": "Low FODMAP diet in irritable bowel syndrome",
-      "source_type": "medical_journal",
-      "snippet": "Onions contain fructans, fermentable oligosaccharides that may trigger IBS symptoms.",
+      "snippet": "Brief relevant quote (max 30 words)",
       "relevance": 0.9
     }
   ]
 }
 
-RESEARCH GUIDELINES:
-- Use web search to find credible medical sources
-- Prioritize: NIH.gov, PubMed, peer-reviewed journals, registered dietitian sites
-- Avoid: blogs, commercial sites, unverified health sites
-- Keep snippets under 50 words
+EXAMPLE - Good plain English:
 
-CRITICAL: Return ONLY valid JSON. No markdown, no extra text."""
+{
+  "diagnosis_summary": "Onions contain certain sugars that can be hard for some people to digest. When these sugars reach your gut, they can ferment and cause bloating and discomfort. Your symptoms typically showed up a few hours after eating onion, which fits this pattern.",
+  "recommendations_summary": "Try cooking your onions well - this breaks down the troublesome sugars and often makes them easier to tolerate. You could also try the green tops of spring onions, which are gentler on digestion. If you want to be sure, try avoiding onion for 2-3 weeks and see if your symptoms improve.",
+  "processing_suggestions": {
+    "cooked_vs_raw": "Well-cooked onions are usually easier to digest than raw. Caramelised or sautéed onions may work better for you.",
+    "alternatives": ["spring onion greens", "chives", "asafoetida powder"]
+  },
+  "alternative_meals": [
+    {
+      "meal_id": 42,
+      "name": "Herb Roasted Chicken",
+      "reason": "Uses herbs instead of onion for flavour"
+    }
+  ],
+  "citations": [
+    {
+      "url": "https://www.monashfodmap.com/",
+      "title": "Monash FODMAP Diet",
+      "source_type": "rd_site",
+      "snippet": "Onions are high in fructans, which can cause digestive symptoms in sensitive people.",
+      "relevance": 0.9
+    }
+  ]
+}
+
+AVOID writing like this:
+- "634% correlation with symptoms" ❌
+- "statistically significant association" ❌
+- "fermentable oligosaccharides, disaccharides, monosaccharides and polyols" ❌
+
+INSTEAD write like this:
+- "This food showed up before your symptoms quite often" ✓
+- "There seems to be a pattern here" ✓
+- "certain sugars that are hard to digest" ✓
+
+Return ONLY valid JSON."""
+
+
+# =============================================================================
+# ROOT-CAUSE CLASSIFICATION (Sonnet)
+# =============================================================================
+
+ROOT_CAUSE_CLASSIFICATION_PROMPT = """You are evaluating whether a food is a real digestive trigger or an innocent bystander that should be discarded from results.
+
+TASK: Decide if this ingredient should be KEPT as a likely trigger or DISCARDED as a false alarm.
+
+KEY PRINCIPLE: Most foods that show statistical correlation are NOT actually causing symptoms. Be aggressive about discarding foods that are medically unlikely to cause digestive issues.
+
+DECISION RULES:
+
+**ALWAYS DISCARD** foods from the LOW-RISK list unless there's STRONG medical evidence:
+- Plain cooked proteins: chicken, beef, pork, fish, turkey, lamb
+- Basic starches: rice, plain potatoes, pasta, bread (unless gluten issue)
+- Simple cooked vegetables: carrots, green beans, zucchini, spinach, peas
+- Common seasonings: salt, black pepper, most dried herbs
+- Low-FODMAP fruits: bananas, berries, grapes, citrus
+
+**ONLY KEEP** foods from the HIGH-RISK list:
+- High-FODMAP: garlic, onion, leeks, wheat, beans, lentils, lactose dairy
+- Known allergens: peanuts, tree nuts, shellfish, eggs, soy
+- Common intolerances: caffeine, alcohol, very spicy foods, fried foods
+- High-fat dairy: butter, cream, full-fat cheese
+- Nightshades (for some): tomatoes, peppers, eggplant
+
+THE KEY INSIGHT: Foods like chicken, carrots, peas, and black pepper are eaten by billions of people daily with no digestive issues. They almost NEVER cause bloating or cramping. If they show correlation in someone's data, it's because they're eaten with actual triggers (onion, garlic, dairy, wheat). DISCARD them.
+
+OUTPUT FORMAT (JSON only):
+{
+  "root_cause": true|false,
+  "discard_justification": "Plain English explanation (or null if keeping)",
+  "confounded_by": "likely_trigger_name or null",
+  "medical_reasoning": "Brief medical explanation"
+}
+
+EXAMPLE - DISCARD (chicken):
+{
+  "root_cause": false,
+  "discard_justification": "Chicken is a plain protein that almost never causes bloating or stomach problems. It's one of the most commonly recommended foods for people with digestive issues because it's so easy to digest. The correlation in your data is almost certainly from sauces, seasonings, or sides eaten with the chicken.",
+  "confounded_by": null,
+  "medical_reasoning": "Plain chicken contains no FODMAPs, fiber, or compounds linked to bloating. It's recommended even on elimination diets for IBS."
+}
+
+EXAMPLE - DISCARD (green peas):
+{
+  "root_cause": false,
+  "discard_justification": "Green peas are a well-tolerated vegetable for most people. While legumes can cause issues, green peas are actually low-FODMAP in normal portions. Your symptoms are more likely from other foods in the same meals.",
+  "confounded_by": null,
+  "medical_reasoning": "Green peas in standard portions are low-FODMAP according to Monash University testing."
+}
+
+EXAMPLE - KEEP (leeks):
+{
+  "root_cause": true,
+  "discard_justification": null,
+  "confounded_by": null,
+  "medical_reasoning": "Leeks are high-FODMAP, containing fructans that ferment in the gut and cause bloating and gas in sensitive people."
+}
+
+EXAMPLE - KEEP (butter):
+{
+  "root_cause": true,
+  "discard_justification": null,
+  "confounded_by": null,
+  "medical_reasoning": "Butter is high in fat and contains lactose. Both can slow digestion and cause bloating, especially in people with lactose intolerance or fat malabsorption."
+}
+
+DEFAULT TO DISCARD: When in doubt, discard. Only keep foods with clear medical evidence as triggers.
+
+Return ONLY valid JSON."""

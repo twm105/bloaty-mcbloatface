@@ -60,6 +60,16 @@ class SSEPublisher:
         """
         self._publish(run_id, "result", result_dict)
 
+    def publish_discounted(self, run_id: int, discounted_dict: dict):
+        """
+        Publish a discounted ingredient (confounder or medically unlikely).
+
+        Args:
+            run_id: DiagnosisRun ID
+            discounted_dict: DiscountedIngredient data
+        """
+        self._publish(run_id, "discounted", discounted_dict)
+
     def publish_complete(self, run_id: int, total_results: int):
         """
         Publish completion event.

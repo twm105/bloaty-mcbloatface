@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     # Diagnosis thresholds
     diagnosis_min_meals: int = 3
     diagnosis_min_symptom_occurrences: int = 3
+    diagnosis_max_ingredient_occurrences: int = 15  # Max meal logs per ingredient for holistic analysis
 
     # Auth settings
     session_secret_key: str = ""  # Required in production
