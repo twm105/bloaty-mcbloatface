@@ -35,6 +35,27 @@
                     Meal Photo (Optional)
                     <small>Supported: JPEG, PNG, WebP</small>
                 </label>
+
+                <!-- Camera quick-action (Mobile Only) -->
+                <div class="upload-actions-mobile" style="margin-bottom: var(--space-3);">
+                    <label for="image-camera" class="btn-secondary btn-sm camera-capture-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true">
+                            <use href="/static/icons/lucide-sprite.svg#camera"></use>
+                        </svg>
+                        Take Photo
+                    </label>
+                    <input
+                        type="file"
+                        id="image-camera"
+                        name="image"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        capture="environment"
+                        @change="handleFileChange"
+                        style="display: none;"
+                    >
+                </div>
+
+                <!-- Standard file input -->
                 <input
                     type="file"
                     id="image"

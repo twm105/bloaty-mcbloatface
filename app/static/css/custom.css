@@ -133,3 +133,37 @@ button,
 a[role="button"] {
     border-radius: 50px;
 }
+
+/* ============================================
+   MOBILE CAMERA CAPTURE
+   ============================================ */
+
+/* Camera button hidden by default (desktop) */
+.camera-capture-btn {
+    display: none;
+}
+
+/* Show only on touch devices without hover (phones) */
+@media (hover: none) and (pointer: coarse) {
+    .camera-capture-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+}
+
+/* Container for upload buttons */
+.upload-actions-mobile {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Touch-friendly button sizing on mobile */
+@media (hover: none) and (pointer: coarse) {
+    .upload-actions-mobile .btn-primary,
+    .upload-actions-mobile .btn-secondary {
+        min-height: 44px;
+    }
+}

@@ -79,22 +79,41 @@
                         Drag & drop meal photo here
                     </p>
 
-                    <!-- Upload Button -->
-                    <label for="meal-image-home" class="btn-primary">
-                        <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true">
-                            <use href="/static/icons/lucide-sprite.svg#upload"></use>
-                        </svg>
-                        Choose File
-                    </label>
-                    <input
-                        type="file"
-                        id="meal-image-home"
-                        name="image"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
-                        @change="handleFileChange"
-                        style="display: none;"
-                        required
-                    >
+                    <!-- Upload Buttons Container -->
+                    <div class="upload-actions-mobile">
+                        <!-- Camera Button (Mobile Only) -->
+                        <label for="meal-image-camera-home" class="btn-primary camera-capture-btn">
+                            <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true">
+                                <use href="/static/icons/lucide-sprite.svg#camera"></use>
+                            </svg>
+                            Take Photo
+                        </label>
+                        <input
+                            type="file"
+                            id="meal-image-camera-home"
+                            name="image"
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            capture="environment"
+                            @change="handleFileChange"
+                            style="display: none;"
+                        >
+
+                        <!-- File Picker Button (Always visible) -->
+                        <label for="meal-image-home" class="btn-primary">
+                            <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true">
+                                <use href="/static/icons/lucide-sprite.svg#upload"></use>
+                            </svg>
+                            Choose File
+                        </label>
+                        <input
+                            type="file"
+                            id="meal-image-home"
+                            name="image"
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            @change="handleFileChange"
+                            style="display: none;"
+                        >
+                    </div>
 
                     <!-- Loading indicator -->
                     <div x-show="isUploading" x-cloak style="margin-top: var(--space-4);">
