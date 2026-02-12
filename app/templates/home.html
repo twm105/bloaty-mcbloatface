@@ -16,6 +16,7 @@
         <!-- Log Meal - Upload Area -->
         <div>
             <form
+                id="meal-upload-form"
                 action="/meals/create"
                 method="post"
                 enctype="multipart/form-data"
@@ -33,7 +34,9 @@
                             // Auto-submit form after file selection
                             this.isUploading = true;
                             // Small delay for mobile browsers to fully attach file
-                            setTimeout(() => this.$el.submit(), 100);
+                            setTimeout(() => {
+                                document.getElementById('meal-upload-form').submit();
+                            }, 100);
                         }
                     }
                 }"
