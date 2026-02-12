@@ -32,7 +32,7 @@
                             reader.readAsDataURL(file);
                             // Auto-submit form after file selection
                             this.isUploading = true;
-                            event.target.form.submit();
+                            this.$el.submit();
                         }
                     }
                 }"
