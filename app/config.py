@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     sonnet_output_cost_per_1k: float = 1.5  # $0.015 per 1K output tokens
 
     # Diagnosis thresholds
-    diagnosis_min_meals: int = 3
-    diagnosis_min_symptom_occurrences: int = 3
+    diagnosis_min_meals: int = 2
+    diagnosis_min_symptom_occurrences: int = 2
     diagnosis_max_ingredient_occurrences: int = 15  # Max meal logs per ingredient for holistic analysis
 
     # Auth settings
