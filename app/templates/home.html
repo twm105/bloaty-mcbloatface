@@ -32,7 +32,8 @@
                             reader.readAsDataURL(file);
                             // Auto-submit form after file selection
                             this.isUploading = true;
-                            this.$el.submit();
+                            // Small delay for mobile browsers to fully attach file
+                            setTimeout(() => this.$el.submit(), 100);
                         }
                     }
                 }"
