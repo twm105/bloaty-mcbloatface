@@ -128,11 +128,14 @@ class DiagnosisService:
         )
 
         # Count symptom entries with tags in date range
+        # Filter out NULL tags and non-array/empty arrays
+        # Use CASE to avoid evaluating jsonb_array_length on non-arrays
         symptoms_count = (
             self.db.query(func.count(Symptom.id))
             .filter(
                 Symptom.user_id == user_id,
                 Symptom.tags.isnot(None),
+                text("CASE WHEN jsonb_typeof(tags) = 'array' THEN jsonb_array_length(tags) ELSE 0 END > 0"),
                 Symptom.start_time >= date_range_start,
                 Symptom.start_time <= date_range_end,
             )

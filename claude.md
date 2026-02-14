@@ -54,6 +54,27 @@ Always add `overflow: visible` to prevent clipping if viewBox doesn't align perf
 - **Docker Compose**: Container orchestration
 - **nginx**: Reverse proxy (if needed)
 
+### Package Management
+- **uv**: Fast Python package manager (https://docs.astral.sh/uv/)
+  - Install dependencies: `uv sync`
+  - Install with dev deps: `uv sync --all-extras`
+  - Run commands: `uv run <command>`
+  - Add dependency: `uv add <package>`
+
+### Development Environment (IMPORTANT)
+Python code must run inside the Docker web container to access PostgreSQL and other services:
+```bash
+# Run tests
+docker compose exec web pytest tests/ -v
+
+# Run any Python command
+docker compose exec web python -m <module>
+
+# Interactive shell
+docker compose exec web bash
+```
+Do NOT run pytest or python directly on the host - it will fail to connect to the database.
+
 ## Architecture Decisions
 
 ### Database Schema (Initial)

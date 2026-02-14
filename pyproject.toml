@@ -3,7 +3,7 @@ name = "bloaty-mcbloatface"
 version = "0.1.0"
 description = "Meal tracking and gastro issue diagnosis app"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi[all]>=0.115.0",
     "sqlalchemy>=2.0.0",
@@ -14,11 +14,41 @@ dependencies = [
     "pillow>=10.0.0",
     "beautifulsoup4>=4.12.0",
     "requests>=2.31.0",
-    "pytest>=8.0.0",
     "httpx>=0.27.0",
     "pydantic-settings>=2.0.0",
     "dramatiq[redis]>=1.17.0",
     "redis>=5.0.0",
     "sse-starlette>=2.0.0",
     "passlib[bcrypt]>=1.7.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "security: marks tests as security tests",
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/templates/*", "app/static/*"]
+
+[tool.coverage.report]
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
 ]
