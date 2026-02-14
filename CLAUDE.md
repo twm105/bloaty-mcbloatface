@@ -133,6 +133,11 @@ Project documentation lives in the `docs/` folder:
 - Consult for database isolation, API caching, and fixture patterns
 - Check for CI/CD and coverage requirements
 
+**docs/EVALS_STRATEGY.md** - AI evaluation framework
+- Reference when implementing or running evals
+- Consult for metrics definitions and target thresholds
+- Check for dataset requirements and CLI usage
+
 ## Dependencies to Add
 - fastapi[all]
 - sqlalchemy
