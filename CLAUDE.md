@@ -84,6 +84,20 @@ gh run list --limit 1 --json conclusion,status,name,headBranch -q '.[] | "\(.sta
 - `completed/failure` - notify user, prioritize fixing before new work
 - `in_progress/` - CI running, check back later or proceed with caution
 
+### Database Migrations (IMPORTANT)
+The local PostgreSQL database persists data in a Docker volume. **Do NOT wipe user data.**
+
+```bash
+# SAFE - only runs NEW migrations, preserves data
+docker compose exec web alembic upgrade head
+
+# DANGEROUS - wipes all data, reruns all migrations from scratch
+# Only use if explicitly asked or DB is corrupted beyond repair
+docker compose exec web alembic stamp base && alembic upgrade head
+```
+
+If `alembic upgrade head` fails with "table does not exist", ask the user before running destructive commands - they may have test data they want to preserve.
+
 ## Architecture Decisions
 
 ### Database Schema (Initial)
