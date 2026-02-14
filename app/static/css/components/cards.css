@@ -228,3 +228,77 @@
   color: var(--color-text-secondary);
   margin-bottom: var(--space-4);
 }
+
+/* ============================================
+   DAY SECTIONS (Collapsible meal groups)
+   ============================================ */
+
+.day-section {
+  margin-top: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+  list-style: none;
+}
+
+.day-header::-webkit-details-marker {
+  display: none;
+}
+
+.day-header:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.day-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.day-date {
+  font-weight: 500;
+}
+
+.day-thumbnails {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.day-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: var(--crop-x, 50%) var(--crop-y, 50%);
+  border: 1px solid var(--color-border);
+}
+
+.day-thumb-more {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  padding-left: var(--space-1);
+}
+
+.day-section[open] .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.chevron-icon {
+  transition: transform var(--transition-base);
+  flex-shrink: 0;
+}
+
+.day-section > .card-grid {
+  padding: var(--space-4);
+  padding-top: 0;
+}
