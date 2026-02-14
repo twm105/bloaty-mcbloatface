@@ -95,6 +95,9 @@
                 ></textarea>
             </div>
 
+            <!-- Hidden timezone field (auto-captured from browser) -->
+            <input type="hidden" name="local_timezone" :value="Intl.DateTimeFormat().resolvedOptions().timeZone">
+
             <!-- Submit -->
             <div style="margin-top: 2rem;">
                 <button type="submit">Continue to Add Ingredients →</button>

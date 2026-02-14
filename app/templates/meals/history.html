@@ -17,101 +17,48 @@
         </a>
     </div>
 
-    <!-- Meals Grid -->
-    {% if meals %}
+    {% if recent_meals or collapsed_days %}
+
+    <!-- Recent Meals (expanded as grid) -->
+    {% if recent_meals %}
     <div class="card-grid" x-data="{ expandedMeal: null }">
-        {% for meal in meals %}
-        <div
-            class="meal-card"
-            style="text-decoration: none; color: inherit; cursor: pointer; position: relative; display: flex; flex-direction: column; height: 100%;"
-            @click="if (!$event.target.closest('.ingredient-toggle') && !$event.target.closest('.icon-button')) {
-                window.location.href = '/meals/{{ meal.id }}/edit-ingredients';
-            }"
-        >
-            <!-- Circular Image -->
-            {% if meal.image_path %}
-            <div class="meal-card-image-container">
-                <img
-                    src="/{{ meal.image_path }}"
-                    alt="{{ meal.name or 'Meal' }}"
-                    class="meal-thumbnail-lg"
-                    style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;"
-                    loading="lazy"
-                >
-            </div>
-            {% endif %}
-
-            <!-- Meal Name -->
-            <h3 class="meal-card-name">{{ meal.name or 'Untitled Meal' }}</h3>
-
-            <!-- Metadata -->
-            <div class="meal-card-meta" style="margin-bottom: var(--space-2);">
-                <div>{{ meal.timestamp.strftime('%b %d, %Y') }} • {{ meal.timestamp.strftime('%I:%M %p') }}</div>
-            </div>
-
-            <!-- Spacer to push location and ingredients to bottom -->
-            <div style="flex-grow: 1;"></div>
-
-            <!-- Location (lower-justified, just above ingredients) -->
-            {% if meal.country %}
-            <div style="margin-bottom: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary);">
-                <svg class="icon icon-xs" aria-hidden="true" style="vertical-align: text-bottom;">
-                    <use href="/static/icons/lucide-sprite.svg#map-pin"></use>
-                </svg>
-                {{ meal.country }}
-            </div>
-            {% endif %}
-
-            <!-- Ingredients (collapsible) -->
-            {% if meal.meal_ingredients %}
-            <div style="margin-top: var(--space-2);">
-                <button
-                    type="button"
-                    @click.stop="expandedMeal === {{ meal.id }} ? expandedMeal = null : expandedMeal = {{ meal.id }}"
-                    class="ingredient-toggle btn-ghost btn-sm"
-                    style="width: auto; padding: 10px 20px;"
-                >
-                    <span>{{ meal.meal_ingredients|length }} ingredient{{ 's' if meal.meal_ingredients|length != 1 else '' }}</span>
-                    <svg class="icon icon-sm" aria-hidden="true" :style="expandedMeal === {{ meal.id }} ? 'transform: rotate(180deg)' : ''">
-                        <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
-                    </svg>
-                </button>
-
-                <!-- Ingredients List -->
-                <div x-show="expandedMeal === {{ meal.id }}" x-cloak style="margin-top: var(--space-3);">
-                    <div class="badge-group" style="justify-content: center;">
-                        {% for meal_ingredient in meal.meal_ingredients %}
-                        <span class="ingredient-pill {{ meal_ingredient.state.value }}">
-                            {{ meal_ingredient.ingredient.name }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); font-style: italic; text-align: center; margin: var(--space-4) 0;">
-                No ingredients logged
-            </p>
-            {% endif %}
-
-            <!-- Delete button (absolute positioned) -->
-            <button
-                hx-delete="/meals/{{ meal.id }}"
-                hx-target="closest .meal-card"
-                hx-swap="outerHTML swap:0.3s"
-                hx-confirm="Are you sure you want to delete this meal? This action cannot be undone."
-                class="icon-button danger"
-                style="position: absolute; top: var(--space-2); right: var(--space-2);"
-                onclick="event.preventDefault(); event.stopPropagation();"
-                @click.stop
-            >
-                <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
-                    <use href="/static/icons/lucide-sprite.svg#trash-2"></use>
-                </svg>
-            </button>
-        </div>
+        {% for meal in recent_meals %}
+        {% include "meals/_meal_card.html" %}
         {% endfor %}
     </div>
+    {% endif %}
+
+    <!-- Collapsed Day Sections -->
+    {% for day in collapsed_days %}
+    <details class="day-section">
+        <summary class="day-header">
+            <div class="day-header-left">
+                <span class="day-date">{{ day.date.strftime('%A, %B %d') }}</span>
+                <!-- Mini thumbnails (max 3) -->
+                <div class="day-thumbnails">
+                    {% for meal in day.meals[:3] %}
+                    {% if meal.image_path %}
+                    <img src="/{{ meal.image_path }}" alt="" class="day-thumb"
+                         style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;">
+                    {% endif %}
+                    {% endfor %}
+                    {% if day.meals|length > 3 %}
+                    <span class="day-thumb-more">+{{ day.meals|length - 3 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs chevron-icon" aria-hidden="true" style="overflow: visible;">
+                <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
+            </svg>
+        </summary>
+        <div class="card-grid" x-data="{ expandedMeal: null }">
+            {% for meal in day.meals %}
+            {% include "meals/_meal_card.html" %}
+            {% endfor %}
+        </div>
+    </details>
+    {% endfor %}
+
     {% else %}
     <div class="card" style="text-align: center; padding: var(--space-12);">
         <svg class="icon icon-lg" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary);">

@@ -17,6 +17,7 @@ class Meal(Base):
     status = Column(String(20), nullable=False, default='draft')  # 'draft' or 'published'
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     country = Column(String(100))  # Optional: where meal was consumed (e.g., "USA", "France", "Japan")
+    local_timezone = Column(String(50))  # IANA timezone at logging time (e.g., 'Asia/Tokyo', 'America/New_York')
     image_path = Column(String(512))  # Path to uploaded meal image
     meal_image_crop_x = Column(Float, default=50.0)  # X coordinate for circular crop (percentage from left)
     meal_image_crop_y = Column(Float, default=50.0)  # Y coordinate for circular crop (percentage from top)

@@ -1,7 +1,9 @@
 """Business logic for meal management."""
-from datetime import datetime
-from typing import List, Optional
+from collections import OrderedDict
+from datetime import date, datetime
+from typing import Dict, List, Optional, Tuple
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +11,36 @@ from sqlalchemy.exc import IntegrityError
 from app.models.meal import Meal
 from app.models.meal_ingredient import MealIngredient, IngredientState
 from app.models.ingredient import Ingredient
+
+
+def _calculate_recent_days_count(meals_by_date: Dict[date, List[Meal]]) -> int:
+    """
+    Determine how many days to show expanded.
+
+    Returns enough days to show either:
+    - The first 2 days, OR
+    - Enough days to include at least 6 meals
+    Whichever results in MORE meals shown expanded.
+    """
+    days = list(meals_by_date.keys())
+
+    if len(days) <= 2:
+        return len(days)  # show all if 2 or fewer days
+
+    # Option A: First 2 days
+    two_day_count = sum(len(meals_by_date[d]) for d in days[:2])
+
+    # Option B: Enough days to get >= 6 meals
+    running_count = 0
+    days_for_six = 0
+    for d in days:
+        running_count += len(meals_by_date[d])
+        days_for_six += 1
+        if running_count >= 6:
+            break
+
+    # Use whichever results in MORE meals shown expanded
+    return 2 if two_day_count >= running_count else days_for_six
 
 
 class MealService:
@@ -21,7 +53,8 @@ class MealService:
         image_path: Optional[str] = None,
         user_notes: Optional[str] = None,
         country: Optional[str] = None,
-        timestamp: Optional[datetime] = None
+        timestamp: Optional[datetime] = None,
+        local_timezone: Optional[str] = None
     ) -> Meal:
         """
         Create a new meal entry.
@@ -33,6 +66,7 @@ class MealService:
             user_notes: User's notes about the meal
             country: Country where meal was consumed
             timestamp: Meal timestamp (defaults to now)
+            local_timezone: IANA timezone string (e.g., 'America/New_York')
 
         Returns:
             Created Meal object
@@ -43,12 +77,65 @@ class MealService:
             user_notes=user_notes,
             country=country,
             timestamp=timestamp or datetime.utcnow(),
+            local_timezone=local_timezone,
             status='draft'  # New meals start as drafts
         )
         db.add(meal)
         db.commit()
         db.refresh(meal)
         return meal
+
+    @staticmethod
+    def get_meals_grouped_by_date(
+        db: Session,
+        user_id: UUID,
+        limit: int = 50
+    ) -> Tuple[List[Meal], List[dict]]:
+        """
+        Get meals grouped by local date for history display.
+
+        Returns (recent_meals, collapsed_days) where:
+        - recent_meals: expanded meals from recent days
+        - collapsed_days: [{'date': date, 'meals': [...]}] for older days
+
+        Each meal is grouped by its LOCAL date (using meal.local_timezone).
+        """
+        meals = MealService.get_user_meals(db, user_id, limit=limit)
+
+        if not meals:
+            return [], []
+
+        # Group by each meal's local date
+        meals_by_date: Dict[date, List[Meal]] = OrderedDict()
+        for meal in meals:
+            try:
+                tz = ZoneInfo(meal.local_timezone) if meal.local_timezone else ZoneInfo('UTC')
+            except Exception:
+                tz = ZoneInfo('UTC')
+            local_dt = meal.timestamp.astimezone(tz)
+            meal_date = local_dt.date()
+            if meal_date not in meals_by_date:
+                meals_by_date[meal_date] = []
+            meals_by_date[meal_date].append(meal)
+
+        # Calculate threshold (2 days or enough for 6 meals, whichever is more)
+        recent_days_count = _calculate_recent_days_count(meals_by_date)
+
+        # Split into recent and collapsed
+        all_dates = list(meals_by_date.keys())
+        recent_dates = all_dates[:recent_days_count]
+        collapsed_dates = all_dates[recent_days_count:]
+
+        recent_meals = []
+        for d in recent_dates:
+            recent_meals.extend(meals_by_date[d])
+
+        collapsed_days = [
+            {'date': d, 'meals': meals_by_date[d]}
+            for d in collapsed_dates
+        ]
+
+        return recent_meals, collapsed_days
 
     @staticmethod
     def add_ingredient_to_meal(

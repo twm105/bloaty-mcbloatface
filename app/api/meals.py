@@ -36,6 +36,7 @@ async def create_meal(
     user_notes: Optional[str] = Form(None),
     country: Optional[str] = Form(None),
     meal_timestamp: Optional[str] = Form(None),
+    local_timezone: Optional[str] = Form(None),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -69,7 +70,8 @@ async def create_meal(
         image_path=image_path,
         user_notes=user_notes,
         country=country,
-        timestamp=timestamp
+        timestamp=timestamp,
+        local_timezone=local_timezone
     )
 
     # Redirect to ingredient editing
@@ -372,15 +374,16 @@ async def meal_history_page(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Meal history page."""
-    meals = meal_service.get_user_meals(db, user.id, limit=50)
+    """Meal history page with day-based grouping."""
+    recent_meals, collapsed_days = meal_service.get_meals_grouped_by_date(db, user.id, limit=50)
 
     return templates.TemplateResponse(
         "meals/history.html",
         {
             "request": request,
             "user": user,
-            "meals": meals
+            "recent_meals": recent_meals,
+            "collapsed_days": collapsed_days,
         }
     )
 
