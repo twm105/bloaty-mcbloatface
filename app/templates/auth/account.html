@@ -309,21 +309,39 @@
                     {% endif %}
                 </div>
                 {% if u.id != user.id %}
-                <button
-                    class="btn btn-sm btn-secondary"
-                    style="padding: 0.25rem 0.5rem; font-size: 12px;"
-                    @click="
-                        fetch('/auth/reset-password/{{ u.id }}', { method: 'POST' })
-                            .then(r => r.json())
-                            .then(data => {
-                                tempPassword = data.temp_password;
-                                showPassword = true;
-                            })
-                            .catch(() => alert('Failed to reset password'));
-                    "
-                >
-                    Reset Password
-                </button>
+                <div style="display: flex; gap: var(--space-2);">
+                    <button
+                        class="btn btn-sm btn-secondary"
+                        style="padding: 0.25rem 0.5rem; font-size: 12px;"
+                        @click="
+                            fetch('/auth/reset-password/{{ u.id }}', { method: 'POST' })
+                                .then(r => r.json())
+                                .then(data => {
+                                    tempPassword = data.temp_password;
+                                    showPassword = true;
+                                })
+                                .catch(() => alert('Failed to reset password'));
+                        "
+                    >
+                        Reset Password
+                    </button>
+                    <button
+                        class="btn btn-sm"
+                        style="background-color: var(--color-highlight-terra); color: white; padding: 0.25rem 0.5rem; font-size: 12px;"
+                        @click="
+                            if (confirm('Delete user {{ u.email }}? This will permanently remove all their meals, symptoms, and data.')) {
+                                fetch('/auth/users/{{ u.id }}', { method: 'DELETE' })
+                                    .then(r => {
+                                        if (r.ok) location.reload();
+                                        else r.json().then(d => alert(d.detail || 'Failed to delete user'));
+                                    })
+                                    .catch(() => alert('Failed to delete user'));
+                            }
+                        "
+                    >
+                        Delete
+                    </button>
+                </div>
                 {% endif %}
             </div>
             {% endfor %}

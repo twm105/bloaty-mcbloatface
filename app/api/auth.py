@@ -395,3 +395,31 @@ async def reset_user_password(
     temp_password = await auth_provider.reset_password(db, target_user)
 
     return {"temp_password": temp_password}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: str,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete a user and all their data (admin only)."""
+    from uuid import UUID
+
+    try:
+        target_user_id = UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    # Prevent self-deletion
+    if target_user_id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+
+    target_user = db.query(User).filter(User.id == target_user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db.delete(target_user)
+    db.commit()
+
+    return {"success": True}
