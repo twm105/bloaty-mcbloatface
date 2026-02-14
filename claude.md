@@ -109,6 +109,30 @@ bloaty-mcbloatface/
 └── README.md
 ```
 
+## Documentation
+
+Project documentation lives in the `docs/` folder:
+
+**docs/STATUS.md** - Implementation status and progress tracking
+- Reference at session start to understand current project state
+- Check when deciding what to work on next
+- Update after completing features to track progress
+
+**docs/DESIGN_PRINCIPLES.md** - UI/UX design system and patterns
+- Reference when implementing any UI/UX changes
+- Consult when adding new components or pages
+- Check when debugging rendering issues (Alpine.js/Jinja2 patterns, icon sizing)
+
+**docs/DEVOPS.md** - AWS deployment and infrastructure guide
+- Reference when deploying or updating production
+- Consult when troubleshooting infrastructure issues
+- Check when modifying Docker/nginx configuration
+
+**docs/TESTING.md** - Testing strategy and patterns
+- Reference when writing or organizing tests
+- Consult for database isolation, API caching, and fixture patterns
+- Check for CI/CD and coverage requirements
+
 ## Dependencies to Add
 - fastapi[all]
 - sqlalchemy
@@ -172,7 +196,7 @@ bloaty-mcbloatface/
 - **Critical judgment**: Apply critical thinking to user inputs. Be polite but not sycophantic. Test alternative ideas where they exist without delaying development. User has final say.
 - **Track everything**: Ingredient state (raw/cooked), timestamps for correlation analysis
 - **Evals from day 1**: Quantify AI performance before building features on top
-- **Design Principles**: Refer to the DESIGN_PRINCIPLES.md document whenever applying UX or UI design
+- **Design Principles**: Refer to docs/DESIGN_PRINCIPLES.md whenever applying UX or UI design
 
 ## Future Considerations
 - Authentication system
@@ -184,8 +208,8 @@ bloaty-mcbloatface/
 - Sharing/collaboration features
 
 ## Current Status
-- ~65% MVP Complete (see IMPLEMENTATION_STATUS.md for details)
-- Working features: Meal tracking with AI analysis, symptom logging with AI elaboration, history management
-- Recent: UI/UX dark theme redesign with bug fixes (template rendering, icon sizing)
-- Next priority: Pattern analysis dashboard (Phase 8) - the core value proposition
-- See README.md and IMPLEMENTATION_STATUS.md for current progress
+- ~85% MVP Complete (see docs/STATUS.md for details)
+- Working features: Meal tracking with AI analysis, symptom logging with AI elaboration, history management, diagnosis with AI correlation analysis, authentication system
+- Recent: Production deployment to AWS, reduced diagnosis thresholds for faster onboarding
+- Next priority: Analytics & visualizations, evals framework
+- See README.md and docs/STATUS.md for current progress
