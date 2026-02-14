@@ -1,0 +1,75 @@
+# Evals Dataset Manifest
+# Tracks dataset sources, counts, and metadata
+
+version: "1.0"
+last_updated: "2026-02-14"
+
+sources:
+  bbc_good_food:
+    scraper: "bbc_good_food"
+    target_count: 50
+    actual_count: 0  # Updated after scraping
+    categories:
+      - "chicken-recipes"
+      - "vegetarian-recipes"
+      - "fish-recipes"
+      - "salad-recipes"
+      - "pasta-recipes"
+    last_scraped: null
+
+  allrecipes:
+    scraper: "allrecipes"
+    target_count: 30
+    actual_count: 0
+    categories:
+      - "quick-and-easy-recipes"
+      - "healthy-recipes"
+      - "comfort-food-recipes"
+    last_scraped: null
+
+  curated:
+    description: "Hand-selected edge cases for testing model robustness"
+    target_count: 20
+    actual_count: 0
+    subcategories:
+      - name: "poor_lighting"
+        description: "Images with challenging lighting conditions"
+        count: 5
+      - name: "multiple_dishes"
+        description: "Images containing multiple separate dishes"
+        count: 5
+      - name: "unusual_cuisines"
+        description: "Less common cuisines that may challenge the model"
+        count: 5
+      - name: "non_food"
+        description: "Non-food images for validation testing"
+        count: 5
+
+eval_types:
+  meal_analysis:
+    ground_truth: "ground_truth/meal_analysis.json"
+    description: "Meal image to ingredients prediction"
+    required_fields:
+      - "meal_name"
+      - "ingredients"
+    metrics:
+      - precision
+      - recall
+      - f1
+      - state_accuracy
+      - meal_name_similarity
+
+  meal_validation:
+    ground_truth: "ground_truth/meal_validation.json"
+    description: "Is-this-a-food-image classification"
+    required_fields:
+      - "is_food"
+    metrics:
+      - accuracy
+      - true_positive_rate
+      - true_negative_rate
+
+# Notes:
+# - Images stored in meal_images/{source}/ directories (gitignored)
+# - Ground truth JSON files stored in ground_truth/
+# - Run `python -m evals.run scrape --source <name>` to populate

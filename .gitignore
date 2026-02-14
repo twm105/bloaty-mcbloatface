@@ -43,6 +43,8 @@ uploads/
 
 # Eval data
 evals/data/downloaded/
+evals/datasets/meal_images/
+evals/fixtures/api_cache/
 
 # Backups
 backups/

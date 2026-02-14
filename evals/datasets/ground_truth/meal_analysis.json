@@ -1,0 +1,5941 @@
+{
+  "version": "1.0",
+  "source": "bbc_good_food",
+  "description": "Ground truth for meal image analysis - BBC Good Food recipes",
+  "test_cases": [
+    {
+      "id": "bbc_cottage-pie",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/cottage-pie",
+      "image_path": "meal_images/bbc_good_food/cottage-pie_54762c8f.jpg",
+      "expected": {
+        "meal_name": "Cottage pie",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp olive oil"
+          },
+          {
+            "name": "beef mince",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1\u00bckg beef mince"
+          },
+          {
+            "name": "onions finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 onions finely chopped"
+          },
+          {
+            "name": "carrots chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 carrots chopped"
+          },
+          {
+            "name": "celery sticks chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 celery sticks chopped"
+          },
+          {
+            "name": "garlic cloves finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves finely chopped"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp plain flour"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "glass of red wine (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "large glass of red wine (optional)"
+          },
+          {
+            "name": "beef stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "850ml beef stock"
+          },
+          {
+            "name": "Worcestershire sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp Worcestershire sauce"
+          },
+          {
+            "name": "a few thyme sprigs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a few thyme sprigs"
+          },
+          {
+            "name": "bay leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 bay leaves"
+          },
+          {
+            "name": ".8kg potatoes chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1.8kg potatoes chopped"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "225ml milk"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g butter"
+          },
+          {
+            "name": "strong cheddar grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200g strong cheddar grated"
+          },
+          {
+            "name": "freshly grated  nutmeg",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "freshly grated  nutmeg"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make our classic meat and potato pie for a comforting dinner. This great-value family favourite freezes beautifully and is a guaranteed crowd-pleaser",
+        "servings": 10,
+        "prep_time_minutes": 35,
+        "cook_time_minutes": 110,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 597.0,
+          "protein_g": 36.0,
+          "carbs_g": 34.06,
+          "fat_g": 34.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_beef-wellington",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/beef-wellington",
+      "image_path": "meal_images/bbc_good_food/beef-wellington_7f6d16f3.jpg",
+      "expected": {
+        "meal_name": "Beef wellington",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp olive oil"
+          },
+          {
+            "name": "g/9oz chestnut mushroom include some wild ones if you like",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "250g/9oz chestnut mushroom include some wild ones if you like"
+          },
+          {
+            "name": "g/2oz butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g/2oz butter"
+          },
+          {
+            "name": "sprig fresh thyme",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large sprig fresh thyme"
+          },
+          {
+            "name": "ml/3.5 fl oz dry white wine",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml/3.5 fl oz dry white wine"
+          },
+          {
+            "name": "prosciutto",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "12 slices prosciutto"
+          },
+          {
+            "name": "g/1lb 2oz pack puff pastry thawed if frozen",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "500g/1lb 2oz pack puff pastry thawed if frozen"
+          },
+          {
+            "name": "a little flour for dusting",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a little flour for dusting"
+          },
+          {
+            "name": "egg yolks beaten with 1 tsp water",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 egg yolks beaten with 1 tsp water"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Gordon Ramsay's version of the classic steak dish \u2013\u00a0a showstopping centrepiece on a special occasion",
+        "servings": 6,
+        "prep_time_minutes": null,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 779.0,
+          "protein_g": 46.0,
+          "carbs_g": 27.0,
+          "fat_g": 52.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_lasagne",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/lasagne",
+      "image_path": "meal_images/bbc_good_food/lasagne_c1c5f580.jpg",
+      "expected": {
+        "meal_name": "Lasagne",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp olive oil"
+          },
+          {
+            "name": "celery sticks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 celery sticks, finely chopped"
+          },
+          {
+            "name": "onion finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion finely chopped"
+          },
+          {
+            "name": "carrot (about 100g)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 carrot (about 100g), finely chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 garlic cloves crushed"
+          },
+          {
+            "name": "cubetti di pancetta",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "140g cubetti di pancetta"
+          },
+          {
+            "name": "beef mince (we used 10% fat)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g beef mince (we used 10% fat)"
+          },
+          {
+            "name": "pork mince or British veal mince",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g pork mince or British veal mince"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200ml milk"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "bay leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 bay leaves"
+          },
+          {
+            "name": "rosemary sprig",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 rosemary sprig"
+          },
+          {
+            "name": "thyme sprigs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 thyme sprigs"
+          },
+          {
+            "name": "dried oregano",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "2 tsp dried oregano"
+          },
+          {
+            "name": "beef stock cubes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 beef stock cubes"
+          },
+          {
+            "name": "red wine",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500ml red wine"
+          },
+          {
+            "name": "about 400g dried pasta sheets",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "about 400g dried pasta sheets"
+          },
+          {
+            "name": "parmesan finely grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g parmesan finely grated"
+          },
+          {
+            "name": ".5l milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1.5l milk"
+          },
+          {
+            "name": "onion thickly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion thickly sliced"
+          },
+          {
+            "name": "bay leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 bay leaves"
+          },
+          {
+            "name": "cloves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 cloves"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g butter"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g plain flour"
+          },
+          {
+            "name": "good grating of  nutmeg",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "good grating of  nutmeg"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Little is more satisfying than cooking a classic to perfection \u2013 Sarah Cook gives us a lesson in how to make lasagne",
+        "servings": 8,
+        "prep_time_minutes": 60,
+        "cook_time_minutes": 190,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 794.0,
+          "protein_g": 48.0,
+          "carbs_g": 63.0,
+          "fat_g": 38.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_pizza-margherita-in-4-easy-steps",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/pizza-margherita-4-easy-steps",
+      "image_path": "meal_images/bbc_good_food/pizza-margherita-in-4-easy-steps_bb573f7b.jpg",
+      "expected": {
+        "meal_name": "Pizza Margherita in 4 easy steps",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "strong bread flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g strong bread flour"
+          },
+          {
+            "name": "instant yeast (from a sachet or a tub)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp instant yeast (from a sachet or a tub)"
+          },
+          {
+            "name": "salt",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp salt"
+          },
+          {
+            "name": "olive oil plus extra for drizzling",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil plus extra for drizzling"
+          },
+          {
+            "name": "passata",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml passata"
+          },
+          {
+            "name": "fresh basil or 1 tsp dried",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "handful fresh basil or 1 tsp dried"
+          },
+          {
+            "name": "garlic clove crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 garlic clove crushed"
+          },
+          {
+            "name": "ball mozzarella sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "125g ball mozzarella sliced"
+          },
+          {
+            "name": "grated or shaved parmesan (or vegetarian alternative)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful grated or shaved parmesan (or vegetarian alternative)"
+          },
+          {
+            "name": "of cherry tomatoes halved",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful of cherry tomatoes halved"
+          },
+          {
+            "name": "of basil leaves (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful of basil leaves (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Even a novice cook can master the art of perfect pizza with our step-by-step guide. This homemade pizza recipe features a simple pizza dough and toppings.",
+        "servings": 2,
+        "prep_time_minutes": null,
+        "cook_time_minutes": 10,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 431.0,
+          "protein_g": 19.0,
+          "carbs_g": 59.0,
+          "fat_g": 15.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-tikka-masala",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-tikka-masala",
+      "image_path": "meal_images/bbc_good_food/chicken-tikka-masala_c31508f4.jpg",
+      "expected": {
+        "meal_name": "Chicken tikka masala",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp vegetable oil"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g butter"
+          },
+          {
+            "name": "onions roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 onions roughly chopped"
+          },
+          {
+            "name": "chicken tikka masala paste (use shop-bought or make your own \u2013 see recipe",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 tbsp chicken tikka masala paste (use shop-bought or make your own \u2013 see recipe, below)"
+          },
+          {
+            "name": "red peppers deseeded and cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red peppers deseeded and cut into chunks"
+          },
+          {
+            "name": "boneless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "8 boneless, skinless chicken breasts cut into 2.5cm cubes"
+          },
+          {
+            "name": "x 400g cans  chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans  chopped tomatoes"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "mango chutney",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 tbsp  mango chutney"
+          },
+          {
+            "name": "double cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150ml double cream"
+          },
+          {
+            "name": "natural  yogurt",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150ml natural  yogurt"
+          },
+          {
+            "name": "chopped  coriander leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "chopped  coriander leaves, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This takeaway favourite is freezer-friendly and quick to reheat, giving you the chance to get ahead and save money.",
+        "servings": 10,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 50,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 345.0,
+          "protein_g": 31.0,
+          "carbs_g": 13.0,
+          "fat_g": 19.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_butter-chicken",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/butter-chicken",
+      "image_path": "meal_images/bbc_good_food/butter-chicken_e4fa54de.jpg",
+      "expected": {
+        "meal_name": "Butter chicken",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g butter"
+          },
+          {
+            "name": "onion halved and finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion halved and finely sliced"
+          },
+          {
+            "name": "skinless chicken breasts cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless chicken breasts cut into chunks"
+          },
+          {
+            "name": "garam masala",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp garam masala"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 garlic cloves crushed"
+          },
+          {
+            "name": "finely grated ginger",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp finely grated ginger"
+          },
+          {
+            "name": "passata",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g passata"
+          },
+          {
+            "name": "cashew nut butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp cashew nut butter"
+          },
+          {
+            "name": "double cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50ml double cream"
+          },
+          {
+            "name": "coriander chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful coriander chopped"
+          },
+          {
+            "name": "cooked rice to serve",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked rice to serve"
+          },
+          {
+            "name": "wilted spinach to serve",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "wilted spinach to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Cooked with butter, cashew nut butter, tangy passata and plenty of spices, this chicken curry is rich, indulgent and ready in less than an hour",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 358.0,
+          "protein_g": 34.0,
+          "carbs_g": 13.0,
+          "fat_g": 18.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-jalfrezi",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-jalfrezi",
+      "image_path": "meal_images/bbc_good_food/chicken-jalfrezi_1b21cf2b.jpg",
+      "expected": {
+        "meal_name": "Chicken jalfrezi",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "onion roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd large onion roughly chopped"
+          },
+          {
+            "name": "garlic cloves chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves chopped"
+          },
+          {
+            "name": "green chilli finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 green chilli finely chopped"
+          },
+          {
+            "name": "vegetable oil for frying",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "vegetable oil for frying"
+          },
+          {
+            "name": "can plum tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can plum tomatoes"
+          },
+          {
+            "name": "ground coriander",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp ground coriander"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp ground cumin"
+          },
+          {
+            "name": "turmeric",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp turmeric"
+          },
+          {
+            "name": "chicken breasts diced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 chicken breasts diced"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp ground cumin"
+          },
+          {
+            "name": "ground coriander",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp ground coriander"
+          },
+          {
+            "name": "turmeric",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp turmeric"
+          },
+          {
+            "name": "onion sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd large onion sliced"
+          },
+          {
+            "name": "red pepper chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper chopped"
+          },
+          {
+            "name": "red chillies finely chopped (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red chillies finely chopped (optional)"
+          },
+          {
+            "name": "garam masala",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp garam masala"
+          },
+          {
+            "name": "of fresh",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful of fresh, chopped coriander leaves"
+          },
+          {
+            "name": "cooked basmati rice or naan bread to serve",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked basmati rice or naan bread to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Instead of calling the Indian takeaway, make your own\u00a0easy chicken jalfrezi. Our healthy curry recipe also has\u00a0two\u00a0of your 5-a-day and a good dose of vitamin C",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 60,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 284.0,
+          "protein_g": 33.0,
+          "carbs_g": 13.0,
+          "fat_g": 10.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_vegetable-samosas",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/vegetable-samosas",
+      "image_path": "meal_images/bbc_good_food/vegetable-samosas_dc0bdce2.jpg",
+      "expected": {
+        "meal_name": "Vegetable samosas",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp vegetable oil"
+          },
+          {
+            "name": "onion finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion finely chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "potato (about 150g) finely diced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 potato (about 150g) finely diced"
+          },
+          {
+            "name": "carrot (about 100g) finely diced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 carrot (about 100g) finely diced"
+          },
+          {
+            "name": "frozen peas",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "100g frozen peas"
+          },
+          {
+            "name": "curry powder or your own spices according to taste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp curry powder or your own spices according to taste"
+          },
+          {
+            "name": "vegetable stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml vegetable stock"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "225g plain flour"
+          },
+          {
+            "name": "sea salt",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp sea salt"
+          },
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp vegetable oil"
+          },
+          {
+            "name": "vegetable oil to deep fry",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2l vegetable oil to deep fry"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Serve up these crisp\u00a0vegan samosas as a tasty starter\u00a0or side dish with your favourite curry. They also make great buffet food for your next party.",
+        "servings": 24,
+        "prep_time_minutes": 30,
+        "cook_time_minutes": 70,
+        "cuisine": "indian",
+        "meal_type": "starter",
+        "nutrition": {
+          "calories": 105.0,
+          "protein_g": 1.0,
+          "carbs_g": 10.0,
+          "fat_g": 7.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_easy-chow-mein-for-kids",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-chow-mein",
+      "image_path": "meal_images/bbc_good_food/easy-chow-mein-for-kids_d4cd64b2.jpg",
+      "expected": {
+        "meal_name": "Easy chow mein for kids",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "thumb-size piece  fresh root ginger",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "thumb-size piece  fresh root ginger"
+          },
+          {
+            "name": "garlic cloves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves"
+          },
+          {
+            "name": "tomato ketchup",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp tomato ketchup"
+          },
+          {
+            "name": "oyster sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp oyster sauce"
+          },
+          {
+            "name": "reduced-salt soy sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp reduced-salt soy sauce"
+          },
+          {
+            "name": "red pepper",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large red pepper"
+          },
+          {
+            "name": "spring onions",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "5 spring onions"
+          },
+          {
+            "name": "half a 400g bag beansprouts",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "half a 400g bag beansprouts"
+          },
+          {
+            "name": "or 2 small  chicken breasts",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large or 2 small  chicken breasts"
+          },
+          {
+            "name": "nests medium egg noodles",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 nests medium egg noodles"
+          },
+          {
+            "name": "sunflower oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sunflower oil"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "As part of our 'Cooking with Auntie Sara' series, Sara Buenfeld shows the kids how to make the classic takeaway favourite",
+        "servings": 2,
+        "prep_time_minutes": 30,
+        "cook_time_minutes": 35,
+        "cuisine": "chinese",
+        "meal_type": null,
+        "nutrition": {
+          "calories": 515.0,
+          "protein_g": 37.0,
+          "carbs_g": 59.0,
+          "fat_g": 13.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_sweet-sour-chicken",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/sweet-sour-chicken",
+      "image_path": "meal_images/bbc_good_food/sweet-sour-chicken_f2ee9716.jpg",
+      "expected": {
+        "meal_name": "Sweet & sour chicken",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "sunflower or vegetable oil for frying",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "sunflower or vegetable oil for frying"
+          },
+          {
+            "name": "soda water chilled",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml soda water chilled"
+          },
+          {
+            "name": "self-raising flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "140g self-raising flour"
+          },
+          {
+            "name": "cornflour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g cornflour"
+          },
+          {
+            "name": "skinless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless, boneless chicken breasts cut into chunks"
+          },
+          {
+            "name": "spring onions finely shredded",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "spring onions finely shredded, to serve"
+          },
+          {
+            "name": "red pepper deseeded and chopped into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper deseeded and chopped into chunks"
+          },
+          {
+            "name": "red chillies 1 cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 red chillies 1 cut into chunks, 2 halved and deseeded"
+          },
+          {
+            "name": "can pineapple chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "425g can pineapple chunks, drained and juice reserved"
+          },
+          {
+            "name": "star anise",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 star anise"
+          },
+          {
+            "name": "tamarind paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g tamarind paste"
+          },
+          {
+            "name": "caster sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g caster sugar"
+          },
+          {
+            "name": "rice wine vinegar or Chinese vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml rice wine vinegar or Chinese vinegar"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Try an authentic version of this classic Chinese takeaway dish, with natural sweetness and a warm chilli flavour to spice things up",
+        "servings": 4,
+        "prep_time_minutes": 20,
+        "cook_time_minutes": 45,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 654.0,
+          "protein_g": 38.0,
+          "carbs_g": 82.0,
+          "fat_g": 20.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_healthy-chicken-katsu-curry",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-katsu-curry",
+      "image_path": "meal_images/bbc_good_food/healthy-chicken-katsu-curry_ad14d92c.jpg",
+      "expected": {
+        "meal_name": "Healthy chicken katsu curry",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "flaked almonds",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g flaked almonds"
+          },
+          {
+            "name": "cold-pressed rapeseed oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp cold-pressed rapeseed oil"
+          },
+          {
+            "name": "boneless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 boneless, skinless chicken breasts (about 300g total)"
+          },
+          {
+            "name": "lime wedges",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "lime wedges, for squeezing over"
+          },
+          {
+            "name": "cold-pressed rapeseed oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp cold-pressed rapeseed oil"
+          },
+          {
+            "name": "onion roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 medium onion roughly chopped"
+          },
+          {
+            "name": "garlic cloves finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves finely chopped"
+          },
+          {
+            "name": "thumb-sized piece ginger peeled and finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "thumb-sized piece ginger peeled and finely chopped"
+          },
+          {
+            "name": "curry powder",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp medium curry powder"
+          },
+          {
+            "name": "star anise",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 star anise"
+          },
+          {
+            "name": "ground turmeric",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bc tsp ground turmeric"
+          },
+          {
+            "name": "plain wholemeal flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp plain wholemeal flour"
+          },
+          {
+            "name": "long-grain brown rice",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g long-grain brown rice"
+          },
+          {
+            "name": "spring onions finely sliced (include the green part)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 spring onions finely sliced (include the green part)"
+          },
+          {
+            "name": "carrot peeled into long strips with a vegetable peeler",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 medium carrot peeled into long strips with a vegetable peeler"
+          },
+          {
+            "name": "cucumber peeled into long strips with a vegetable peeler",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u2153 cucumber peeled into long strips with a vegetable peeler"
+          },
+          {
+            "name": "red chilli finely chopped (deseeded if you don't like it too hot)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small red chilli finely chopped (deseeded if you don't like it too hot)"
+          },
+          {
+            "name": "juice \u00bd lime",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "juice \u00bd lime"
+          },
+          {
+            "name": "handful mint leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small handful mint leaves"
+          },
+          {
+            "name": "handful coriander leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small handful coriander leaves"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This healthier katsu is coated in finely chopped flaked almonds and baked in the oven (rather than fried) until crisp and golden. If you're following the Healthy Diet Plan, this a great dish to add to your repertoire",
+        "servings": 2,
+        "prep_time_minutes": 20,
+        "cook_time_minutes": 35,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 585.0,
+          "protein_g": 47.0,
+          "carbs_g": 58.0,
+          "fat_g": 16.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_thai-green-curry",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/thai-green-curry",
+      "image_path": "meal_images/bbc_good_food/thai-green-curry_b3d631cc.jpg",
+      "expected": {
+        "meal_name": "Thai green curry",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp  vegetable oil"
+          },
+          {
+            "name": "green curry paste (see below)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 tbsp  green curry paste (see below)"
+          },
+          {
+            "name": "chicken thighs skinned",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200g  chicken thighs skinned, de-boned and cut into chunks"
+          },
+          {
+            "name": "can  coconut milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can  coconut milk"
+          },
+          {
+            "name": "Thai aubergines",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 Thai aubergines"
+          },
+          {
+            "name": "pea aubergines",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g  pea aubergines"
+          },
+          {
+            "name": "baby corn sliced at an angle",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 baby corn sliced at an angle"
+          },
+          {
+            "name": "sugar snap peas",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g  sugar snap peas"
+          },
+          {
+            "name": "fish sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-4 tbsp  fish sauce"
+          },
+          {
+            "name": "sugar or  palm sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-4 tsp sugar or  palm sugar"
+          },
+          {
+            "name": "lime leaves stems removed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 lime leaves stems removed"
+          },
+          {
+            "name": "of Thai basil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bc bunch of Thai basil"
+          },
+          {
+            "name": "red chilli sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red chilli sliced"
+          },
+          {
+            "name": "garlic cloves finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves finely chopped"
+          },
+          {
+            "name": "green chillies finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "8 green chillies finely sliced"
+          },
+          {
+            "name": "fresh  turmeric root",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "5g fresh  turmeric root"
+          },
+          {
+            "name": "lemongrass stalk bruised and finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 lemongrass stalk bruised and finely chopped"
+          },
+          {
+            "name": "galangal finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g  galangal finely chopped"
+          },
+          {
+            "name": "stalks  coriander root finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 stalks  coriander root finely chopped"
+          },
+          {
+            "name": "lime leaves roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 lime leaves roughly chopped"
+          },
+          {
+            "name": "Thai shallots peeled and thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 Thai shallots peeled and thinly sliced"
+          },
+          {
+            "name": "ginger finely chopped (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "10g  ginger finely chopped (optional)"
+          },
+          {
+            "name": "shrimp paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd tsp  shrimp paste"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Forget buying a jar of ready-made sauce and make an aromatic Thai green curry from scratch. This recipe makes more curry paste than needed, but you can freeze the rest for next time",
+        "servings": 2,
+        "prep_time_minutes": 20,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 590.0,
+          "protein_g": 25.0,
+          "carbs_g": 16.0,
+          "fat_g": 46.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_pad-thai",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/pad-thai",
+      "image_path": "meal_images/bbc_good_food/pad-thai_245d7a04.jpg",
+      "expected": {
+        "meal_name": "Pad Thai",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "pack medium rice noodle",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "250g pack medium rice noodle"
+          },
+          {
+            "name": "tamarind paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp tamarind paste"
+          },
+          {
+            "name": "fish sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp fish sauce"
+          },
+          {
+            "name": "sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp sugar"
+          },
+          {
+            "name": "garlic clove",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 garlic clove"
+          },
+          {
+            "name": "spring onions",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 spring onions"
+          },
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp vegetable oil"
+          },
+          {
+            "name": "egg",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 egg"
+          },
+          {
+            "name": "pack large cooked prawn",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "200g pack large cooked prawn"
+          },
+          {
+            "name": "beansprout",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "75g beansprout"
+          },
+          {
+            "name": "salted peanut chopped to serve",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful salted peanut chopped to serve"
+          },
+          {
+            "name": "lime wedges",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "lime wedges, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make this easy prawn stir-fry for a speedy midweek meal. Our pad Thai recipe uses simple ingredients such as prawns, rice noodles and beansprouts, but you could also add chicken or tofu.",
+        "servings": 4,
+        "prep_time_minutes": null,
+        "cook_time_minutes": null,
+        "cuisine": "thai",
+        "meal_type": null,
+        "nutrition": {
+          "calories": 359.0,
+          "protein_g": 19.0,
+          "carbs_g": 57.0,
+          "fat_g": 8.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-fajitas",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-fajitas",
+      "image_path": "meal_images/bbc_good_food/chicken-fajitas_ac96a4c1.jpg",
+      "expected": {
+        "meal_name": "Chicken fajitas",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "flour tortillas",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "24 flour tortillas"
+          },
+          {
+            "name": "soured cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g soured cream"
+          },
+          {
+            "name": "chicken breasts",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 chicken breasts"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp olive oil"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "limes juiced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 limes juiced"
+          },
+          {
+            "name": "chilli powder",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp chilli powder"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp ground cumin"
+          },
+          {
+            "name": "pack coriander finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small pack coriander finely chopped"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "red onion cut into thin wedges",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large red onion cut into thin wedges"
+          },
+          {
+            "name": "red and 2 yellow peppers cut into thin strips",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red and 2 yellow peppers cut into thin strips"
+          },
+          {
+            "name": "cherry tomatoes halved",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200g cherry tomatoes halved"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Add fun to a kids' party and cut down on prep time with fajitas the little ones can build themselves. Serve with guacamole alongside the chicken and peppers",
+        "servings": 8,
+        "prep_time_minutes": 20,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 652.0,
+          "protein_g": 35.0,
+          "carbs_g": 70.0,
+          "fat_g": 24.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_mushroom-stroganoff",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/mushroom-stroganoff",
+      "image_path": "meal_images/bbc_good_food/mushroom-stroganoff_4be0a481.jpg",
+      "expected": {
+        "meal_name": "Mushroom stroganoff",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp olive oil"
+          },
+          {
+            "name": "onion finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion finely chopped"
+          },
+          {
+            "name": "sweet paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sweet paprika"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "mixed mushrooms chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g mixed mushrooms chopped"
+          },
+          {
+            "name": "low-sodium beef or vegetable stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150ml low-sodium beef or vegetable stock"
+          },
+          {
+            "name": "Worcestershire sauce or vegetarian alternative",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp Worcestershire sauce or vegetarian alternative"
+          },
+          {
+            "name": "half-fat soured cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp half-fat soured cream"
+          },
+          {
+            "name": "bunch of parsley roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small bunch of parsley roughly chopped"
+          },
+          {
+            "name": "pouch cooked  wild rice",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "250g pouch cooked  wild rice"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "A few clever substitutions can make this traditional creamy casserole low in fat and calories",
+        "servings": 2,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 20,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 329.0,
+          "protein_g": 11.0,
+          "carbs_g": 50.0,
+          "fat_g": 9.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_spinach-ricotta-cannelloni",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/spinach-ricotta-cannelloni",
+      "image_path": "meal_images/bbc_good_food/spinach-ricotta-cannelloni_42271c15.jpg",
+      "expected": {
+        "meal_name": "Spinach & ricotta cannelloni",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp olive oil"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "8 garlic cloves crushed"
+          },
+          {
+            "name": "caster sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp caster sugar"
+          },
+          {
+            "name": "red wine vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp red wine vinegar"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "bunch basil leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small bunch basil leaves"
+          },
+          {
+            "name": "x 250g tubs mascarpone",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 250g tubs mascarpone"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp milk"
+          },
+          {
+            "name": "parmesan (or vegetarian alternative)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g parmesan (or vegetarian alternative), grated"
+          },
+          {
+            "name": "x 125g balls mozzarella sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 125g balls mozzarella sliced"
+          },
+          {
+            "name": "spinach",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1kg spinach"
+          },
+          {
+            "name": "parmesan (or vegetarian alternative)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g parmesan (or vegetarian alternative), grated"
+          },
+          {
+            "name": "x 250g tubs ricotta",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 x 250g tubs ricotta"
+          },
+          {
+            "name": "pinch grated nutmeg",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "large pinch grated nutmeg"
+          },
+          {
+            "name": "dried cannelloni",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "400g dried cannelloni"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Try our easy spinach and ricotta cannelloni. Keep a few portions of this vegetarian classic in the freezer and you'll never be stuck for a satisfying supper",
+        "servings": 10,
+        "prep_time_minutes": 50,
+        "cook_time_minutes": 40,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 711.0,
+          "protein_g": 30.0,
+          "carbs_g": 44.0,
+          "fat_g": 47.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_ratatouille",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/ratatouille",
+      "image_path": "meal_images/bbc_good_food/ratatouille_bde7766f.jpg",
+      "expected": {
+        "meal_name": "Ratatouille",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "aubergines",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 large aubergines"
+          },
+          {
+            "name": "courgettes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 small courgettes"
+          },
+          {
+            "name": "red or yellow peppers",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red or yellow peppers"
+          },
+          {
+            "name": "ripe tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 large ripe tomatoes"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "5 tbsp olive oil"
+          },
+          {
+            "name": "supermarket pack or small bunch basil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "supermarket pack or small bunch basil"
+          },
+          {
+            "name": "onion peeled and thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 medium onion peeled and thinly sliced"
+          },
+          {
+            "name": "garlic cloves peeled and crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 garlic cloves peeled and crushed"
+          },
+          {
+            "name": "red wine vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp red wine vinegar"
+          },
+          {
+            "name": "sugar (any kind)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp sugar (any kind)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Enjoy this super-healthy traditional ratatouille recipe for lunch or dinner, safe in the knowledge that it counts as four of your five-a-day",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 252.0,
+          "protein_g": 6.0,
+          "carbs_g": 18.0,
+          "fat_g": 15.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_greek-salad",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/greek-salad",
+      "image_path": "meal_images/bbc_good_food/greek-salad_bfdb5231.jpg",
+      "expected": {
+        "meal_name": "Greek salad",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "vine tomatoes cut into irregular wedges",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 large  vine tomatoes cut into irregular wedges"
+          },
+          {
+            "name": "cucumber peeled",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 cucumber peeled, deseeded, then roughly chopped"
+          },
+          {
+            "name": "a red onion thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd a red onion thinly sliced"
+          },
+          {
+            "name": "Kalamata olives",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "16 Kalamata olives"
+          },
+          {
+            "name": "dried oregano",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "1 tsp dried oregano"
+          },
+          {
+            "name": "feta cheese cut into chunks (barrel matured feta is the best)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g feta cheese cut into chunks (barrel matured feta is the best)"
+          },
+          {
+            "name": "Greek extra virgin olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp Greek extra virgin olive oil"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make a fresh and colourful Greek salad in no time. It's\u00a0great with grilled meats at a barbecue, or on its own as a veggie main",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 211.0,
+          "protein_g": 5.0,
+          "carbs_g": 8.0,
+          "fat_g": 17.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_gluten-free-banana-pancakes",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/banana-pancakes",
+      "image_path": "meal_images/bbc_good_food/gluten-free-banana-pancakes_b3ed1ddf.jpg",
+      "expected": {
+        "meal_name": "Gluten-free banana pancakes",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "banana",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large banana"
+          },
+          {
+            "name": "eggs beaten",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 medium eggs beaten"
+          },
+          {
+            "name": "of baking powder (gluten-free if coeliac)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "pinch of baking powder (gluten-free if coeliac)"
+          },
+          {
+            "name": "splash of vanilla extract",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "splash of vanilla extract"
+          },
+          {
+            "name": "oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp oil"
+          },
+          {
+            "name": "pecans roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g pecans roughly chopped"
+          },
+          {
+            "name": "raspberries",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "125g raspberries"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Gluten-free banana pancakes you can whip up in just 10 minutes! Scatter with pecans and raspberries to enjoy a low-calorie (but still indulgent) breakfast",
+        "servings": 2,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 5,
+        "cuisine": null,
+        "meal_type": "breakfast",
+        "nutrition": {
+          "calories": 243.0,
+          "protein_g": 9.0,
+          "carbs_g": 15.0,
+          "fat_g": 15.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_eggs-benedict",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/eggs-benedict",
+      "image_path": "meal_images/bbc_good_food/eggs-benedict_5bb67a8d.jpg",
+      "expected": {
+        "meal_name": "Eggs benedict",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "white wine vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp white wine vinegar"
+          },
+          {
+            "name": "eggs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 eggs"
+          },
+          {
+            "name": "toasting muffins",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 toasting muffins"
+          },
+          {
+            "name": "parma ham",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 parma ham"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "125g butter"
+          },
+          {
+            "name": "egg yolks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 egg yolks"
+          },
+          {
+            "name": "white wine vinegar or tarragon vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd tsp white wine vinegar or tarragon vinegar"
+          },
+          {
+            "name": "squeeze of lemon juice",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "squeeze of lemon juice"
+          },
+          {
+            "name": "of cayenne pepper",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "pinch of cayenne pepper"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Learn how to make the perfect eggs benedict for an indulgent weekend brunch. Gordon Ramsay's recipe features poached eggs, parma ham and hollandaise on fluffy muffins",
+        "servings": 4,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 15,
+        "cuisine": null,
+        "meal_type": "brunch",
+        "nutrition": {
+          "calories": 453.0,
+          "protein_g": 17.0,
+          "carbs_g": 13.0,
+          "fat_g": 37.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_french-toast",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/french-toast",
+      "image_path": "meal_images/bbc_good_food/french-toast_0309b6b5.jpg",
+      "expected": {
+        "meal_name": "French toast",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "eggs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 large eggs"
+          },
+          {
+            "name": "ml/2\u00bdfl oz whole milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "80ml/2\u00bdfl oz whole milk"
+          },
+          {
+            "name": "ml/1\u00bdfl oz double cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40ml/1\u00bdfl oz double cream"
+          },
+          {
+            "name": "vanilla extract",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp vanilla extract"
+          },
+          {
+            "name": "cinnamon",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd tsp cinnamon"
+          },
+          {
+            "name": "thick slices brioche",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 thick slices brioche"
+          },
+          {
+            "name": "tbsp/30ml vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp/30ml vegetable oil"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp butter"
+          },
+          {
+            "name": "icing sugar and fresh berries",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "icing sugar and fresh berries, to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Eggy bread, pain perdu or\u00a0French toast \u2013\u00a0this classic breakfast dish has plenty of names and just as many options for toppings. We like it with fresh berries",
+        "servings": 4,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 15,
+        "cuisine": null,
+        "meal_type": "breakfast",
+        "nutrition": {
+          "calories": 401.0,
+          "protein_g": 9.0,
+          "carbs_g": 26.0,
+          "fat_g": 29.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_shakshuka",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/shakshuka",
+      "image_path": "meal_images/bbc_good_food/shakshuka_fbe89bd4.jpg",
+      "expected": {
+        "meal_name": "Shakshuka",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil"
+          },
+          {
+            "name": "red onions chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red onions chopped"
+          },
+          {
+            "name": "red chilli deseeded and finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red chilli deseeded and finely chopped"
+          },
+          {
+            "name": "garlic clove sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 garlic clove sliced"
+          },
+          {
+            "name": "bunch coriander stalks and leaves chopped separately",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small bunch coriander stalks and leaves chopped separately"
+          },
+          {
+            "name": "cans  cherry tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 cans  cherry tomatoes"
+          },
+          {
+            "name": "caster sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp caster sugar"
+          },
+          {
+            "name": "eggs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 eggs"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make our easy shakshuka for a comforting brunch. Vary this dish\u00a0by flavouring the simple tomato sauce with whatever you have to hand - curry powder, pesto or fresh herbs",
+        "servings": 2,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 20,
+        "cuisine": null,
+        "meal_type": "breakfast",
+        "nutrition": {
+          "calories": 340.0,
+          "protein_g": 21.0,
+          "carbs_g": 21.0,
+          "fat_g": 20.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_fish-chips-recipes",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/fish-chips",
+      "image_path": "meal_images/bbc_good_food/fish-chips-recipes_c133e207.jpg",
+      "expected": {
+        "meal_name": "Fish & chips recipes",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "F",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "F"
+          },
+          {
+            "name": "i",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "i"
+          },
+          {
+            "name": "s",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "s"
+          },
+          {
+            "name": "h",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "h"
+          },
+          {
+            "name": "",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": ""
+          },
+          {
+            "name": "&",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "&"
+          },
+          {
+            "name": "a",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a"
+          },
+          {
+            "name": "m",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "m"
+          },
+          {
+            "name": "p",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "p"
+          },
+          {
+            "name": ";",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": ";"
+          },
+          {
+            "name": "",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": ""
+          },
+          {
+            "name": "c",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "c"
+          },
+          {
+            "name": "h",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "h"
+          },
+          {
+            "name": "i",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "i"
+          },
+          {
+            "name": "p",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "p"
+          },
+          {
+            "name": "s",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "s"
+          },
+          {
+            "name": "",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": ""
+          },
+          {
+            "name": "r",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "r"
+          },
+          {
+            "name": "e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "e"
+          },
+          {
+            "name": "c",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "c"
+          },
+          {
+            "name": "i",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "i"
+          },
+          {
+            "name": "p",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "p"
+          },
+          {
+            "name": "e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "e"
+          },
+          {
+            "name": "s",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "s"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Go traditional or add a twist to this takeaway classic.",
+        "servings": null,
+        "prep_time_minutes": null,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": null
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_seafood-paella",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/seafood-paella",
+      "image_path": "meal_images/bbc_good_food/seafood-paella_ddabe880.jpg",
+      "expected": {
+        "meal_name": "Seafood paella",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "raw shell-on king prawns",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "20-24 raw shell-on king prawns"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "monkfish cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g monkfish cut into chunks"
+          },
+          {
+            "name": "onion finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large onion finely chopped"
+          },
+          {
+            "name": "paella rice",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g paella rice"
+          },
+          {
+            "name": "garlic cloves sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 garlic cloves sliced"
+          },
+          {
+            "name": "smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp smoked paprika"
+          },
+          {
+            "name": "cayenne pepper (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp cayenne pepper (optional)"
+          },
+          {
+            "name": "of saffron",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "pinch of saffron"
+          },
+          {
+            "name": "x 400g can chopped tomatoes (save the rest for the stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd x 400g can chopped tomatoes (save the rest for the stock, below)"
+          },
+          {
+            "name": "mussels cleaned",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g mussels cleaned"
+          },
+          {
+            "name": "frozen peas",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "100g frozen peas"
+          },
+          {
+            "name": "frozen baby broad beans",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "100g frozen baby broad beans"
+          },
+          {
+            "name": "parsley leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful  parsley leaves, roughly chopped"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil"
+          },
+          {
+            "name": "onion roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion roughly chopped"
+          },
+          {
+            "name": "x 400g can  chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd x 400g can  chopped tomatoes"
+          },
+          {
+            "name": "garlic cloves roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 garlic cloves roughly chopped"
+          },
+          {
+            "name": "chicken stock cube",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 chicken stock cube"
+          },
+          {
+            "name": "star anise",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 star anise"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This impressive Spanish one pot, with monkfish, king prawns and mussels, is perfect for feeding a crowd at a dinner party",
+        "servings": 8,
+        "prep_time_minutes": 40,
+        "cook_time_minutes": 70,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 384.0,
+          "protein_g": 26.0,
+          "carbs_g": 54.0,
+          "fat_g": 6.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_tomato-soup",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/tomato-soup",
+      "image_path": "meal_images/bbc_good_food/tomato-soup_3eeabb32.jpg",
+      "expected": {
+        "meal_name": "Tomato soup",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": ".25kg/2lb 4oz-2lb 12oz ripe  tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1-1.25kg/2lb 4oz-2lb 12oz ripe  tomatoes"
+          },
+          {
+            "name": "onion",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 medium onion"
+          },
+          {
+            "name": "carrot",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small carrot"
+          },
+          {
+            "name": "celery stick",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 celery stick"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "squirts of tomato pur\u00e9e (about 2 tsp)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 squirts of tomato pur\u00e9e (about 2 tsp)"
+          },
+          {
+            "name": "a good pinch of sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a good pinch of sugar"
+          },
+          {
+            "name": "bay leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 bay leaves"
+          },
+          {
+            "name": ".2 litres/2 pints hot vegetable stock (made with boiling water and 4 rounded tsp bouillon powder or 2 stock cubes)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1.2 litres/2 pints hot vegetable stock (made with boiling water and 4 rounded tsp bouillon powder or 2 stock cubes)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This warming vegan tomato soup recipe is best made using juicy, ripe tomatoes. These come into season in September but it can also be enjoyed all year round",
+        "servings": 4,
+        "prep_time_minutes": null,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 132.0,
+          "protein_g": 3.0,
+          "carbs_g": 13.0,
+          "fat_g": 7.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-noodle-soup",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-noodle-soup",
+      "image_path": "meal_images/bbc_good_food/chicken-noodle-soup_d4636825.jpg",
+      "expected": {
+        "meal_name": "Chicken noodle soup",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "chicken or vegetable stock (or Miso soup mix)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "900ml chicken or vegetable stock (or Miso soup mix)"
+          },
+          {
+            "name": "boneless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 boneless, skinless chicken breast (about 175g)"
+          },
+          {
+            "name": "chopped  fresh ginger",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp chopped  fresh ginger"
+          },
+          {
+            "name": "garlic clove finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 garlic clove finely chopped"
+          },
+          {
+            "name": "rice or wheat noodles",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g rice or wheat noodles"
+          },
+          {
+            "name": "sweetcorn canned or frozen",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "2 tbsp  sweetcorn canned or frozen"
+          },
+          {
+            "name": "mushrooms thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 mushrooms thinly sliced"
+          },
+          {
+            "name": "spring onions shredded",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 spring onions shredded"
+          },
+          {
+            "name": "soy sauce plus extra for serving",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp  soy sauce plus extra for serving"
+          },
+          {
+            "name": "mint or basil leaves and a little shredded chilli (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "mint or basil leaves and a little shredded chilli (optional), to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Mary Cadogan's homemade chicken noodle soup recipe will warm you up on a winter's evening. The broth contains ginger, which is particularly good for colds.",
+        "servings": 2,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 266.0,
+          "protein_g": 34.0,
+          "carbs_g": 26.0,
+          "fat_g": 2.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_french-onion-soup",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/french-onion-soup",
+      "image_path": "meal_images/bbc_good_food/french-onion-soup_cb6c4bbd.jpg",
+      "expected": {
+        "meal_name": "French onion soup",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g butter"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil"
+          },
+          {
+            "name": "onions halved and thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1kg onions halved and thinly sliced"
+          },
+          {
+            "name": "sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp sugar"
+          },
+          {
+            "name": "garlic cloves thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 garlic cloves thinly sliced"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp plain flour"
+          },
+          {
+            "name": "dry white wine",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "250ml dry white wine"
+          },
+          {
+            "name": ".3l hot strongly-flavoured  beef stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1.3l hot strongly-flavoured  beef stock"
+          },
+          {
+            "name": "baguette (depending on size)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4-8 slices baguette (depending on size)"
+          },
+          {
+            "name": "gruy\u00e8re finely grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "140g gruy\u00e8re finely grated"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Our French onion soup is deliciously rich and easy to make at home. This savoury soup is perfect for using up a garden glut and great for dinner parties",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 55,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 618.0,
+          "protein_g": 26.0,
+          "carbs_g": 59.0,
+          "fat_g": 27.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_the-best-spaghetti-bolognese-recipe",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/spaghetti-bolognese",
+      "image_path": "meal_images/bbc_good_food/the-best-spaghetti-bolognese-recipe_3b1feae9.jpg",
+      "expected": {
+        "meal_name": "The best spaghetti bolognese recipe",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil"
+          },
+          {
+            "name": "rashers smoked streaky bacon finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 rashers smoked streaky bacon finely chopped"
+          },
+          {
+            "name": "onions finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 medium onions finely chopped"
+          },
+          {
+            "name": "carrots trimmed and finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 carrots trimmed and finely chopped"
+          },
+          {
+            "name": "celery sticks finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 celery sticks finely chopped"
+          },
+          {
+            "name": "garlic cloves finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves finely chopped"
+          },
+          {
+            "name": "sprigs rosemary leaves picked and finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 sprigs rosemary leaves picked and finely chopped"
+          },
+          {
+            "name": "beef mince",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g beef mince"
+          },
+          {
+            "name": "x 400g tins plum tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g tins plum tomatoes"
+          },
+          {
+            "name": "pack basil leaves picked",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small pack basil leaves picked, \u00be finely chopped and the rest left whole for garnish"
+          },
+          {
+            "name": "dried oregano",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "1 tsp dried oregano"
+          },
+          {
+            "name": "fresh bay leaves",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 fresh bay leaves"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "beef stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 beef stock"
+          },
+          {
+            "name": "red chilli deseeded and finely chopped (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red chilli deseeded and finely chopped (optional)"
+          },
+          {
+            "name": "red wine",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "125ml red wine"
+          },
+          {
+            "name": "cherry tomatoes sliced in half",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 cherry tomatoes sliced in half"
+          },
+          {
+            "name": "parmesan grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "75g parmesan grated, plus extra to serve"
+          },
+          {
+            "name": "spaghetti",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g spaghetti"
+          },
+          {
+            "name": "crusty bread to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "crusty bread to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Our best ever spaghetti bolognese\u00a0is super easy and a true Italian classic\u00a0with a\u00a0meaty, chilli\u00a0sauce.\u00a0This\u00a0pasta bolognese recipe is sure to become a family favourite.",
+        "servings": 6,
+        "prep_time_minutes": 25,
+        "cook_time_minutes": 110,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 624.0,
+          "protein_g": 35.0,
+          "carbs_g": 58.0,
+          "fat_g": 25.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_ultimate-spaghetti-carbonara-recipe",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/ultimate-spaghetti-carbonara-recipe",
+      "image_path": "meal_images/bbc_good_food/ultimate-spaghetti-carbonara-recipe_246b22ac.jpg",
+      "expected": {
+        "meal_name": "Ultimate spaghetti carbonara recipe",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "pancetta",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g pancetta"
+          },
+          {
+            "name": "pecorino cheese",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g pecorino cheese"
+          },
+          {
+            "name": "parmesan",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g parmesan"
+          },
+          {
+            "name": "eggs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 large eggs"
+          },
+          {
+            "name": "spaghetti",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "350g spaghetti"
+          },
+          {
+            "name": "plump garlic cloves peeled and left whole",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 plump garlic cloves peeled and left whole"
+          },
+          {
+            "name": "unsalted butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g unsalted butter"
+          },
+          {
+            "name": "sea salt and freshly ground black pepper",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "sea salt and freshly ground black pepper"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Discover how to make\u00a0traditional spaghetti carbonara. This classic Italian pasta dish combines a silky cheese sauce with crisp pancetta and black pepper.",
+        "servings": 4,
+        "prep_time_minutes": 20,
+        "cook_time_minutes": 15,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 656.0,
+          "protein_g": 29.0,
+          "carbs_g": 66.0,
+          "fat_g": 30.03
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_easy-chicken-fajitas",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/easy-chicken-fajitas",
+      "image_path": "meal_images/bbc_good_food/easy-chicken-fajitas_0fc62c77.jpg",
+      "expected": {
+        "meal_name": "Easy chicken fajitas",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "chicken breasts finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 chicken breasts finely sliced"
+          },
+          {
+            "name": "red onion finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red onion finely sliced"
+          },
+          {
+            "name": "red pepper sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper sliced"
+          },
+          {
+            "name": "red chilli finely sliced (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red chilli finely sliced (optional)"
+          },
+          {
+            "name": "smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp smoked paprika"
+          },
+          {
+            "name": "ground coriander",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp ground coriander"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "ground cumin"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp olive oil"
+          },
+          {
+            "name": "lime juiced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 lime juiced"
+          },
+          {
+            "name": "Tabasco",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "Tabasco"
+          },
+          {
+            "name": "tortillas",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "8 tortillas"
+          },
+          {
+            "name": "mixed salad",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "mixed salad"
+          },
+          {
+            "name": "fresh salsa",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "230g fresh salsa"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Need a simple, vibrant midweek meal the family will love? Put together these easy chicken fajitas and people can create their own masterpieces at the table",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 10,
+        "cuisine": "mexican",
+        "meal_type": null,
+        "nutrition": {
+          "calories": 494.0,
+          "protein_g": 25.0,
+          "carbs_g": 50.0,
+          "fat_g": 20.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_no-fuss-shepherds-pie",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/shepherds-pie",
+      "image_path": "meal_images/bbc_good_food/no-fuss-shepherds-pie_6c8bebc6.jpg",
+      "expected": {
+        "meal_name": "No-fuss shepherd's pie",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "sunflower oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sunflower oil"
+          },
+          {
+            "name": "onion chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large onion chopped"
+          },
+          {
+            "name": "carrots chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 medium carrots chopped"
+          },
+          {
+            "name": "pack lamb mince",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g pack lamb mince"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "splash Worcestershire sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "large splash Worcestershire sauce"
+          },
+          {
+            "name": "beef stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500ml beef stock"
+          },
+          {
+            "name": "potatoes cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "900g potatoes cut into chunks"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g butter"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp milk"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "A classic comfort food favourite, this shepherd's pie sees succulent lamb mince and veg topped with a fluffy layer of mashed potato",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 60,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 657.0,
+          "protein_g": 32.0,
+          "carbs_g": 43.06,
+          "fat_g": 39.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-biryani",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-biryani",
+      "image_path": "meal_images/bbc_good_food/chicken-biryani_9705e3c5.jpg",
+      "expected": {
+        "meal_name": "Chicken biryani",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "basmati rice",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g basmati rice"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g butter"
+          },
+          {
+            "name": "onion finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large onion finely sliced"
+          },
+          {
+            "name": "bay leaf",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 bay leaf"
+          },
+          {
+            "name": "cardamom pods",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 cardamom pods"
+          },
+          {
+            "name": "cinnamon stick",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small  cinnamon stick"
+          },
+          {
+            "name": "turmeric",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp turmeric"
+          },
+          {
+            "name": "skinless chicken breasts cut into large chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless chicken breasts cut into large chunks"
+          },
+          {
+            "name": "balti curry paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp balti curry paste"
+          },
+          {
+            "name": "raisins",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g raisins"
+          },
+          {
+            "name": "chicken stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "850ml chicken stock"
+          },
+          {
+            "name": "coriander \u00bd chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "30g coriander \u00bd chopped, \u00bd leaves picked and 2 tbsp toasted flaked almonds, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "A great one-pot rice dish that still tastes great a few days later \u2013 perfect for leftovers",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 660.0,
+          "protein_g": 49.0,
+          "carbs_g": 79.0,
+          "fat_g": 16.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_easy-pancakes",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/easy-pancakes",
+      "image_path": "meal_images/bbc_good_food/easy-pancakes_5376fb20.jpg",
+      "expected": {
+        "meal_name": "Easy pancakes",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g plain flour"
+          },
+          {
+            "name": "eggs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 large eggs"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300ml milk"
+          },
+          {
+            "name": "sunflower or vegetable oil plus a little extra for frying",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sunflower or vegetable oil plus a little extra for frying"
+          },
+          {
+            "name": "lemon wedges to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "lemon wedges to serve (optional)"
+          },
+          {
+            "name": "caster sugar to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "caster sugar to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Learn how to make the perfect pancakes every time with our foolproof easy cr\u00eape recipe \u2013 elaborate flip optional",
+        "servings": 12,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 20,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 61.0,
+          "protein_g": 3.0,
+          "carbs_g": 7.0,
+          "fat_g": 2.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-korma",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-korma",
+      "image_path": "meal_images/bbc_good_food/chicken-korma_ca3a7396.jpg",
+      "expected": {
+        "meal_name": "Chicken korma",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "onion chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion chopped"
+          },
+          {
+            "name": "garlic cloves roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves roughly chopped"
+          },
+          {
+            "name": "thumb-sized piece ginger roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "thumb-sized piece ginger roughly chopped"
+          },
+          {
+            "name": "korma paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp korma paste"
+          },
+          {
+            "name": "skinless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless, boneless chicken breasts cut into bite-sized pieces"
+          },
+          {
+            "name": "ground almonds plus extra to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g ground almonds plus extra to serve (optional)"
+          },
+          {
+            "name": "sultanas",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp sultanas"
+          },
+          {
+            "name": "chicken stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400ml chicken stock"
+          },
+          {
+            "name": "golden caster sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bc tsp golden caster sugar"
+          },
+          {
+            "name": "pot 0% fat Greek yogurt",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150g pot 0% fat Greek yogurt"
+          },
+          {
+            "name": "bunch coriander chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "small bunch coriander chopped"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Want a curry without too many\u00a0calories? Use\u00a0fat-free Greek yogurt instead of cream for a\u00a0healthy chicken\u00a0korma that will give your local takeaway a run for its money",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 376.0,
+          "protein_g": 40.0,
+          "carbs_g": 28.0,
+          "fat_g": 11.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_beef-stroganoff",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/beef-stroganoff",
+      "image_path": "meal_images/bbc_good_food/beef-stroganoff_c4fd7c82.jpg",
+      "expected": {
+        "meal_name": "Beef stroganoff",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil"
+          },
+          {
+            "name": "onion sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion sliced"
+          },
+          {
+            "name": "of  garlic",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 clove of  garlic"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp butter"
+          },
+          {
+            "name": "g/9oz mushrooms sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "250g/9oz mushrooms sliced"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp plain flour"
+          },
+          {
+            "name": "g/1lb 2oz fillet steak sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "500g/1lb 2oz fillet steak sliced"
+          },
+          {
+            "name": "g/5oz cr\u00e8me fra\u00eeche",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150g/5oz cr\u00e8me fra\u00eeche"
+          },
+          {
+            "name": "English mustard",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp English mustard"
+          },
+          {
+            "name": "ml/3\u00bdfl oz beef stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml/3\u00bdfl oz beef stock"
+          },
+          {
+            "name": "pack of parsley chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd small pack of parsley chopped"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make a classic beef stroganoff with steak and mushrooms for a tasty midweek meal. Garnish with parsley and serve with pappardelle pasta or rice.",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 35,
+        "cuisine": null,
+        "meal_type": "dinner",
+        "nutrition": {
+          "calories": 438.0,
+          "protein_g": 30.0,
+          "carbs_g": 8.0,
+          "fat_g": 31.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_crispy-chilli-beef",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/crispy-chilli-beef",
+      "image_path": "meal_images/bbc_good_food/crispy-chilli-beef_5debdcbe.jpg",
+      "expected": {
+        "meal_name": "Crispy chilli beef",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "thin-cut  minute steak very thinly sliced into strips",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "350g thin-cut  minute steak very thinly sliced into strips"
+          },
+          {
+            "name": "cornflour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp cornflour"
+          },
+          {
+            "name": "Chinese five-spice powder",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp Chinese five-spice powder"
+          },
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100ml vegetable oil"
+          },
+          {
+            "name": "red pepper thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper thinly sliced"
+          },
+          {
+            "name": "red chilli thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red chilli thinly sliced"
+          },
+          {
+            "name": "spring onions sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 spring onions sliced, green and white parts separated"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "thumb-sized piece  ginger cut into matchsticks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "thumb-sized piece  ginger cut into matchsticks"
+          },
+          {
+            "name": "rice wine vinegar or white wine vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp rice wine vinegar or white wine vinegar"
+          },
+          {
+            "name": "soy sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp soy sauce"
+          },
+          {
+            "name": "sweet chilli sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp sweet chilli sauce"
+          },
+          {
+            "name": "tomato ketchup",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp tomato ketchup"
+          },
+          {
+            "name": "cooked noodles to serve (optional)",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked noodles to serve (optional)"
+          },
+          {
+            "name": "prawn crackers to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "prawn crackers to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Ditch the takeaway and whip up this Chinese-inspired flash-fried steak with a sweet gingery sauce and red peppers",
+        "servings": 3,
+        "prep_time_minutes": 25,
+        "cook_time_minutes": 15,
+        "cuisine": "chinese",
+        "meal_type": null,
+        "nutrition": {
+          "calories": 454.0,
+          "protein_g": 26.0,
+          "carbs_g": 32.0,
+          "fat_g": 23.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_quick-cauliflower-cheese",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/cauliflower-cheese",
+      "image_path": "meal_images/bbc_good_food/quick-cauliflower-cheese_0e7aafb2.jpg",
+      "expected": {
+        "meal_name": "Quick cauliflower cheese",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "mature cheddar grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g mature cheddar grated"
+          },
+          {
+            "name": "fresh white breadcrumbs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g fresh white breadcrumbs"
+          },
+          {
+            "name": "flat-leaf parsley roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful flat-leaf parsley roughly chopped"
+          },
+          {
+            "name": "cauliflower cut into florets",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 large cauliflower cut into florets"
+          },
+          {
+            "name": "full-fat milk plus a splash",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1l full-fat milk plus a splash"
+          },
+          {
+            "name": "onion halved",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small onion halved"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g butter"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "85g plain flour"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Everyone's favourite side dish,\u00a0using mature cheddar and a hint of onion for extra flavour - the perfect accompaniment to a roast",
+        "servings": 6,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 403.0,
+          "protein_g": 15.0,
+          "carbs_g": 28.0,
+          "fat_g": 25.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_avocado-toast",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/avocado-toast",
+      "image_path": "meal_images/bbc_good_food/avocado-toast_63ffefd9.jpg",
+      "expected": {
+        "meal_name": "Avocado toast",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "ripe avocado",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 ripe avocado"
+          },
+          {
+            "name": "lemon",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd lemon"
+          },
+          {
+            "name": "pinch chilli flakes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "big pinch chilli flakes"
+          },
+          {
+            "name": "sourdough bread",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 slices sourdough bread"
+          },
+          {
+            "name": "good drizzle extra virgin olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "good drizzle extra virgin olive oil"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make this simple speedy breakfast with just a few ingredients. Our smashed avocado on toast uses crusty sourdough bread and a pinch of chilli for a kick.",
+        "servings": 1,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": "breakfast",
+        "nutrition": {
+          "calories": 501.0,
+          "protein_g": 10.0,
+          "carbs_g": 37.0,
+          "fat_g": 33.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_hummus",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/hummus",
+      "image_path": "meal_images/bbc_good_food/hummus_2066caad.jpg",
+      "expected": {
+        "meal_name": "Hummus",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "can chickpeas drained",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 can chickpeas drained"
+          },
+          {
+            "name": "ml/2fl oz oil plus 30ml/1fl oz for a looser consistency",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "60ml/2fl oz oil plus 30ml/1fl oz for a looser consistency"
+          },
+          {
+            "name": "garlic clove peeled and crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small garlic clove peeled and crushed"
+          },
+          {
+            "name": "lemon juiced then \u00bd zested",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 lemon juiced then \u00bd zested"
+          },
+          {
+            "name": "tbsp/45ml tahini",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp/45ml tahini"
+          },
+          {
+            "name": "olive oil to garnish (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp olive oil to garnish (optional)"
+          },
+          {
+            "name": "mixed crudit\u00e9s and toasted pitta bread",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "mixed crudit\u00e9s and toasted pitta bread, to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This creamy, rich vegan hummus is made using just five ingredients and\u00a0is ready in\u00a010 minutes. Serve with\u00a0crunchy seasonal veg or warm pitta breads",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": null,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 380.0,
+          "protein_g": 7.0,
+          "carbs_g": 9.0,
+          "fat_g": 28.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_creamy-spinach-chicken",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/creamy-spinach-chicken",
+      "image_path": "meal_images/bbc_good_food/creamy-spinach-chicken_fcda8e1b.jpg",
+      "expected": {
+        "meal_name": "Creamy spinach chicken",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "unsalted butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "30g unsalted butter"
+          },
+          {
+            "name": "baby spinach",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "240g baby spinach"
+          },
+          {
+            "name": "chicken breasts skin removed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 chicken breasts skin removed, sliced crosswise into strips"
+          },
+          {
+            "name": "garlic cloves finely chopped or grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 garlic cloves finely chopped or grated"
+          },
+          {
+            "name": "double cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200ml double cream"
+          },
+          {
+            "name": "Parmigiano Reggiano finely grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40g Parmigiano Reggiano finely grated"
+          },
+          {
+            "name": "cooked rice or potatoes",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked rice or potatoes, to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Enjoy our creamy spinach chicken with plenty of sauce and rice or potatoes on the side. Serving four, it's an ideal midweek dinner for a family",
+        "servings": null,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 588.0,
+          "protein_g": 51.0,
+          "carbs_g": 2.0,
+          "fat_g": 42.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_3-veg-mac-n-cheese",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/3-veg-mac-n-cheese",
+      "image_path": "meal_images/bbc_good_food/3-veg-mac-n-cheese_1d6338af.jpg",
+      "expected": {
+        "meal_name": "3-veg mac 'n' cheese",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "butternut squash cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150g butternut squash cut into chunks"
+          },
+          {
+            "name": "penne (we used Napolina 50% white 50% wholemeal)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g penne (we used Napolina 50% white 50% wholemeal)"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40g butter"
+          },
+          {
+            "name": "leek finely sliced (about 50g)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small leek finely sliced (about 50g)"
+          },
+          {
+            "name": "flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "25g flour"
+          },
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "600ml milk"
+          },
+          {
+            "name": "frozen peas",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "100g frozen peas"
+          },
+          {
+            "name": "mature Cheddar cheese (we used a vegetarian version)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "175g mature Cheddar cheese (we used a vegetarian version)"
+          },
+          {
+            "name": "day-old brown bread blitzed into crumbs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 slice day-old brown bread blitzed into crumbs"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Sneak vegetables into\u00a0macaroni cheese, a popular family meal that becomes even more\u00a0nourishing for kids\u00a0with the addition of butternut squash, leeks and peas",
+        "servings": 2,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 40,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 680.0,
+          "protein_g": 29.0,
+          "carbs_g": 69.0,
+          "fat_g": 31.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_tomato-pasta-soup",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/orzo-tomato-soup",
+      "image_path": "meal_images/bbc_good_food/tomato-pasta-soup_956619dd.jpg",
+      "expected": {
+        "meal_name": "Tomato & pasta soup",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "onion chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion chopped"
+          },
+          {
+            "name": "celery sticks chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 celery sticks chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "can chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can chopped tomatoes"
+          },
+          {
+            "name": "can chickpeas",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can chickpeas"
+          },
+          {
+            "name": "orzo or other small pasta shapes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150g orzo or other small pasta shapes"
+          },
+          {
+            "name": "vegetable stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "700ml vegetable stock"
+          },
+          {
+            "name": "basil pesto",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp basil pesto"
+          },
+          {
+            "name": "crusty bread to serve",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "crusty bread to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Make our simple, budget-friendly tomato, pasta and chickpea soup in just 30 minutes. This easy, vegetarian family meal is healthy and even low fat",
+        "servings": 4,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 349.0,
+          "protein_g": 12.0,
+          "carbs_g": 45.0,
+          "fat_g": 12.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_easy-chicken-curry",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/easy-chicken-curry",
+      "image_path": "meal_images/bbc_good_food/easy-chicken-curry_d4390be6.jpg",
+      "expected": {
+        "meal_name": "Easy chicken curry",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "sunflower oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp sunflower oil"
+          },
+          {
+            "name": "onion thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion thinly sliced"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "thumb-sized piece of ginger grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "thumb-sized piece of ginger grated"
+          },
+          {
+            "name": "chicken thighs boneless and skinless",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 chicken thighs boneless and skinless"
+          },
+          {
+            "name": "spice paste (tikka works well)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp medium spice paste (tikka works well)"
+          },
+          {
+            "name": "can chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can chopped tomatoes"
+          },
+          {
+            "name": "Greek yogurt",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "100g Greek yogurt"
+          },
+          {
+            "name": "bunch of coriander leaves chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 small bunch of coriander leaves chopped"
+          },
+          {
+            "name": "ground almonds",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g ground almonds"
+          },
+          {
+            "name": "naan breads or cooked basmati rice",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "naan breads or cooked basmati rice, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This easy staple chicken curry is a fantastic recipe for family dinners. It's made with just a handful of ingredients and is enriched with creamy yogurt",
+        "servings": 4,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 45,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 354.0,
+          "protein_g": 24.0,
+          "carbs_g": 10.0,
+          "fat_g": 23.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_creamy-pesto-kale-pasta",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/creamy-pesto-kale-pasta",
+      "image_path": "meal_images/bbc_good_food/creamy-pesto-kale-pasta_2bceb658.jpg",
+      "expected": {
+        "meal_name": "Creamy pesto & kale pasta",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "rapeseed oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp rapeseed oil"
+          },
+          {
+            "name": "red onions thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 red onions thinly sliced"
+          },
+          {
+            "name": "kale",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g kale"
+          },
+          {
+            "name": "wholemeal  pasta (penne or mafalda work well)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g wholemeal  pasta (penne or mafalda work well)"
+          },
+          {
+            "name": "reduced-fat soft cheese",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp reduced-fat soft cheese"
+          },
+          {
+            "name": "fresh or jar pesto or vegetarian alternative",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp fresh or jar pesto or vegetarian alternative"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Enjoy our creamy pesto and kale pasta as a tasty and nutritious supper. Make it with just a handful of ingredients and storecupboard staples",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 25,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 428.0,
+          "protein_g": 17.0,
+          "carbs_g": 55.0,
+          "fat_g": 13.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_speedy-lentil-coconut-curry",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/speedy-lentil-coconut-curry",
+      "image_path": "meal_images/bbc_good_food/speedy-lentil-coconut-curry_db52d543.jpg",
+      "expected": {
+        "meal_name": "Speedy lentil coconut curry",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "onion roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion roughly chopped"
+          },
+          {
+            "name": "garlic cloves roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves roughly chopped"
+          },
+          {
+            "name": "red or green chilli roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red or green chilli roughly chopped"
+          },
+          {
+            "name": "carrot roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 carrot roughly chopped"
+          },
+          {
+            "name": "piece of ginger peeled and chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "10g piece of ginger peeled and chopped"
+          },
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp vegetable oil"
+          },
+          {
+            "name": "\u00bd tbsp tikka masala curry paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 \u00bd tbsp tikka masala curry paste"
+          },
+          {
+            "name": "can cooked green lentils",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "400g can cooked green lentils"
+          },
+          {
+            "name": "light coconut milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "220ml  light coconut milk"
+          },
+          {
+            "name": "frozen peas",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "200g frozen peas"
+          },
+          {
+            "name": "coriander roughly chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "10g coriander roughly chopped"
+          },
+          {
+            "name": "cooked brown rice",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "200g cooked brown rice"
+          },
+          {
+            "name": "light coconut or natural yogurt to serve",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp light coconut or natural yogurt to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This quick and easy curry has such great depth of flavour \u2013 it tastes like it\u2019s been cooked for hours. It's healthy too, as well as being low in fat and calories",
+        "servings": 4,
+        "prep_time_minutes": 5,
+        "cook_time_minutes": 20,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 282.01,
+          "protein_g": 12.0,
+          "carbs_g": 37.0,
+          "fat_g": 8.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_honey-chicken",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/honey-chicken",
+      "image_path": "meal_images/bbc_good_food/honey-chicken_d7a1a7f9.jpg",
+      "expected": {
+        "meal_name": "Honey chicken",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "chicken breasts (about 600g)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 chicken breasts (about 600g), trimmed and cut into 2-3cm cubes"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp plain flour"
+          },
+          {
+            "name": "piece of ginger peeled and finely grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40g piece of ginger peeled and finely grated"
+          },
+          {
+            "name": "garlic cloves finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 garlic cloves finely chopped"
+          },
+          {
+            "name": "soy sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 tbsp soy sauce"
+          },
+          {
+            "name": "honey",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "5 tbsp honey"
+          },
+          {
+            "name": "lemon",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd-1 lemon, juiced"
+          },
+          {
+            "name": "sunflower",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sunflower, vegetable, rice bran or rapeseed oil"
+          },
+          {
+            "name": "cooked rice and steamed broccoli",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked rice and steamed broccoli, to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Rustle up this family-friendly honey chicken, flavoured with garlic, soy sauce, lemon and ginger, in 30 minutes. Serve with rice and broccoli for a filling meal",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 15,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 333.0,
+          "protein_g": 36.0,
+          "carbs_g": 35.0,
+          "fat_g": 6.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_easy-vegetarian-chilli",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/easy-vegetarian-chilli",
+      "image_path": "meal_images/bbc_good_food/easy-vegetarian-chilli_8cbf1590.jpg",
+      "expected": {
+        "meal_name": "Easy vegetarian chilli",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "vegetable oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp vegetable oil"
+          },
+          {
+            "name": "carrots finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 carrots finely chopped"
+          },
+          {
+            "name": "celery sticks finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 celery sticks finely chopped"
+          },
+          {
+            "name": "onions finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 onions finely chopped"
+          },
+          {
+            "name": "dried mixed herbs",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "2 tsp dried mixed herbs"
+          },
+          {
+            "name": "garlic cloves crushed or finely grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed or finely grated"
+          },
+          {
+            "name": "red pepper sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper sliced"
+          },
+          {
+            "name": "green pepper sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 green pepper sliced"
+          },
+          {
+            "name": "chilli powder (depending on how hot you like it)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2-3 tsp chilli powder (depending on how hot you like it)"
+          },
+          {
+            "name": "sweet smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp sweet smoked paprika"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "can red kidney beans",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can red kidney beans, drained"
+          },
+          {
+            "name": "can black beans",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400g can black beans, drained"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "vegetable stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400ml vegetable stock"
+          },
+          {
+            "name": "cooked rice grated cheddar and soured cream",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked rice grated cheddar and soured cream, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Rustle up our easy veggie chilli. It's a great recipe for batch-cooking \u2013 you can easily double it if you have a pan big enough, and freeze the rest",
+        "servings": 8,
+        "prep_time_minutes": 25,
+        "cook_time_minutes": 55,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 157.0,
+          "protein_g": 7.0,
+          "carbs_g": 19.0,
+          "fat_g": 4.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_fajita-style-pasta",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/fajita-style-pasta",
+      "image_path": "meal_images/bbc_good_food/fajita-style-pasta_15860b0e.jpg",
+      "expected": {
+        "meal_name": "Fajita-style pasta",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp  olive oil"
+          },
+          {
+            "name": "skinless chicken breasts cut into strips",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 large skinless chicken breasts cut into strips"
+          },
+          {
+            "name": "onion thinly sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion thinly sliced"
+          },
+          {
+            "name": "red pepper deseeded and sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 red pepper deseeded and sliced"
+          },
+          {
+            "name": "yellow pepper deseeded and sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 yellow pepper deseeded and sliced"
+          },
+          {
+            "name": "garlic clove crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 garlic clove crushed"
+          },
+          {
+            "name": "\u20444 tsp chilli powder",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1\u20444 tsp chilli powder"
+          },
+          {
+            "name": "heaped tsp sweet smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 heaped tsp sweet smoked paprika"
+          },
+          {
+            "name": "\u20442 tsp dried oregano",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "1\u20442 tsp dried oregano"
+          },
+          {
+            "name": "ground coriander",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp ground coriander"
+          },
+          {
+            "name": "\u20442 tsp ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1\u20442 tsp ground cumin"
+          },
+          {
+            "name": "tomato pur\u00e9e",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 tbsp tomato pur\u00e9e"
+          },
+          {
+            "name": "double cream",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "80ml double cream"
+          },
+          {
+            "name": "penne or rigatoni pasta",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "350g penne or rigatoni pasta"
+          },
+          {
+            "name": "\u20442 small bunch of flat-leaf parsley finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1\u20442 small bunch of flat-leaf parsley finely chopped"
+          },
+          {
+            "name": "grated parmesan or cheddar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "grated parmesan or cheddar, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Take the aromatic flavours of a classic Mexican fajita and combine with pasta for this easy, vibrant meal. It's an ideal Friday night dinner",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 25,
+        "cuisine": "mexican",
+        "meal_type": null,
+        "nutrition": {
+          "calories": 395.0,
+          "protein_g": 23.0,
+          "carbs_g": 41.0,
+          "fat_g": 14.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_meatball-black-bean-chilli",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/meatball-black-bean-chilli",
+      "image_path": "meal_images/bbc_good_food/meatball-black-bean-chilli_5cadf2a5.jpg",
+      "expected": {
+        "meal_name": "Meatball black bean chilli",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "beef meatballs",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "12 beef meatballs"
+          },
+          {
+            "name": "onion finely sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion finely sliced"
+          },
+          {
+            "name": "mixed peppers sliced",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 mixed peppers sliced"
+          },
+          {
+            "name": "bunch coriander leaves and stalks chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd large bunch coriander leaves and stalks chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 large garlic cloves crushed"
+          },
+          {
+            "name": "hot smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp hot smoked paprika"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp ground cumin"
+          },
+          {
+            "name": "heaped tbsp light brown soft sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 heaped tbsp light brown soft sugar"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "x 400g cans black beans drained and rinsed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans black beans drained and rinsed"
+          },
+          {
+            "name": "cooked rice to serve",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "cooked rice to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Double the amounts for this one-pot black bean chilli, then\u00a0freeze the leftovers\u00a0for busy days. It tastes just as great\u00a0reheated as it does freshly cooked",
+        "servings": 4,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 423.0,
+          "protein_g": 24.0,
+          "carbs_g": 36.0,
+          "fat_g": 16.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_double-bean-roasted-pepper-chilli",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/double-bean-roasted-pepper-chilli",
+      "image_path": "meal_images/bbc_good_food/double-bean-roasted-pepper-chilli_b12e2612.jpg",
+      "expected": {
+        "meal_name": "Double bean & roasted pepper chilli",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "onions chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 onions chopped"
+          },
+          {
+            "name": "celery sticks finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 celery sticks finely chopped"
+          },
+          {
+            "name": "yellow or orange peppers finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 yellow or orange peppers finely chopped"
+          },
+          {
+            "name": "sunflower oil or rapeseed oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp sunflower oil or rapeseed oil"
+          },
+          {
+            "name": "x 460g jars roasted red peppers",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "2 x 460g jars roasted red peppers"
+          },
+          {
+            "name": "chipotle paste",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp chipotle paste"
+          },
+          {
+            "name": "red wine vinegar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp red wine vinegar"
+          },
+          {
+            "name": "cocoa powder",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp cocoa powder"
+          },
+          {
+            "name": "dried oregano",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "1 tbsp dried oregano"
+          },
+          {
+            "name": "sweet smoked paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sweet smoked paprika"
+          },
+          {
+            "name": "ground cumin",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp ground cumin"
+          },
+          {
+            "name": "ground cinnamon",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp ground cinnamon"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "can refried beans",
+            "name_variants": [],
+            "state": "cooked",
+            "required": true,
+            "raw_text": "400g can refried beans"
+          },
+          {
+            "name": "x 400g cans kidney beans drained and rinsed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "3 x 400g cans kidney beans drained and rinsed"
+          },
+          {
+            "name": "x 400g cans  black beans drained and rinsed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans  black beans drained and rinsed"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "This warming vegetarian\u00a0chilli is a low-fat, healthy option that packs in the veggies and flavour. Serve with\u00a0Tabasco sauce, soured cream or yoghurt.",
+        "servings": 8,
+        "prep_time_minutes": 30,
+        "cook_time_minutes": 75,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 324.0,
+          "protein_g": 17.0,
+          "carbs_g": 42.0,
+          "fat_g": 6.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_fish-pie-mac-n-cheese",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/fish-pie-mac-n-cheese",
+      "image_path": "meal_images/bbc_good_food/fish-pie-mac-n-cheese_0ec46079.jpg",
+      "expected": {
+        "meal_name": "Fish pie mac \u2019n\u2019 cheese",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "milk",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "650ml milk"
+          },
+          {
+            "name": "plain flour",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40g plain flour"
+          },
+          {
+            "name": "butter",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "40g butter"
+          },
+          {
+            "name": "Dijon mustard",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tsp Dijon mustard"
+          },
+          {
+            "name": "mature  cheddar grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "150g mature  cheddar grated"
+          },
+          {
+            "name": "frozen peas",
+            "name_variants": [],
+            "state": "processed",
+            "required": true,
+            "raw_text": "180g frozen peas"
+          },
+          {
+            "name": "of  parsley chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "handful of  parsley chopped"
+          },
+          {
+            "name": "macaroni",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g macaroni"
+          },
+          {
+            "name": "fish pie mix (smoked fish",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g fish pie mix (smoked fish, white fish and salmon)"
+          },
+          {
+            "name": "green salad to serve (optional)",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "green salad to serve (optional)"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Combine fish pie with mac 'n' cheese to make this crowd-pleasing dinner. The dish freezes well, so you can make ahead if you like for busy weeknights",
+        "servings": 6,
+        "prep_time_minutes": 10,
+        "cook_time_minutes": 40,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 504.0,
+          "protein_g": 28.0,
+          "carbs_g": 47.0,
+          "fat_g": 22.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-stroganoff",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-stroganoff",
+      "image_path": "meal_images/bbc_good_food/chicken-stroganoff_f4926262.jpg",
+      "expected": {
+        "meal_name": "Chicken stroganoff",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp olive oil"
+          },
+          {
+            "name": "skinless chicken breasts cut into chunks",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless chicken breasts cut into chunks"
+          },
+          {
+            "name": "onions finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 onions finely chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 garlic cloves crushed"
+          },
+          {
+            "name": "sweet paprika",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tbsp sweet paprika"
+          },
+          {
+            "name": "chicken stock",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "400ml chicken stock"
+          },
+          {
+            "name": "Dijon mustard",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tsp Dijon mustard"
+          },
+          {
+            "name": "Worcestershire sauce",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 tbsp Worcestershire sauce"
+          },
+          {
+            "name": "soured cream or cr\u00e8me fraiche",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "200g soured cream or cr\u00e8me fraiche"
+          },
+          {
+            "name": "a large handful of parsley chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "a large handful of parsley chopped"
+          },
+          {
+            "name": "rice mash or pasta",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "rice mash or pasta, to serve"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Use chicken thigh fillets if you prefer in this chicken stroganoff, and use half-fat soured cream for a lighter version. Enjoy with pasta, mash or rice.",
+        "servings": 4,
+        "prep_time_minutes": 15,
+        "cook_time_minutes": 30,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 425.0,
+          "protein_g": 43.0,
+          "carbs_g": 11.0,
+          "fat_g": 23.0
+        }
+      },
+      "difficulty": "medium"
+    },
+    {
+      "id": "bbc_chicken-pasta-bake",
+      "source": "bbc_good_food",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-pasta-bake",
+      "image_path": "meal_images/bbc_good_food/chicken-pasta-bake_0dc8078a.jpg",
+      "expected": {
+        "meal_name": "Chicken pasta bake",
+        "meal_name_alternatives": [],
+        "ingredients": [
+          {
+            "name": "olive oil",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 tbsp olive oil"
+          },
+          {
+            "name": "onion finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 onion finely chopped"
+          },
+          {
+            "name": "garlic cloves crushed",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 garlic cloves crushed"
+          },
+          {
+            "name": "chilli flakes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bc tsp chilli flakes"
+          },
+          {
+            "name": "x 400g cans chopped tomatoes",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "2 x 400g cans chopped tomatoes"
+          },
+          {
+            "name": "caster sugar",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "1 tsp caster sugar"
+          },
+          {
+            "name": "mascarpone",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "6 tbsp mascarpone"
+          },
+          {
+            "name": "skinless chicken breasts",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "4 skinless chicken breasts, sliced into strips"
+          },
+          {
+            "name": "penne",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "300g penne"
+          },
+          {
+            "name": "mature cheddar grated",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "70g mature cheddar grated"
+          },
+          {
+            "name": "grated mozzarella",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "50g grated mozzarella"
+          },
+          {
+            "name": "bunch of parsley finely chopped",
+            "name_variants": [],
+            "state": "raw",
+            "required": true,
+            "raw_text": "\u00bd small bunch of parsley finely chopped"
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Enjoy this gooey cheese and chicken pasta bake\u00a0for the ultimate weekday family dinner. Serve straight from\u00a0the dish with a dressed green salad",
+        "servings": 6,
+        "prep_time_minutes": 30,
+        "cook_time_minutes": 45,
+        "cuisine": null,
+        "meal_type": null,
+        "nutrition": {
+          "calories": 575.0,
+          "protein_g": 33.0,
+          "carbs_g": 41.0,
+          "fat_g": 30.0
+        }
+      },
+      "difficulty": "medium"
+    }
+  ]
+}
