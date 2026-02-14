@@ -75,6 +75,13 @@ docker compose exec web bash
 ```
 Do NOT run pytest or python directly on the host - it will fail to connect to the database.
 
+### CI Status Check (IMPORTANT)
+At the start of each session, check if CI is green:
+```bash
+gh run list --limit 1 --json conclusion,name,headBranch -q '.[] | "\(.conclusion) - \(.name) on \(.headBranch)"'
+```
+If the last run failed, notify the user and prioritize fixing it before new work. CI failures block the team.
+
 ## Architecture Decisions
 
 ### Database Schema (Initial)
