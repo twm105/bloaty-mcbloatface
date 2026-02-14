@@ -48,7 +48,8 @@ class DiagnosisResult(Base):
     run = relationship("DiagnosisRun", back_populates="results")
     ingredient = relationship("Ingredient")
     citations = relationship("DiagnosisCitation", back_populates="result", cascade="all, delete-orphan")
-    feedback = relationship("DiagnosisFeedback", back_populates="result", cascade="all, delete-orphan")
+    # Note: feedback is now stored in unified user_feedback table (feature_type='diagnosis_result')
+    # Query via: db.query(UserFeedback).filter_by(feature_type='diagnosis_result', feature_id=result.id)
 
     def __repr__(self):
         return f"<DiagnosisResult(id={self.id}, ingredient_id={self.ingredient_id}, confidence={self.confidence_score})>"

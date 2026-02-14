@@ -18,7 +18,7 @@ from app.models.eval_run import EvalRun
 from app.models.diagnosis_run import DiagnosisRun
 from app.models.diagnosis_result import DiagnosisResult
 from app.models.diagnosis_citation import DiagnosisCitation
-from app.models.diagnosis_feedback import DiagnosisFeedback
+from app.models.user_feedback import UserFeedback
 from app.models.discounted_ingredient import DiscountedIngredient
 from app.models.ai_usage_log import AIUsageLog
 from app.models.session import Session
@@ -40,7 +40,7 @@ __all__ = [
     "DiagnosisRun",
     "DiagnosisResult",
     "DiagnosisCitation",
-    "DiagnosisFeedback",
+    "UserFeedback",
     "DiscountedIngredient",
     "AIUsageLog",
     "Session",

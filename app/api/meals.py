@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.models.meal_ingredient import IngredientState
+from app.models.user_feedback import UserFeedback
 from app.services.meal_service import meal_service
 from app.services.file_service import file_service
 from app.services.ai_service import ClaudeService, ServiceUnavailableError, RateLimitError
@@ -94,13 +95,28 @@ async def edit_ingredients_page(
     if meal.user_id != user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
+    # Get existing feedback for meal analysis (if any)
+    existing_feedback = None
+    if meal.ai_suggested_ingredients:
+        existing_feedback = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.user_id == user.id,
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal_id,
+            )
+            .first()
+        )
+
     return templates.TemplateResponse(
         "meals/edit_ingredients.html",
         {
             "request": request,
             "meal": meal,
             "user": user,
-            "ingredient_states": [state.value for state in IngredientState]
+            "ingredient_states": [state.value for state in IngredientState],
+            "existing_rating": existing_feedback.rating if existing_feedback else 0,
+            "existing_feedback": existing_feedback.feedback_text if existing_feedback else "",
         }
     )
 
@@ -155,6 +171,7 @@ async def analyze_meal_image(
 
         # Update meal with AI-suggested name and store original suggestions
         meal.name = result["meal_name"]
+        meal.name_source = 'ai'  # Track that name came from AI
         meal.ai_suggested_ingredients = result["ingredients"]  # Store for evals
         db.commit()
 

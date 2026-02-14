@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models import DiagnosisRun, DiagnosisResult, DiscountedIngredient
+from app.models import DiagnosisRun, DiagnosisResult, DiscountedIngredient, UserFeedback
 from app.models.user import User
 from app.services.diagnosis_service import DiagnosisService
 from app.services.diagnosis_queue_service import DiagnosisQueueService
@@ -288,8 +288,7 @@ async def get_diagnosis(
             .joinedload(DiagnosisResult.ingredient),
             joinedload(DiagnosisRun.results)
             .joinedload(DiagnosisResult.citations),
-            joinedload(DiagnosisRun.results)
-            .joinedload(DiagnosisResult.feedback),
+            # Note: feedback is now in unified user_feedback table
             joinedload(DiagnosisRun.discounted_ingredients)
             .joinedload(DiscountedIngredient.ingredient),
             joinedload(DiagnosisRun.discounted_ingredients)
@@ -330,6 +329,21 @@ async def get_diagnosis(
 
     discounted = latest_run.discounted_ingredients or []
 
+    # Load feedback for all results from unified user_feedback table
+    result_ids = [r.id for r in results]
+    feedback_records = (
+        db.query(UserFeedback)
+        .filter(
+            UserFeedback.user_id == user.id,
+            UserFeedback.feature_type == "diagnosis_result",
+            UserFeedback.feature_id.in_(result_ids),
+        )
+        .all()
+    ) if result_ids else []
+
+    # Build feedback lookup by result_id
+    feedback_by_result = {f.feature_id: f for f in feedback_records}
+
     # Show results page with run_id for SSE streaming
     return templates.TemplateResponse(
         "diagnosis/results.html",
@@ -344,6 +358,7 @@ async def get_diagnosis(
             "total_ingredients": latest_run.total_ingredients,
             "completed_ingredients": latest_run.completed_ingredients,
             "has_new_data": False,  # Holistic analysis always starts fresh
+            "feedback_by_result": feedback_by_result,  # Feedback lookup
         },
     )
 
@@ -357,10 +372,8 @@ async def submit_feedback(
     """
     Submit user feedback on a diagnosis result.
 
-    Validates rating range (0-5) and stores feedback in database.
+    Validates rating range (0-5) and stores feedback in unified user_feedback table.
     """
-    from app.models import DiagnosisFeedback
-
     # Validate rating
     if not 0 <= request.rating <= 5:
         raise HTTPException(status_code=400, detail="Rating must be between 0 and 5")
@@ -378,12 +391,13 @@ async def submit_feedback(
     if not result:
         raise HTTPException(status_code=404, detail="Diagnosis result not found")
 
-    # Check if feedback already exists
+    # Check if feedback already exists in unified table
     existing_feedback = (
-        db.query(DiagnosisFeedback)
+        db.query(UserFeedback)
         .filter(
-            DiagnosisFeedback.result_id == request.result_id,
-            DiagnosisFeedback.user_id == user.id,
+            UserFeedback.user_id == user.id,
+            UserFeedback.feature_type == "diagnosis_result",
+            UserFeedback.feature_id == request.result_id,
         )
         .first()
     )
@@ -394,10 +408,11 @@ async def submit_feedback(
         existing_feedback.feedback_text = request.feedback_text
         existing_feedback.created_at = datetime.utcnow()
     else:
-        # Create new feedback
-        feedback = DiagnosisFeedback(
-            result_id=request.result_id,
+        # Create new feedback in unified table
+        feedback = UserFeedback(
             user_id=user.id,
+            feature_type="diagnosis_result",
+            feature_id=request.result_id,
             rating=request.rating,
             feedback_text=request.feedback_text,
         )

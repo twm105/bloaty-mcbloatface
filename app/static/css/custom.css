@@ -133,3 +133,117 @@ button,
 a[role="button"] {
     border-radius: 50px;
 }
+
+/* Ingredient source badges */
+.source-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    margin-left: var(--space-2);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.source-ai {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.source-edited {
+    color: #6BA4C8;
+    background: rgba(69, 123, 157, 0.1);
+    border: 1px solid rgba(69, 123, 157, 0.3);
+}
+
+/* Diagnosis/feedback section styles (shared) */
+.diagnosis-section {
+    margin-bottom: var(--space-4);
+}
+
+.diagnosis-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+/* Feedback rating component styles */
+.feedback-section {
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rating-stars {
+    display: flex;
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+}
+
+/* Feedback rating star buttons - complete reset */
+button.star-btn,
+.star-btn {
+    all: unset !important;  /* Reset ALL inherited/default styles */
+    cursor: pointer !important;
+    color: var(--color-text-tertiary) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2px !important;  /* Small padding for click target */
+    transition: color 0.15s ease !important;
+}
+
+button.star-btn.active,
+.star-btn.active {
+    color: #FFD700 !important;
+}
+
+button.star-btn:hover,
+.star-btn:hover {
+    color: #FFD700 !important;
+}
+
+button.star-btn:focus,
+.star-btn:focus {
+    outline: none !important;
+}
+
+.feedback-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: var(--space-2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+    resize: vertical;
+}
+
+.feedback-form {
+    margin-top: var(--space-3);
+}
+
+.rating-saving,
+.rating-saved {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--space-2);
+}
+
+.spinner-tiny {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--color-accent-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}

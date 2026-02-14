@@ -13,6 +13,7 @@ class Meal(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     name = Column(String(255))  # AI-suggested meal name (user editable)
+    name_source = Column(String(20), nullable=True)  # 'ai', 'user-edit', or None for manual entry
     status = Column(String(20), nullable=False, default='draft')  # 'draft' or 'published'
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     country = Column(String(100))  # Optional: where meal was consumed (e.g., "USA", "France", "Japan")

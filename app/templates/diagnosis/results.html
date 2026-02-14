@@ -228,8 +228,9 @@
                 {% set entity_type = 'diagnosis' %}
                 {% set entity_id = result.id %}
                 {% set endpoint_url = '/diagnosis/feedback' %}
-                {% set existing_rating = result.feedback[0].rating if result.feedback else 0 %}
-                {% set existing_feedback = result.feedback[0].feedback_text if result.feedback and result.feedback[0].feedback_text else '' %}
+                {% set result_feedback = feedback_by_result.get(result.id) %}
+                {% set existing_rating = result_feedback.rating if result_feedback else 0 %}
+                {% set existing_feedback = result_feedback.feedback_text if result_feedback and result_feedback.feedback_text else '' %}
                 {% include 'components/_feedback_rating.html' %}
             </div>
         </div>
@@ -328,7 +329,7 @@
                                     class="star-btn"
                                     :class="{ 'active': rating >= i }"
                                 >
-                                    <svg class="icon icon-sm" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" class="icon icon-sm" aria-hidden="true" style="overflow: visible;">
                                         <use href="/static/icons/lucide-sprite.svg#star"></use>
                                     </svg>
                                 </button>
@@ -625,13 +626,12 @@ function diagnosisResults() {
     };
 }
 
-// Reusable feedback rating component
+// Reusable feedback rating component (unified API)
 function feedbackRating(config) {
     return {
-        entityType: config.entityType || 'diagnosis',
-        entityId: config.entityId,
-        endpoint: config.endpoint || '/diagnosis/feedback',
-        idField: config.idField || 'result_id',
+        featureType: config.featureType || 'diagnosis_result',
+        featureId: config.featureId,
+        endpoint: config.endpoint || '/feedback',
         rating: config.existingRating || 0,
         feedback: config.existingFeedback || '',
         savedFeedback: config.existingFeedback || '',  // Track last saved comment
@@ -657,17 +657,18 @@ function feedbackRating(config) {
             this.submitting = true;
 
             try {
-                const body = {
-                    rating: stars,
-                    // Preserve existing comment when updating rating
-                    feedback_text: this.savedFeedback || null
-                };
-                body[this.idField] = this.entityId;
+                // Use FormData for unified endpoint
+                const formData = new FormData();
+                formData.append('feature_type', this.featureType);
+                formData.append('feature_id', this.featureId);
+                formData.append('rating', stars);
+                if (this.savedFeedback) {
+                    formData.append('feedback_text', this.savedFeedback);
+                }
 
                 await fetch(this.endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    body: formData
                 });
 
                 this.hasRated = true;
@@ -684,16 +685,16 @@ function feedbackRating(config) {
             this.commentSubmitting = true;
 
             try {
-                const body = {
-                    rating: this.rating,
-                    feedback_text: this.feedback
-                };
-                body[this.idField] = this.entityId;
+                // Use FormData for unified endpoint
+                const formData = new FormData();
+                formData.append('feature_type', this.featureType);
+                formData.append('feature_id', this.featureId);
+                formData.append('rating', this.rating);
+                formData.append('feedback_text', this.feedback);
 
                 await fetch(this.endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    body: formData
                 });
 
                 this.savedFeedback = this.feedback;  // Update saved state

@@ -57,7 +57,7 @@ class MealService:
         state: IngredientState,
         quantity_description: Optional[str] = None,
         confidence: Optional[float] = None,
-        source: str = 'manual'
+        source: str = 'user-add'
     ) -> MealIngredient:
         """
         Add an ingredient to a meal, creating the ingredient if it doesn't exist.
@@ -231,6 +231,10 @@ class MealService:
         if not meal:
             return None
 
+        # Track source change: if AI-suggested name was edited, mark as user-edit
+        if meal.name != name and meal.name_source == 'ai':
+            meal.name_source = 'user-edit'
+
         meal.name = name
         db.commit()
         db.refresh(meal)
@@ -262,6 +266,8 @@ class MealService:
         if not meal_ingredient:
             return None
 
+        modified = False
+
         # Update ingredient if name changed
         if ingredient_name and ingredient_name != meal_ingredient.ingredient.name:
             normalized_name = Ingredient.normalize_name(ingredient_name)
@@ -280,10 +286,17 @@ class MealService:
                 db.flush()
 
             meal_ingredient.ingredient_id = ingredient.id
+            modified = True
 
-        # Update quantity if provided
+        # Update quantity if provided and different
         if quantity_description is not None:
-            meal_ingredient.quantity_description = quantity_description
+            if meal_ingredient.quantity_description != quantity_description:
+                meal_ingredient.quantity_description = quantity_description
+                modified = True
+
+        # Track source change: if AI-suggested ingredient was edited, mark as user-edit
+        if modified and meal_ingredient.source == 'ai':
+            meal_ingredient.source = 'user-edit'
 
         db.commit()
         db.refresh(meal_ingredient)
@@ -312,6 +325,10 @@ class MealService:
 
         if not meal_ingredient:
             return None
+
+        # Track source change: if AI-suggested state was changed, mark as user-edit
+        if meal_ingredient.state != state and meal_ingredient.source == 'ai':
+            meal_ingredient.source = 'user-edit'
 
         meal_ingredient.state = state
         db.commit()

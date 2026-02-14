@@ -70,6 +70,16 @@
                 {% endif %}
             </div>
         </section>
+
+        <!-- Meal Analysis Feedback (shown if AI analysis was performed) -->
+        {% if meal.ai_suggested_ingredients %}
+        <section style="margin-top: var(--space-6);">
+            {% set entity_type = 'meal_analysis' %}
+            {% set entity_id = meal.id %}
+            {# existing_rating and existing_feedback passed from route #}
+            {% include 'components/_feedback_rating.html' %}
+        </section>
+        {% endif %}
         </div>
     {% endif %}
     </div>
@@ -577,6 +587,83 @@ function makeEditable(element, mealId, ingredientId, field) {
             element.blur();
         }
     }, { once: true });
+}
+
+// Reusable feedback rating component (unified API)
+function feedbackRating(config) {
+    return {
+        featureType: config.featureType || 'meal_analysis',
+        featureId: config.featureId,
+        endpoint: config.endpoint || '/feedback',
+        rating: config.existingRating || 0,
+        feedback: config.existingFeedback || '',
+        savedFeedback: config.existingFeedback || '',
+        hasRated: config.existingRating > 0,
+        submitting: false,
+        commentSubmitting: false,
+
+        get commentDirty() {
+            return this.feedback.trim() !== this.savedFeedback.trim();
+        },
+
+        get commentButtonText() {
+            if (this.savedFeedback) {
+                return this.commentDirty ? 'Update Comment' : 'Comment Saved';
+            }
+            return 'Add Comment';
+        },
+
+        async submitRating(stars) {
+            this.rating = stars;
+            this.submitting = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('feature_type', this.featureType);
+                formData.append('feature_id', this.featureId);
+                formData.append('rating', stars);
+                if (this.savedFeedback) {
+                    formData.append('feedback_text', this.savedFeedback);
+                }
+
+                await fetch(this.endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                this.hasRated = true;
+            } catch (err) {
+                console.error('Failed to submit rating:', err);
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        async submitComment() {
+            if (!this.feedback.trim() || !this.commentDirty) return;
+
+            this.commentSubmitting = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('feature_type', this.featureType);
+                formData.append('feature_id', this.featureId);
+                formData.append('rating', this.rating);
+                formData.append('feedback_text', this.feedback);
+
+                await fetch(this.endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                this.savedFeedback = this.feedback;
+            } catch (err) {
+                console.error('Failed to submit comment:', err);
+            } finally {
+                this.commentSubmitting = false;
+            }
+        }
+    };
 }
 </script>
 {% endblock %}

@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.exceptions import HTTPException
 
-from app.api import routes, meals, symptoms, diagnosis, diagnosis_sse, auth
+from app.api import routes, meals, symptoms, diagnosis, diagnosis_sse, auth, feedback
 
 app = FastAPI(title="Bloaty McBloatface", version="0.1.0")
 
@@ -53,6 +53,7 @@ app.include_router(meals.router)
 app.include_router(symptoms.router)
 app.include_router(diagnosis.router)
 app.include_router(diagnosis_sse.router)
+app.include_router(feedback.router)
 
 
 @app.get("/health")
