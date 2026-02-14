@@ -17,7 +17,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 # Initialize Anthropic client
-client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+client = Anthropic(api_key=settings.anthropic_api_key)
 
 
 async def detect_meal_center(image_path: str) -> Tuple[float, float]:
