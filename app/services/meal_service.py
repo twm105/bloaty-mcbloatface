@@ -4,6 +4,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.models.meal import Meal
 from app.models.meal_ingredient import MealIngredient, IngredientState
@@ -76,18 +77,25 @@ class MealService:
         # Normalize ingredient name
         normalized_name = Ingredient.normalize_name(ingredient_name)
 
-        # Find or create ingredient
+        # Find or create ingredient (handle race condition)
         ingredient = db.query(Ingredient).filter(
             Ingredient.normalized_name == normalized_name
         ).first()
 
         if not ingredient:
-            ingredient = Ingredient(
-                name=ingredient_name,
-                normalized_name=normalized_name
-            )
-            db.add(ingredient)
-            db.flush()
+            try:
+                ingredient = Ingredient(
+                    name=ingredient_name,
+                    normalized_name=normalized_name
+                )
+                db.add(ingredient)
+                db.flush()
+            except IntegrityError:
+                # Race condition: another request created it, rollback and fetch
+                db.rollback()
+                ingredient = db.query(Ingredient).filter(
+                    Ingredient.normalized_name == normalized_name
+                ).first()
 
         # Create meal-ingredient link
         meal_ingredient = MealIngredient(
@@ -272,18 +280,29 @@ class MealService:
         if ingredient_name and ingredient_name != meal_ingredient.ingredient.name:
             normalized_name = Ingredient.normalize_name(ingredient_name)
 
-            # Find or create new ingredient
+            # Find or create new ingredient (handle race condition)
             ingredient = db.query(Ingredient).filter(
                 Ingredient.normalized_name == normalized_name
             ).first()
 
             if not ingredient:
-                ingredient = Ingredient(
-                    name=ingredient_name,
-                    normalized_name=normalized_name
-                )
-                db.add(ingredient)
-                db.flush()
+                try:
+                    ingredient = Ingredient(
+                        name=ingredient_name,
+                        normalized_name=normalized_name
+                    )
+                    db.add(ingredient)
+                    db.flush()
+                except IntegrityError:
+                    # Race condition: another request created it, rollback and fetch
+                    db.rollback()
+                    ingredient = db.query(Ingredient).filter(
+                        Ingredient.normalized_name == normalized_name
+                    ).first()
+                    # Re-fetch meal_ingredient since we rolled back
+                    meal_ingredient = db.query(MealIngredient).filter(
+                        MealIngredient.id == meal_ingredient_id
+                    ).first()
 
             meal_ingredient.ingredient_id = ingredient.id
             modified = True
