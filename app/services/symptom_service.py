@@ -21,6 +21,7 @@ SYMPTOM_TAGS = [
     {"name": "constipation", "default": False},
     {"name": "lost appetite", "default": False},
     {"name": "difficulty swallowing", "default": False},
+    {"name": "fatigue", "default": False},
 ]
 
 

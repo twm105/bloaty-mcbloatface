@@ -53,16 +53,18 @@ class TestCommonTags:
 
         assert response.status_code == 200
         data = response.json()
-        assert "tags" in data
-        assert len(data["tags"]) <= 6
+        assert "default_tags" in data
+        assert "extended_tags" in data
+        assert "user_tags" in data
+        assert len(data["default_tags"]) == 6
         # Default tags for new users
-        tag_names = [t["name"] for t in data["tags"]]
-        assert "bloating" in tag_names or len(tag_names) > 0
+        tag_names = [t["name"] for t in data["default_tags"]]
+        assert "bloating" in tag_names
 
     def test_get_common_tags_with_history(
         self, auth_client: TestClient, test_user: User, db: Session
     ):
-        """Test common tags uses user history."""
+        """Test common tags includes user history."""
         # Create some symptoms with tags
         for i in range(3):
             create_symptom(
@@ -73,7 +75,11 @@ class TestCommonTags:
 
         assert response.status_code == 200
         data = response.json()
-        assert "tags" in data
+        assert "default_tags" in data
+        assert "user_tags" in data
+        # User's custom symptom should appear in user_tags
+        user_tag_names = [t["name"] for t in data["user_tags"]]
+        assert "custom_symptom" in user_tag_names
 
 
 class TestTagAutocomplete:
@@ -476,12 +482,12 @@ class TestOngoingSymptomDetection:
 
 
 class TestCommonTagsFilling:
-    """Tests for common tags filling logic."""
+    """Tests for common tags with user history."""
 
     def test_common_tags_fills_with_more_recent_tags(
         self, auth_client: TestClient, test_user: User, db: Session
     ):
-        """Test that common tags fills with more recent tags when < 6."""
+        """Test that user_tags includes recent symptom history."""
         # Create 5 different symptoms with different tags
         for i in range(5):
             create_symptom(
@@ -495,32 +501,29 @@ class TestCommonTagsFilling:
 
         assert response.status_code == 200
         data = response.json()
-        # Should have multiple tags
-        assert len(data["tags"]) >= 1
+        # Should have default tags and user's recent tags
+        assert len(data["default_tags"]) == 6
+        assert len(data["user_tags"]) >= 1
 
     def test_common_tags_hybrid_recent_and_common(
         self, auth_client: TestClient, test_user: User, db: Session
     ):
-        """Test hybrid of recent and common tags."""
-        # Create repeated symptom (common)
+        """Test that user severity overrides default severity."""
+        # Create repeated symptom with custom severity
         for _ in range(5):
-            create_symptom(db, test_user, tags=[{"name": "bloating", "severity": 6}])
-
-        # Create recent but different symptom
-        create_symptom(
-            db,
-            test_user,
-            tags=[{"name": "nausea", "severity": 4}],
-            timestamp=datetime.now(timezone.utc) - timedelta(minutes=5),
-        )
+            create_symptom(db, test_user, tags=[{"name": "bloating", "severity": 8}])
 
         response = auth_client.get("/symptoms/tags/common")
 
         assert response.status_code == 200
         data = response.json()
-        tag_names = [t["name"] for t in data["tags"]]
-        # Should have bloating (common) and nausea (recent)
-        assert "bloating" in tag_names or "nausea" in tag_names
+        # Default tags should include bloating with user's avg severity
+        bloating_tag = next(
+            (t for t in data["default_tags"] if t["name"] == "bloating"), None
+        )
+        assert bloating_tag is not None
+        # User's average severity should override the default 5.0
+        assert bloating_tag["avg_severity"] == 8.0
 
 
 class TestElaborationWithTimestamps:
