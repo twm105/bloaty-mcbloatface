@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.user import User
-from app.services.symptom_service import symptom_service
+from app.services.symptom_service import symptom_service, SYMPTOM_TAGS
 from app.services.ai_service import ClaudeService
 from app.models.user_settings import UserSettings
 from app.services.auth.dependencies import get_current_user
@@ -67,76 +67,44 @@ async def get_common_tags(
     """
     Get quick-add symptom tags for the user.
 
-    Returns hybrid of recent + common tags, or defaults if no history.
-    Logic:
-    - Get 3 most recent + 3 most common tags
-    - Deduplicate (if tag is both recent and common, only show once)
-    - Fill remaining slots with next most recent tags
-    - If < 6 total, use defaults to fill
-    - Max 6 tags total
+    Returns default and extended tags from unified schema, plus user history.
 
-    Returns: {"tags": [{"name": "bloating", "count": 15, "avg_severity": 6.2}, ...]}
+    Returns: {
+        "default_tags": [{"name": "bloating", "avg_severity": 5.0}, ...],  # 6 defaults
+        "extended_tags": [{"name": "vomiting", "avg_severity": 5.0}, ...], # 4 extended
+        "user_tags": [...]  # User's historical tags (for autocomplete prioritization)
+    }
     """
-    # Default tags for new users
-    DEFAULTS = [
-        {"name": "bloating", "avg_severity": 5.0},
-        {"name": "nausea", "avg_severity": 5.0},
-        {"name": "cramping", "avg_severity": 5.0},
-        {"name": "heartburn", "avg_severity": 5.0},
-        {"name": "stomach pain", "avg_severity": 5.0},
-        {"name": "fatigue", "avg_severity": 5.0},
+    # Build default and extended tags from unified schema
+    default_tags = [
+        {"name": tag["name"], "avg_severity": 5.0}
+        for tag in SYMPTOM_TAGS
+        if tag["default"]
+    ]
+    extended_tags = [
+        {"name": tag["name"], "avg_severity": 5.0}
+        for tag in SYMPTOM_TAGS
+        if not tag["default"]
     ]
 
-    # Get recent and common tags
-    recent_tags = symptom_service.get_most_recent_symptom_tags(db, user.id, limit=6)
-    common_tags = symptom_service.get_most_common_symptom_tags(db, user.id, limit=3)
+    # Get user's historical tags for severity hints
+    recent_tags = symptom_service.get_most_recent_symptom_tags(db, user.id, limit=10)
+    user_tag_map = {t["name"]: t["avg_severity"] for t in recent_tags}
 
-    # If no tags exist, return defaults
-    if not recent_tags and not common_tags:
-        return {"tags": DEFAULTS}
+    # Override default severities with user's historical averages
+    for tag in default_tags:
+        if tag["name"] in user_tag_map:
+            tag["avg_severity"] = user_tag_map[tag["name"]]
 
-    # Build hybrid list: 3 recent + 3 common, deduplicated
-    tags_dict = {}
+    for tag in extended_tags:
+        if tag["name"] in user_tag_map:
+            tag["avg_severity"] = user_tag_map[tag["name"]]
 
-    # Add recent tags first (up to 3)
-    for tag in recent_tags[:3]:
-        tags_dict[tag["name"]] = {
-            "name": tag["name"],
-            "avg_severity": tag["avg_severity"],
-            "is_recent": True,
-        }
-
-    # Add common tags (up to 3)
-    for tag in common_tags:
-        if tag["name"] not in tags_dict:
-            tags_dict[tag["name"]] = {
-                "name": tag["name"],
-                "count": tag["count"],
-                "avg_severity": tag["avg_severity"],
-            }
-
-    # If we have < 6, fill with more recent tags
-    if len(tags_dict) < 6:
-        for tag in recent_tags[3:]:
-            if len(tags_dict) >= 6:
-                break
-            if tag["name"] not in tags_dict:
-                tags_dict[tag["name"]] = {
-                    "name": tag["name"],
-                    "avg_severity": tag["avg_severity"],
-                    "is_recent": True,
-                }
-
-    # If still < 6, fill with defaults
-    result = list(tags_dict.values())
-    if len(result) < 6:
-        for default in DEFAULTS:
-            if len(result) >= 6:
-                break
-            if default["name"] not in tags_dict:
-                result.append(default)
-
-    return {"tags": result[:6]}
+    return {
+        "default_tags": default_tags,
+        "extended_tags": extended_tags,
+        "user_tags": recent_tags,  # For potential future use
+    }
 
 
 @router.get("/tags/autocomplete")

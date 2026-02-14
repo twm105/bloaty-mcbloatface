@@ -9,6 +9,20 @@ from sqlalchemy import text
 
 from app.models.symptom import Symptom
 
+# Unified symptom tag schema - single source of truth
+SYMPTOM_TAGS = [
+    {"name": "bloating", "default": True},
+    {"name": "nausea", "default": True},
+    {"name": "stomach pain", "default": True},
+    {"name": "gas", "default": True},
+    {"name": "heartburn", "default": True},
+    {"name": "diarrhoea", "default": True},
+    {"name": "vomiting", "default": False},
+    {"name": "constipation", "default": False},
+    {"name": "lost appetite", "default": False},
+    {"name": "difficulty swallowing", "default": False},
+]
+
 
 class SymptomService:
     """Service for symptom-related operations."""
@@ -142,23 +156,10 @@ class SymptomService:
         Get list of common gastro symptom types for dropdown.
 
         Returns:
-            List of common symptom type strings
+            List of common symptom type strings (title case)
         """
-        return [
-            "Bloating",
-            "Gas",
-            "Stomach Pain",
-            "Abdominal Cramps",
-            "Nausea",
-            "Diarrhea",
-            "Constipation",
-            "Heartburn",
-            "Acid Reflux",
-            "Indigestion",
-            "Vomiting",
-            "Loss of Appetite",
-            "Other",
-        ]
+        # Derive from unified SYMPTOM_TAGS constant
+        return [tag["name"].title() for tag in SYMPTOM_TAGS] + ["Other"]
 
     @staticmethod
     def get_most_recent_symptom_tags(
