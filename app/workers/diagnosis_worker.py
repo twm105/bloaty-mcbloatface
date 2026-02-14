@@ -4,16 +4,19 @@ Dramatiq worker for async per-ingredient diagnosis analysis.
 This worker handles individual ingredient analysis tasks, allowing
 parallel processing and real-time progress updates via SSE.
 """
+
 import dramatiq
-from dramatiq.middleware import CurrentMessage
 from datetime import datetime
 import asyncio
-import json
 
 # Import broker setup (must be before actor definitions)
-from app.workers import redis_broker
 from app.database import SessionLocal
-from app.models import DiagnosisRun, DiagnosisResult, DiagnosisCitation, DiscountedIngredient
+from app.models import (
+    DiagnosisRun,
+    DiagnosisResult,
+    DiagnosisCitation,
+    DiscountedIngredient,
+)
 from app.services.sse_publisher import SSEPublisher
 from app.services.ai_usage_service import AIUsageService
 
@@ -32,7 +35,7 @@ def analyze_ingredient(
     run_id: int,
     ingredient_data: dict,
     user_meal_history: list,
-    web_search_enabled: bool = True
+    web_search_enabled: bool = True,
 ):
     """
     Analyze a single ingredient for symptom correlations.
@@ -50,7 +53,11 @@ def analyze_ingredient(
         user_meal_history: List of user's recent meals for context
         web_search_enabled: Whether to enable web search for medical grounding
     """
-    from app.services.ai_service import ClaudeService, ServiceUnavailableError, RateLimitError
+    from app.services.ai_service import (
+        ClaudeService,
+        ServiceUnavailableError,
+        RateLimitError,
+    )
 
     db = SessionLocal()
     sse_publisher = SSEPublisher()
@@ -73,12 +80,14 @@ def analyze_ingredient(
         confounder_result = None
 
         try:
-            confounder_result = run_async(claude_service.classify_root_cause(
-                ingredient_data=ingredient_data,
-                cooccurrence_data=cooccurrence_data,
-                medical_grounding="",  # Will use web search
-                web_search_enabled=web_search_enabled
-            ))
+            confounder_result = run_async(
+                claude_service.classify_root_cause(
+                    ingredient_data=ingredient_data,
+                    cooccurrence_data=cooccurrence_data,
+                    medical_grounding="",  # Will use web search
+                    web_search_enabled=web_search_enabled,
+                )
+            )
             is_confounder = not confounder_result.get("root_cause", True)
         except Exception as e:
             # On classification error, treat as root cause (don't discard)
@@ -92,7 +101,10 @@ def analyze_ingredient(
             confounded_by_id = None
             if confounded_by_name:
                 for cooc in cooccurrence_data:
-                    if cooc.get("with_ingredient_name", "").lower() == confounded_by_name.lower():
+                    if (
+                        cooc.get("with_ingredient_name", "").lower()
+                        == confounded_by_name.lower()
+                    ):
                         confounded_by_id = cooc.get("with_ingredient_id")
                         break
 
@@ -102,13 +114,17 @@ def analyze_ingredient(
             discounted = DiscountedIngredient(
                 run_id=run_id,
                 ingredient_id=ingredient_data["ingredient_id"],
-                discard_justification=confounder_result.get("discard_justification", "Confounded by co-occurring ingredient"),
+                discard_justification=confounder_result.get(
+                    "discard_justification", "Confounded by co-occurring ingredient"
+                ),
                 confounded_by_ingredient_id=confounded_by_id,
                 # Original correlation data
                 original_confidence_score=ingredient_data.get("confidence_score"),
                 original_confidence_level=ingredient_data.get("confidence_level"),
                 times_eaten=ingredient_data.get("times_eaten"),
-                times_followed_by_symptoms=ingredient_data.get("total_symptom_occurrences"),
+                times_followed_by_symptoms=ingredient_data.get(
+                    "total_symptom_occurrences"
+                ),
                 immediate_correlation=ingredient_data.get("immediate_total"),
                 delayed_correlation=ingredient_data.get("delayed_total"),
                 cumulative_correlation=ingredient_data.get("cumulative_total"),
@@ -125,9 +141,12 @@ def analyze_ingredient(
 
             # Increment completed count
             from sqlalchemy import text
+
             db.execute(
-                text("UPDATE diagnosis_runs SET completed_ingredients = completed_ingredients + 1 WHERE id = :run_id"),
-                {"run_id": run_id}
+                text(
+                    "UPDATE diagnosis_runs SET completed_ingredients = completed_ingredients + 1 WHERE id = :run_id"
+                ),
+                {"run_id": run_id},
             )
             db.commit()
             db.refresh(diagnosis_run)
@@ -137,39 +156,48 @@ def analyze_ingredient(
                 run_id=run_id,
                 completed=diagnosis_run.completed_ingredients,
                 total=diagnosis_run.total_ingredients or 0,
-                ingredient=f"{ingredient_name} (discounted)"
+                ingredient=f"{ingredient_name} (discounted)",
             )
 
             # Publish discounted ingredient data for real-time UI update
-            sse_publisher.publish_discounted(run_id, {
-                "id": discounted.id,
-                "ingredient_id": discounted.ingredient_id,
-                "ingredient_name": ingredient_name,
-                "discard_justification": discounted.discard_justification,
-                "confounded_by_name": confounded_by_name,
-                "original_confidence_level": discounted.original_confidence_level,
-                "times_eaten": discounted.times_eaten,
-                "times_followed_by_symptoms": discounted.times_followed_by_symptoms,
-                "medical_grounding_summary": discounted.medical_grounding_summary,
-            })
+            sse_publisher.publish_discounted(
+                run_id,
+                {
+                    "id": discounted.id,
+                    "ingredient_id": discounted.ingredient_id,
+                    "ingredient_name": ingredient_name,
+                    "discard_justification": discounted.discard_justification,
+                    "confounded_by_name": confounded_by_name,
+                    "original_confidence_level": discounted.original_confidence_level,
+                    "times_eaten": discounted.times_eaten,
+                    "times_followed_by_symptoms": discounted.times_followed_by_symptoms,
+                    "medical_grounding_summary": discounted.medical_grounding_summary,
+                },
+            )
 
             # Check if this was the last ingredient
-            if diagnosis_run.completed_ingredients >= (diagnosis_run.total_ingredients or 0):
+            if diagnosis_run.completed_ingredients >= (
+                diagnosis_run.total_ingredients or 0
+            ):
                 diagnosis_run.status = "completed"
                 diagnosis_run.completed_at = datetime.utcnow()
                 db.commit()
-                total_results = len(diagnosis_run.results) if diagnosis_run.results else 0
+                total_results = (
+                    len(diagnosis_run.results) if diagnosis_run.results else 0
+                )
                 sse_publisher.publish_complete(run_id, total_results)
 
             return  # Exit early - don't do full analysis for confounders
 
         # Step 3: Call Claude API for single-ingredient analysis (not a confounder)
         try:
-            result = run_async(claude_service.diagnose_single_ingredient(
-                ingredient_data=ingredient_data,
-                user_meal_history=user_meal_history,
-                web_search_enabled=web_search_enabled
-            ))
+            result = run_async(
+                claude_service.diagnose_single_ingredient(
+                    ingredient_data=ingredient_data,
+                    user_meal_history=user_meal_history,
+                    web_search_enabled=web_search_enabled,
+                )
+            )
         except ServiceUnavailableError as e:
             # Log failure and publish error
             ai_usage_service.log_usage(
@@ -182,12 +210,16 @@ def analyze_ingredient(
                 request_type="diagnosis_run",
                 web_search_enabled=web_search_enabled,
                 success=False,
-                error_message=str(e)
+                error_message=str(e),
             )
-            sse_publisher.publish_error(run_id, f"Failed to analyze {ingredient_name}: {str(e)}")
+            sse_publisher.publish_error(
+                run_id, f"Failed to analyze {ingredient_name}: {str(e)}"
+            )
             raise
-        except RateLimitError as e:
-            sse_publisher.publish_error(run_id, "Rate limit exceeded. Please wait and try again.")
+        except RateLimitError:
+            sse_publisher.publish_error(
+                run_id, "Rate limit exceeded. Please wait and try again."
+            )
             raise
 
         # Log AI usage
@@ -201,7 +233,7 @@ def analyze_ingredient(
             request_id=str(run_id),
             request_type="diagnosis_run",
             web_search_enabled=web_search_enabled,
-            success=True
+            success=True,
         )
 
         # Create DiagnosisResult record
@@ -216,7 +248,9 @@ def analyze_ingredient(
             times_eaten=ingredient_data["times_eaten"],
             times_followed_by_symptoms=ingredient_data["total_symptom_occurrences"],
             state_matters=False,
-            problematic_states=[ingredient_data.get("state")] if ingredient_data.get("state") else None,
+            problematic_states=[ingredient_data.get("state")]
+            if ingredient_data.get("state")
+            else None,
             associated_symptoms=ingredient_data["associated_symptoms"],
             # Structured summaries from AI
             diagnosis_summary=result.get("diagnosis_summary"),
@@ -224,7 +258,9 @@ def analyze_ingredient(
             processing_suggestions=result.get("processing_suggestions"),
             alternative_meals=result.get("alternative_meals"),
             # Legacy ai_analysis field for backwards compatibility
-            ai_analysis=result.get("diagnosis_summary", "") + "\n\n" + result.get("recommendations_summary", "")
+            ai_analysis=result.get("diagnosis_summary", "")
+            + "\n\n"
+            + result.get("recommendations_summary", ""),
         )
         db.add(diagnosis_result)
         db.flush()
@@ -237,15 +273,18 @@ def analyze_ingredient(
                 source_title=citation.get("title", ""),
                 source_type=citation.get("source_type", "other"),
                 snippet=citation.get("snippet", ""),
-                relevance_score=citation.get("relevance", 0.0)
+                relevance_score=citation.get("relevance", 0.0),
             )
             db.add(citation_obj)
 
         # Increment completed count atomically to avoid race conditions with parallel workers
         from sqlalchemy import text
+
         db.execute(
-            text("UPDATE diagnosis_runs SET completed_ingredients = completed_ingredients + 1 WHERE id = :run_id"),
-            {"run_id": run_id}
+            text(
+                "UPDATE diagnosis_runs SET completed_ingredients = completed_ingredients + 1 WHERE id = :run_id"
+            ),
+            {"run_id": run_id},
         )
         db.commit()
 
@@ -257,7 +296,7 @@ def analyze_ingredient(
             run_id=run_id,
             completed=diagnosis_run.completed_ingredients,
             total=diagnosis_run.total_ingredients or 0,
-            ingredient=ingredient_name
+            ingredient=ingredient_name,
         )
 
         # Publish SSE result event
@@ -279,15 +318,17 @@ def analyze_ingredient(
                     "url": c.get("url"),
                     "title": c.get("title"),
                     "source_type": c.get("source_type"),
-                    "snippet": c.get("snippet")
+                    "snippet": c.get("snippet"),
                 }
                 for c in result.get("citations", [])
-            ]
+            ],
         }
         sse_publisher.publish_result(run_id, result_dict)
 
         # Check if this was the last ingredient - finalize immediately if so
-        if diagnosis_run.completed_ingredients >= (diagnosis_run.total_ingredients or 0):
+        if diagnosis_run.completed_ingredients >= (
+            diagnosis_run.total_ingredients or 0
+        ):
             diagnosis_run.status = "completed"
             diagnosis_run.completed_at = datetime.utcnow()
             db.commit()
@@ -343,13 +384,15 @@ def finalize_diagnosis_run(run_id: int):
         db.rollback()
         # Mark as failed
         try:
-            diagnosis_run = db.query(DiagnosisRun).filter(DiagnosisRun.id == run_id).first()
+            diagnosis_run = (
+                db.query(DiagnosisRun).filter(DiagnosisRun.id == run_id).first()
+            )
             if diagnosis_run:
                 diagnosis_run.status = "failed"
                 diagnosis_run.error_message = str(e)
                 diagnosis_run.completed_at = datetime.utcnow()
                 db.commit()
-        except:
+        except Exception:
             pass
         sse_publisher.publish_error(run_id, str(e))
         raise

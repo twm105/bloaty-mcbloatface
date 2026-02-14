@@ -1,4 +1,5 @@
 """CLI commands for Bloaty McBloatface."""
+
 import argparse
 import getpass
 import sys
@@ -34,12 +35,10 @@ def create_admin(email: str, password: str | None = None) -> None:
             sys.exit(1)
 
         # Create admin user
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        user = User(
-            email=email.lower(),
-            password_hash=password_hash,
-            is_admin=True
-        )
+        password_hash = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
+        user = User(email=email.lower(), password_hash=password_hash, is_admin=True)
         db.add(user)
         db.commit()
 
@@ -55,17 +54,13 @@ def main():
 
     # create-admin command
     create_admin_parser = subparsers.add_parser(
-        "create-admin",
-        help="Create an admin user"
+        "create-admin", help="Create an admin user"
     )
     create_admin_parser.add_argument(
-        "--email",
-        required=True,
-        help="Admin email address"
+        "--email", required=True, help="Admin email address"
     )
     create_admin_parser.add_argument(
-        "--password",
-        help="Admin password (will prompt if not provided)"
+        "--password", help="Admin password (will prompt if not provided)"
     )
 
     args = parser.parse_args()

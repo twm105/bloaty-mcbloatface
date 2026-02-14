@@ -7,18 +7,19 @@ Tests the meal business logic including:
 - Race condition handling
 - Draft/published status
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
-from uuid import uuid4
 
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 
-from app.services.meal_service import MealService, meal_service
-from app.models import User, Meal, Ingredient, MealIngredient, IngredientState
+from app.services.meal_service import MealService
+from app.models import Meal, Ingredient, MealIngredient, IngredientState
 from tests.factories import (
-    create_user, create_meal, create_ingredient, create_meal_ingredient
+    create_user,
+    create_meal,
+    create_ingredient,
+    create_meal_ingredient,
 )
 
 
@@ -42,11 +43,12 @@ class TestMealCreation:
         timestamp = datetime.now(timezone.utc)
 
         meal = MealService.create_meal(
-            db, user.id,
+            db,
+            user.id,
             image_path="/uploads/test.jpg",
             user_notes="Test meal notes",
             country="USA",
-            timestamp=timestamp
+            timestamp=timestamp,
         )
 
         assert meal.image_path == "/uploads/test.jpg"
@@ -72,9 +74,7 @@ class TestMealIngredients:
         meal = create_meal(db, user)
 
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id,
-            ingredient_name="Chicken Breast",
-            state=IngredientState.COOKED
+            db, meal.id, ingredient_name="Chicken Breast", state=IngredientState.COOKED
         )
 
         assert meal_ingredient.id is not None
@@ -91,9 +91,7 @@ class TestMealIngredients:
 
         # Add to meal
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id,
-            ingredient_name="chicken",
-            state=IngredientState.COOKED
+            db, meal.id, ingredient_name="chicken", state=IngredientState.COOKED
         )
 
         assert meal_ingredient.ingredient_id == existing.id
@@ -105,15 +103,18 @@ class TestMealIngredients:
 
         # Add with varied capitalization and spacing
         MealService.add_ingredient_to_meal(
-            db, meal.id,
+            db,
+            meal.id,
             ingredient_name="  CHICKEN BREAST  ",
-            state=IngredientState.COOKED
+            state=IngredientState.COOKED,
         )
 
         # Check normalized form
-        ingredient = db.query(Ingredient).filter(
-            Ingredient.normalized_name == "chicken_breast"
-        ).first()
+        ingredient = (
+            db.query(Ingredient)
+            .filter(Ingredient.normalized_name == "chicken_breast")
+            .first()
+        )
         assert ingredient is not None
 
     def test_add_ingredient_with_quantity(self, db: Session):
@@ -122,10 +123,11 @@ class TestMealIngredients:
         meal = create_meal(db, user)
 
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id,
+            db,
+            meal.id,
             ingredient_name="Rice",
             state=IngredientState.COOKED,
-            quantity_description="1 cup"
+            quantity_description="1 cup",
         )
 
         assert meal_ingredient.quantity_description == "1 cup"
@@ -136,11 +138,12 @@ class TestMealIngredients:
         meal = create_meal(db, user)
 
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id,
+            db,
+            meal.id,
             ingredient_name="Broccoli",
             state=IngredientState.COOKED,
             confidence=0.92,
-            source="ai"
+            source="ai",
         )
 
         assert float(meal_ingredient.confidence) == pytest.approx(0.92, abs=0.01)
@@ -157,9 +160,10 @@ class TestMealIngredients:
 
         assert result is True
         # Verify it's gone
-        assert db.query(MealIngredient).filter(
-            MealIngredient.id == meal_ing.id
-        ).first() is None
+        assert (
+            db.query(MealIngredient).filter(MealIngredient.id == meal_ing.id).first()
+            is None
+        )
 
     def test_remove_nonexistent_ingredient(self, db: Session):
         """Test that removing a non-existent ingredient returns False."""
@@ -219,9 +223,10 @@ class TestMealQueries:
         # Create meals
         for i in range(3):
             create_meal(
-                db, user,
+                db,
+                user,
                 name=f"Meal {i}",
-                timestamp=datetime.now(timezone.utc) - timedelta(hours=i)
+                timestamp=datetime.now(timezone.utc) - timedelta(hours=i),
             )
 
         meals = MealService.get_user_meals(db, user.id)
@@ -254,8 +259,7 @@ class TestMealQueries:
         # Create 10 meals
         for i in range(10):
             create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(hours=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(hours=i)
             )
 
         # Get first page
@@ -280,10 +284,7 @@ class TestMealUpdates:
         user = create_user(db)
         meal = create_meal(db, user, user_notes="Original notes")
 
-        result = MealService.update_meal(
-            db, meal.id,
-            user_notes="Updated notes"
-        )
+        result = MealService.update_meal(db, meal.id, user_notes="Updated notes")
 
         assert result is not None
         assert result.user_notes == "Updated notes"
@@ -293,10 +294,7 @@ class TestMealUpdates:
         user = create_user(db)
         meal = create_meal(db, user)
 
-        result = MealService.update_meal(
-            db, meal.id,
-            country="Japan"
-        )
+        result = MealService.update_meal(db, meal.id, country="Japan")
 
         assert result.country == "Japan"
 
@@ -306,19 +304,13 @@ class TestMealUpdates:
         meal = create_meal(db, user)
         new_time = datetime.now(timezone.utc) - timedelta(days=1)
 
-        result = MealService.update_meal(
-            db, meal.id,
-            timestamp=new_time
-        )
+        result = MealService.update_meal(db, meal.id, timestamp=new_time)
 
         assert result.timestamp == new_time
 
     def test_update_nonexistent_meal(self, db: Session):
         """Test that updating a non-existent meal returns None."""
-        result = MealService.update_meal(
-            db, 99999,
-            user_notes="Notes"
-        )
+        result = MealService.update_meal(db, 99999, user_notes="Notes")
 
         assert result is None
 
@@ -355,8 +347,9 @@ class TestIngredientUpdates:
         meal_ing = create_meal_ingredient(db, meal, ingredient)
 
         result = MealService.update_ingredient_in_meal(
-            db, meal_ing.id,
-            ingredient_name="Chicken"  # Corrected
+            db,
+            meal_ing.id,
+            ingredient_name="Chicken",  # Corrected
         )
 
         assert result is not None
@@ -369,13 +362,11 @@ class TestIngredientUpdates:
         meal = create_meal(db, user)
         ingredient = create_ingredient(db, name="Rice")
         meal_ing = create_meal_ingredient(
-            db, meal, ingredient,
-            quantity_description="1 cup"
+            db, meal, ingredient, quantity_description="1 cup"
         )
 
         result = MealService.update_ingredient_in_meal(
-            db, meal_ing.id,
-            quantity_description="2 cups"
+            db, meal_ing.id, quantity_description="2 cups"
         )
 
         assert result.quantity_description == "2 cups"
@@ -386,13 +377,11 @@ class TestIngredientUpdates:
         meal = create_meal(db, user)
         ingredient = create_ingredient(db, name="Carrot")
         meal_ing = create_meal_ingredient(
-            db, meal, ingredient,
-            state=IngredientState.RAW
+            db, meal, ingredient, state=IngredientState.RAW
         )
 
         result = MealService.update_ingredient_state(
-            db, meal_ing.id,
-            state=IngredientState.COOKED
+            db, meal_ing.id, state=IngredientState.COOKED
         )
 
         assert result.state == IngredientState.COOKED
@@ -402,14 +391,10 @@ class TestIngredientUpdates:
         user = create_user(db)
         meal = create_meal(db, user)
         ingredient = create_ingredient(db, name="Broccoli")
-        meal_ing = create_meal_ingredient(
-            db, meal, ingredient,
-            source="ai"
-        )
+        meal_ing = create_meal_ingredient(db, meal, ingredient, source="ai")
 
         result = MealService.update_ingredient_in_meal(
-            db, meal_ing.id,
-            ingredient_name="Cauliflower"
+            db, meal_ing.id, ingredient_name="Cauliflower"
         )
 
         assert result.source == "user-edit"
@@ -461,13 +446,15 @@ class TestMealDeletion:
         MealService.delete_meal(db, meal.id)
 
         # Meal ingredient should be deleted
-        assert db.query(MealIngredient).filter(
-            MealIngredient.id == meal_ing_id
-        ).first() is None
+        assert (
+            db.query(MealIngredient).filter(MealIngredient.id == meal_ing_id).first()
+            is None
+        )
         # But the ingredient itself should still exist
-        assert db.query(Ingredient).filter(
-            Ingredient.id == ingredient.id
-        ).first() is not None
+        assert (
+            db.query(Ingredient).filter(Ingredient.id == ingredient.id).first()
+            is not None
+        )
 
     def test_delete_nonexistent_meal(self, db: Session):
         """Test that deleting a non-existent meal returns False."""
@@ -490,9 +477,7 @@ class TestRaceConditions:
 
         # Add ingredient normally first
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id,
-            ingredient_name="Test Ingredient",
-            state=IngredientState.RAW
+            db, meal.id, ingredient_name="Test Ingredient", state=IngredientState.RAW
         )
 
         assert meal_ingredient is not None

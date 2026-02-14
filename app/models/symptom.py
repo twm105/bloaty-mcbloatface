@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Index, Boolean
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+    Index,
+    Boolean,
+)
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -8,17 +17,24 @@ from app.database import Base
 
 class Symptom(Base):
     """Symptom logging with conversational AI clarification and structured data extraction."""
+
     __tablename__ = "symptoms"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    timestamp = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
     # Natural language input
     raw_description = Column(Text, nullable=False)  # User's original description
 
     # AI clarification process
-    clarification_history = Column(JSONB, default=list)  # Array of {question: str, answer: str, skipped: bool}
+    clarification_history = Column(
+        JSONB, default=list
+    )  # Array of {question: str, answer: str, skipped: bool}
 
     # Structured extraction from AI
     structured_type = Column(String(255))  # e.g., "bloating", "nausea", "stomach pain"
@@ -29,7 +45,7 @@ class Symptom(Base):
     tags = Column(JSONB)  # [{"name": "bloating", "severity": 7}, ...]
     start_time = Column(DateTime(timezone=True), nullable=True)
     end_time = Column(DateTime(timezone=True), nullable=True)
-    episode_id = Column(Integer, ForeignKey('symptoms.id'), nullable=True)
+    episode_id = Column(Integer, ForeignKey("symptoms.id"), nullable=True)
 
     # AI elaboration tracking (deprecated fields - replaced by ai_generated_text/final_notes)
     ai_elaborated = Column(Boolean, default=False)
@@ -38,19 +54,23 @@ class Symptom(Base):
 
     # New AI notes tracking (preferred over deprecated fields above)
     ai_generated_text = Column(Text, nullable=True)  # Original unedited AI response
-    final_notes = Column(Text, nullable=True)  # User-edited version (or same as AI if not edited)
+    final_notes = Column(
+        Text, nullable=True
+    )  # User-edited version (or same as AI if not edited)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     user = relationship("User", back_populates="symptoms")
-    continuation_of = relationship('Symptom', remote_side=[id], foreign_keys=[episode_id], backref='continuations')
+    continuation_of = relationship(
+        "Symptom", remote_side=[id], foreign_keys=[episode_id], backref="continuations"
+    )
 
     __table_args__ = (
-        Index('idx_symptoms_user_id', 'user_id'),
-        Index('idx_symptoms_timestamp', 'timestamp'),
-        Index('idx_symptoms_structured_type', 'structured_type'),
-        Index('idx_symptoms_episode_id', 'episode_id'),
-        Index('idx_symptoms_user_start_time', 'user_id', 'start_time'),
+        Index("idx_symptoms_user_id", "user_id"),
+        Index("idx_symptoms_timestamp", "timestamp"),
+        Index("idx_symptoms_structured_type", "structured_type"),
+        Index("idx_symptoms_episode_id", "episode_id"),
+        Index("idx_symptoms_user_start_time", "user_id", "start_time"),
     )

@@ -6,13 +6,11 @@ Tests the AI usage tracking functionality including:
 - Usage logging
 - Cost aggregation
 """
-import pytest
-from datetime import datetime, timedelta, timezone
+
 from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from app.services.ai_usage_service import AIUsageService
-from app.models import AIUsageLog
 from tests.factories import create_user
 
 
@@ -27,7 +25,7 @@ class TestCostCalculation:
             model="claude-sonnet-4-5-20250929",
             input_tokens=1000,
             output_tokens=500,
-            cached_tokens=0
+            cached_tokens=0,
         )
 
         # Should be a positive decimal
@@ -42,7 +40,7 @@ class TestCostCalculation:
             model="claude-haiku-3",
             input_tokens=1000,
             output_tokens=500,
-            cached_tokens=0
+            cached_tokens=0,
         )
 
         # Should still calculate (defaults to Sonnet pricing)
@@ -57,7 +55,7 @@ class TestCostCalculation:
             model="claude-sonnet-4-5-20250929",
             input_tokens=1000,
             output_tokens=500,
-            cached_tokens=0
+            cached_tokens=0,
         )
 
         # Calculate cost with same tokens but half cached
@@ -65,7 +63,7 @@ class TestCostCalculation:
             model="claude-sonnet-4-5-20250929",
             input_tokens=1000,
             output_tokens=500,
-            cached_tokens=500  # Half cached at 10% rate
+            cached_tokens=500,  # Half cached at 10% rate
         )
 
         # Cached should be cheaper
@@ -79,7 +77,7 @@ class TestCostCalculation:
             model="claude-sonnet-4-5-20250929",
             input_tokens=0,
             output_tokens=0,
-            cached_tokens=0
+            cached_tokens=0,
         )
 
         assert cost == Decimal("0")
@@ -98,7 +96,7 @@ class TestUsageLogging:
             model="claude-sonnet-4-5-20250929",
             input_tokens=1000,
             output_tokens=500,
-            user_id=str(user.id)
+            user_id=str(user.id),
         )
 
         assert log_entry.id is not None
@@ -123,7 +121,7 @@ class TestUsageLogging:
             request_type="diagnosis_run",
             web_search_enabled=True,
             success=True,
-            error_message=None
+            error_message=None,
         )
 
         assert log_entry.cached_tokens == 500
@@ -142,7 +140,7 @@ class TestUsageLogging:
             input_tokens=500,
             output_tokens=0,
             success=False,
-            error_message="API timeout"
+            error_message="API timeout",
         )
 
         assert log_entry.success is False
@@ -164,7 +162,7 @@ class TestCostAggregation:
                 input_tokens=1000,
                 output_tokens=500,
                 request_id="42",
-                request_type="diagnosis_run"
+                request_type="diagnosis_run",
             )
 
         total = service.get_total_cost_for_run(42)
@@ -196,7 +194,7 @@ class TestUsageSummary:
                 model="claude-sonnet-4-5-20250929",
                 input_tokens=100,
                 output_tokens=50,
-                user_id=str(user.id)
+                user_id=str(user.id),
             )
 
         summary = service.get_usage_summary()
@@ -218,7 +216,7 @@ class TestUsageSummary:
                 model="claude-sonnet-4-5-20250929",
                 input_tokens=100,
                 output_tokens=50,
-                user_id=str(user1.id)
+                user_id=str(user1.id),
             )
 
         # Create logs for user2
@@ -228,7 +226,7 @@ class TestUsageSummary:
                 model="claude-sonnet-4-5-20250929",
                 input_tokens=200,
                 output_tokens=100,
-                user_id=str(user2.id)
+                user_id=str(user2.id),
             )
 
         # Get summary for user1 only

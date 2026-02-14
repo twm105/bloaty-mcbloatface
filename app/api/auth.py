@@ -1,4 +1,5 @@
 """Authentication routes for login, logout, registration, and account management."""
+
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -28,24 +29,20 @@ templates = Jinja2Templates(directory="app/templates")
 # Login / Logout
 # =============================================================================
 
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(
     request: Request,
     next: Optional[str] = Query(None),
     error: Optional[str] = Query(None),
-    user: Optional[User] = Depends(get_optional_user)
+    user: Optional[User] = Depends(get_optional_user),
 ):
     """Login page. Redirects to home if already logged in."""
     if user:
         return RedirectResponse(url="/", status_code=303)
 
     return templates.TemplateResponse(
-        "auth/login.html",
-        {
-            "request": request,
-            "next": next,
-            "error": error
-        }
+        "auth/login.html", {"request": request, "next": next, "error": error}
     )
 
 
@@ -55,7 +52,7 @@ async def login(
     email: str = Form(...),
     password: str = Form(...),
     next: Optional[str] = Form(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Process login form."""
     auth_provider = get_auth_provider()
@@ -63,10 +60,7 @@ async def login(
 
     if not user:
         # Redirect back to login with error
-        return RedirectResponse(
-            url="/auth/login?error=invalid",
-            status_code=303
-        )
+        return RedirectResponse(url="/auth/login?error=invalid", status_code=303)
 
     # Create session and set cookie
     token = await auth_provider.create_session(db, user, request)
@@ -80,16 +74,13 @@ async def login(
         max_age=settings.session_max_age,
         httponly=True,
         samesite="lax",
-        secure=settings.session_cookie_secure
+        secure=settings.session_cookie_secure,
     )
     return response
 
 
 @router.post("/logout")
-async def logout(
-    request: Request,
-    db: Session = Depends(get_db)
-):
+async def logout(request: Request, db: Session = Depends(get_db)):
     """Logout and clear session."""
     auth_provider = get_auth_provider()
 
@@ -108,13 +99,14 @@ async def logout(
 # Registration (Invite-Only)
 # =============================================================================
 
+
 @router.get("/register", response_class=HTMLResponse)
 async def register_page(
     request: Request,
     invite: Optional[str] = Query(None),
     error: Optional[str] = Query(None),
     user: Optional[User] = Depends(get_optional_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Registration page. Requires valid invite token."""
     if user:
@@ -124,11 +116,15 @@ async def register_page(
     invite_valid = False
     if invite:
         now = datetime.now(timezone.utc)
-        invite_record = db.query(Invite).filter(
-            Invite.token == invite,
-            Invite.expires_at > now,
-            Invite.used_at.is_(None)
-        ).first()
+        invite_record = (
+            db.query(Invite)
+            .filter(
+                Invite.token == invite,
+                Invite.expires_at > now,
+                Invite.used_at.is_(None),
+            )
+            .first()
+        )
         invite_valid = invite_record is not None
 
     return templates.TemplateResponse(
@@ -137,8 +133,8 @@ async def register_page(
             "request": request,
             "invite": invite,
             "invite_valid": invite_valid,
-            "error": error
-        }
+            "error": error,
+        },
     )
 
 
@@ -149,43 +145,43 @@ async def register(
     password: str = Form(...),
     password_confirm: str = Form(...),
     invite: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Process registration with invite token."""
     # Validate passwords match
     if password != password_confirm:
         return RedirectResponse(
             url=f"/auth/register?invite={invite}&error=passwords_mismatch",
-            status_code=303
+            status_code=303,
         )
 
     # Validate password strength (basic)
     if len(password) < 8:
         return RedirectResponse(
             url=f"/auth/register?invite={invite}&error=password_too_short",
-            status_code=303
+            status_code=303,
         )
 
     # Validate invite token
     now = datetime.now(timezone.utc)
-    invite_record = db.query(Invite).filter(
-        Invite.token == invite,
-        Invite.expires_at > now,
-        Invite.used_at.is_(None)
-    ).first()
+    invite_record = (
+        db.query(Invite)
+        .filter(
+            Invite.token == invite, Invite.expires_at > now, Invite.used_at.is_(None)
+        )
+        .first()
+    )
 
     if not invite_record:
         return RedirectResponse(
-            url=f"/auth/register?invite={invite}&error=invalid_invite",
-            status_code=303
+            url=f"/auth/register?invite={invite}&error=invalid_invite", status_code=303
         )
 
     # Check if email already exists
     existing_user = db.query(User).filter(User.email == email.lower()).first()
     if existing_user:
         return RedirectResponse(
-            url=f"/auth/register?invite={invite}&error=email_exists",
-            status_code=303
+            url=f"/auth/register?invite={invite}&error=email_exists", status_code=303
         )
 
     # Create user
@@ -207,7 +203,7 @@ async def register(
         max_age=settings.session_max_age,
         httponly=True,
         samesite="lax",
-        secure=settings.session_cookie_secure
+        secure=settings.session_cookie_secure,
     )
     return response
 
@@ -216,24 +212,30 @@ async def register(
 # Account Management
 # =============================================================================
 
+
 @router.get("/account", response_class=HTMLResponse)
 async def account_page(
     request: Request,
     success: Optional[str] = Query(None),
     error: Optional[str] = Query(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Account management page."""
     # Get user's active invites (for admins)
     invites = []
     if user.is_admin:
         now = datetime.now(timezone.utc)
-        invites = db.query(Invite).filter(
-            Invite.created_by == user.id,
-            Invite.expires_at > now,
-            Invite.used_at.is_(None)
-        ).order_by(Invite.created_at.desc()).all()
+        invites = (
+            db.query(Invite)
+            .filter(
+                Invite.created_by == user.id,
+                Invite.expires_at > now,
+                Invite.used_at.is_(None),
+            )
+            .order_by(Invite.created_at.desc())
+            .all()
+        )
 
     # Get all users (for admins)
     all_users = []
@@ -248,8 +250,8 @@ async def account_page(
             "invites": invites,
             "all_users": all_users,
             "success": success,
-            "error": error
-        }
+            "error": error,
+        },
     )
 
 
@@ -260,36 +262,34 @@ async def change_password(
     new_password: str = Form(...),
     new_password_confirm: str = Form(...),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Change user's own password."""
     # Validate new passwords match
     if new_password != new_password_confirm:
         return RedirectResponse(
-            url="/auth/account?error=passwords_mismatch",
-            status_code=303
+            url="/auth/account?error=passwords_mismatch", status_code=303
         )
 
     # Validate password strength
     if len(new_password) < 8:
         return RedirectResponse(
-            url="/auth/account?error=password_too_short",
-            status_code=303
+            url="/auth/account?error=password_too_short", status_code=303
         )
 
     # Change password
     auth_provider = get_auth_provider()
-    success = await auth_provider.change_password(db, user, current_password, new_password)
+    success = await auth_provider.change_password(
+        db, user, current_password, new_password
+    )
 
     if not success:
         return RedirectResponse(
-            url="/auth/account?error=wrong_password",
-            status_code=303
+            url="/auth/account?error=wrong_password", status_code=303
         )
 
     return RedirectResponse(
-        url="/auth/account?success=password_changed",
-        status_code=303
+        url="/auth/account?success=password_changed", status_code=303
     )
 
 
@@ -297,21 +297,16 @@ async def change_password(
 # Invite Management (Admin Only)
 # =============================================================================
 
+
 @router.post("/invite")
 async def create_invite(
-    request: Request,
-    user: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    request: Request, user: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
     """Generate a new invite link (admin only)."""
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
-    invite = Invite(
-        token=token,
-        created_by=user.id,
-        expires_at=expires_at
-    )
+    invite = Invite(token=token, created_by=user.id, expires_at=expires_at)
     db.add(invite)
     db.commit()
 
@@ -324,16 +319,20 @@ async def create_invite(
 
 @router.get("/invites")
 async def list_invites(
-    user: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    user: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
     """List active invites (admin only)."""
     now = datetime.now(timezone.utc)
-    invites = db.query(Invite).filter(
-        Invite.created_by == user.id,
-        Invite.expires_at > now,
-        Invite.used_at.is_(None)
-    ).order_by(Invite.created_at.desc()).all()
+    invites = (
+        db.query(Invite)
+        .filter(
+            Invite.created_by == user.id,
+            Invite.expires_at > now,
+            Invite.used_at.is_(None),
+        )
+        .order_by(Invite.created_at.desc())
+        .all()
+    )
 
     return {
         "invites": [
@@ -341,7 +340,7 @@ async def list_invites(
                 "id": inv.id,
                 "token": inv.token,
                 "created_at": inv.created_at.isoformat(),
-                "expires_at": inv.expires_at.isoformat()
+                "expires_at": inv.expires_at.isoformat(),
             }
             for inv in invites
         ]
@@ -350,15 +349,14 @@ async def list_invites(
 
 @router.delete("/invite/{invite_id}")
 async def revoke_invite(
-    invite_id: int,
-    user: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    invite_id: int, user: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
     """Revoke an invite (admin only)."""
-    invite = db.query(Invite).filter(
-        Invite.id == invite_id,
-        Invite.created_by == user.id
-    ).first()
+    invite = (
+        db.query(Invite)
+        .filter(Invite.id == invite_id, Invite.created_by == user.id)
+        .first()
+    )
 
     if not invite:
         raise HTTPException(status_code=404, detail="Invite not found")
@@ -373,11 +371,10 @@ async def revoke_invite(
 # Admin User Management
 # =============================================================================
 
+
 @router.post("/reset-password/{user_id}")
 async def reset_user_password(
-    user_id: str,
-    admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    user_id: str, admin: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
     """Reset a user's password (admin only). Returns temporary password."""
     from uuid import UUID
@@ -399,9 +396,7 @@ async def reset_user_password(
 
 @router.delete("/users/{user_id}")
 async def delete_user(
-    user_id: str,
-    admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    user_id: str, admin: User = Depends(require_admin), db: Session = Depends(get_db)
 ):
     """Delete a user and all their data (admin only)."""
     from uuid import UUID

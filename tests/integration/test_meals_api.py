@@ -7,17 +7,19 @@ Tests the full meal management flow including:
 - Ingredient management
 - Authorization checks
 """
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
+
+from unittest.mock import patch, AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 import io
 
-from app.models import User, Meal, Ingredient, MealIngredient, IngredientState
+from app.models import User, Meal, MealIngredient, IngredientState
 from app.models.user_feedback import UserFeedback
 from tests.factories import (
-    create_user, create_meal, create_ingredient, create_meal_ingredient
+    create_user,
+    create_meal,
+    create_ingredient,
+    create_meal_ingredient,
 )
 
 
@@ -94,9 +96,7 @@ class TestMealCreation:
 
         assert response.status_code in [302, 303, 307, 401]
 
-    def test_create_meal_page_renders(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_create_meal_page_renders(self, auth_client: TestClient, test_user: User):
         """Test that meal log page renders."""
         response = auth_client.get("/meals/log")
 
@@ -164,15 +164,12 @@ class TestMealEditing:
 class TestMealPublishing:
     """Tests for publishing meals."""
 
-    def test_complete_meal(
-        self, auth_client: TestClient, test_user: User, db: Session
-    ):
+    def test_complete_meal(self, auth_client: TestClient, test_user: User, db: Session):
         """Test completing/publishing a draft meal."""
         meal = create_meal(db, test_user, status="draft")
 
         response = auth_client.post(
-            f"/meals/{meal.id}/complete",
-            follow_redirects=False
+            f"/meals/{meal.id}/complete", follow_redirects=False
         )
 
         # Should redirect to history
@@ -186,9 +183,7 @@ class TestMealPublishing:
 class TestMealDeletion:
     """Tests for deleting meals."""
 
-    def test_delete_meal(
-        self, auth_client: TestClient, test_user: User, db: Session
-    ):
+    def test_delete_meal(self, auth_client: TestClient, test_user: User, db: Session):
         """Test deleting own meal."""
         meal = create_meal(db, test_user)
         meal_id = meal.id
@@ -224,12 +219,9 @@ class TestMealIngredients:
         """Test adding an ingredient to a meal."""
         meal = create_meal(db, test_user)
 
-        response = auth_client.post(
+        auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
-            data={
-                "ingredient_name": "Chicken",
-                "state": "cooked"
-            }
+            data={"ingredient_name": "Chicken", "state": "cooked"},
         )
 
         # Check ingredient was added
@@ -244,16 +236,15 @@ class TestMealIngredients:
         ingredient = create_ingredient(db, name="Tomato")
         meal_ing = create_meal_ingredient(db, meal, ingredient)
 
-        response = auth_client.delete(
-            f"/meals/{meal.id}/ingredients/{meal_ing.id}"
-        )
+        response = auth_client.delete(f"/meals/{meal.id}/ingredients/{meal_ing.id}")
 
         assert response.status_code in [200, 204]
 
         # Verify ingredient link is removed
-        assert db.query(MealIngredient).filter(
-            MealIngredient.id == meal_ing.id
-        ).first() is None
+        assert (
+            db.query(MealIngredient).filter(MealIngredient.id == meal_ing.id).first()
+            is None
+        )
 
     def test_update_ingredient_state(
         self, auth_client: TestClient, test_user: User, db: Session
@@ -262,14 +253,12 @@ class TestMealIngredients:
         meal = create_meal(db, test_user)
         ingredient = create_ingredient(db, name="Carrot")
         meal_ing = create_meal_ingredient(
-            db, meal, ingredient,
-            state=IngredientState.RAW
+            db, meal, ingredient, state=IngredientState.RAW
         )
 
         # PATCH to /meals/ingredients/{id}/state with JSON body
         response = auth_client.patch(
-            f"/meals/ingredients/{meal_ing.id}/state",
-            json={"state": "cooked"}
+            f"/meals/ingredients/{meal_ing.id}/state", json={"state": "cooked"}
         )
 
         assert response.status_code == 200
@@ -339,11 +328,8 @@ class TestMealCreationAdvanced:
         """Test creating meal with invalid timestamp falls back to now."""
         response = auth_client.post(
             "/meals/create",
-            data={
-                "meal_timestamp": "not-a-valid-timestamp",
-                "user_notes": "Test meal"
-            },
-            follow_redirects=False
+            data={"meal_timestamp": "not-a-valid-timestamp", "user_notes": "Test meal"},
+            follow_redirects=False,
         )
 
         # Should succeed with fallback timestamp
@@ -359,11 +345,8 @@ class TestMealCreationAdvanced:
         """Test creating meal with valid timestamp."""
         response = auth_client.post(
             "/meals/create",
-            data={
-                "meal_timestamp": "2025-06-15T12:30:00",
-                "user_notes": "Lunch"
-            },
-            follow_redirects=False
+            data={"meal_timestamp": "2025-06-15T12:30:00", "user_notes": "Lunch"},
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -373,9 +356,7 @@ class TestMealCreationAdvanced:
     ):
         """Test creating meal without timestamp defaults to now."""
         response = auth_client.post(
-            "/meals/create",
-            data={"user_notes": "Test"},
-            follow_redirects=False
+            "/meals/create", data={"user_notes": "Test"}, follow_redirects=False
         )
 
         assert response.status_code == 303
@@ -388,8 +369,11 @@ class TestMealCreationWithImage:
         self, auth_client: TestClient, test_user: User, db: Session
     ):
         """Test handling of image upload errors."""
-        with patch('app.api.meals.file_service.save_meal_image',
-                   new_callable=AsyncMock, side_effect=ValueError("File too large")):
+        with patch(
+            "app.api.meals.file_service.save_meal_image",
+            new_callable=AsyncMock,
+            side_effect=ValueError("File too large"),
+        ):
             # Create fake file
             fake_file = io.BytesIO(b"fake image data")
 
@@ -397,7 +381,7 @@ class TestMealCreationWithImage:
                 "/meals/create",
                 files={"image": ("test.jpg", fake_file, "image/jpeg")},
                 data={"user_notes": "Test"},
-                follow_redirects=False
+                follow_redirects=False,
             )
 
         assert response.status_code == 400
@@ -406,9 +390,7 @@ class TestMealCreationWithImage:
 class TestMealAnalysis:
     """Tests for meal image analysis."""
 
-    def test_analyze_nonexistent_meal(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_analyze_nonexistent_meal(self, auth_client: TestClient, test_user: User):
         """Test analyzing non-existent meal returns 404."""
         response = auth_client.post("/meals/99999/analyze-image")
 
@@ -424,15 +406,31 @@ class TestMealAnalysis:
             "meal_name": "Chicken Salad",
             "raw_response": "AI response text",
             "ingredients": [
-                {"name": "chicken", "state": "cooked", "quantity": "200g", "confidence": 0.95},
-                {"name": "lettuce", "state": "raw", "quantity": "1 cup", "confidence": 0.90},
-            ]
+                {
+                    "name": "chicken",
+                    "state": "cooked",
+                    "quantity": "200g",
+                    "confidence": 0.95,
+                },
+                {
+                    "name": "lettuce",
+                    "state": "raw",
+                    "quantity": "1 cup",
+                    "confidence": 0.90,
+                },
+            ],
         }
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, return_value=True):
-            with patch('app.api.meals.claude_service.analyze_meal_image',
-                       new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            with patch(
+                "app.api.meals.claude_service.analyze_meal_image",
+                new_callable=AsyncMock,
+                return_value=mock_result,
+            ):
                 response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
@@ -456,13 +454,19 @@ class TestMealAnalysis:
                 {"name": "chicken", "state": "cooked"},  # Valid
                 {"name": "bad", "state": "invalid_state"},  # Invalid state
                 {"missing_name": "test"},  # Missing name key
-            ]
+            ],
         }
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, return_value=True):
-            with patch('app.api.meals.claude_service.analyze_meal_image',
-                       new_callable=AsyncMock, return_value=mock_result):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            with patch(
+                "app.api.meals.claude_service.analyze_meal_image",
+                new_callable=AsyncMock,
+                return_value=mock_result,
+            ):
                 response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
@@ -498,12 +502,17 @@ class TestMealAnalysis:
         """Test analyzing non-food image returns error."""
         meal = create_meal(db, test_user, image_path="/uploads/test.jpg")
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, return_value=False):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            return_value=False,
+        ):
             response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
-        assert "food image" in response.text.lower() or "manual" in response.text.lower()
+        assert (
+            "food image" in response.text.lower() or "manual" in response.text.lower()
+        )
 
     def test_analyze_meal_service_unavailable(
         self, auth_client: TestClient, test_user: User, db: Session
@@ -513,8 +522,11 @@ class TestMealAnalysis:
 
         meal = create_meal(db, test_user, image_path="/uploads/test.jpg")
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, side_effect=ServiceUnavailableError("Service down")):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            side_effect=ServiceUnavailableError("Service down"),
+        ):
             response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
@@ -528,8 +540,11 @@ class TestMealAnalysis:
 
         meal = create_meal(db, test_user, image_path="/uploads/test.jpg")
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, side_effect=RateLimitError("Too many requests")):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            side_effect=RateLimitError("Too many requests"),
+        ):
             response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
@@ -541,8 +556,11 @@ class TestMealAnalysis:
         """Test handling of generic errors during analysis."""
         meal = create_meal(db, test_user, image_path="/uploads/test.jpg")
 
-        with patch('app.api.meals.claude_service.validate_meal_image',
-                   new_callable=AsyncMock, side_effect=Exception("Something went wrong")):
+        with patch(
+            "app.api.meals.claude_service.validate_meal_image",
+            new_callable=AsyncMock,
+            side_effect=Exception("Something went wrong"),
+        ):
             response = auth_client.post(f"/meals/{meal.id}/analyze-image")
 
         assert response.status_code == 200
@@ -558,7 +576,7 @@ class TestMealIngredientErrors:
         """Test adding ingredient to non-existent meal."""
         response = auth_client.post(
             "/meals/99999/ingredients/add",
-            data={"ingredient_name": "Test", "state": "cooked"}
+            data={"ingredient_name": "Test", "state": "cooked"},
         )
 
         assert response.status_code == 404
@@ -572,7 +590,7 @@ class TestMealIngredientErrors:
 
         response = auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
-            data={"ingredient_name": "Test", "state": "cooked"}
+            data={"ingredient_name": "Test", "state": "cooked"},
         )
 
         assert response.status_code == 403
@@ -585,7 +603,7 @@ class TestMealIngredientErrors:
 
         response = auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
-            data={"ingredient_name": "Test", "state": "invalid"}
+            data={"ingredient_name": "Test", "state": "invalid"},
         )
 
         assert response.status_code == 400
@@ -599,9 +617,7 @@ class TestMealIngredientErrors:
         ingredient = create_ingredient(db, name="Test")
         mi = create_meal_ingredient(db, meal, ingredient)
 
-        response = auth_client.delete(
-            f"/meals/{meal.id}/ingredients/{mi.id}"
-        )
+        response = auth_client.delete(f"/meals/{meal.id}/ingredients/{mi.id}")
 
         assert response.status_code == 403
 
@@ -611,9 +627,7 @@ class TestMealIngredientErrors:
         """Test removing non-existent ingredient."""
         meal = create_meal(db, test_user)
 
-        response = auth_client.delete(
-            f"/meals/{meal.id}/ingredients/99999"
-        )
+        response = auth_client.delete(f"/meals/{meal.id}/ingredients/99999")
 
         assert response.status_code == 404
 
@@ -629,20 +643,14 @@ class TestCompleteMealErrors:
         meal = create_meal(db, other_user)
 
         response = auth_client.post(
-            f"/meals/{meal.id}/complete",
-            follow_redirects=False
+            f"/meals/{meal.id}/complete", follow_redirects=False
         )
 
         assert response.status_code == 403
 
-    def test_complete_nonexistent_meal(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_complete_nonexistent_meal(self, auth_client: TestClient, test_user: User):
         """Test completing non-existent meal."""
-        response = auth_client.post(
-            "/meals/99999/complete",
-            follow_redirects=False
-        )
+        response = auth_client.post("/meals/99999/complete", follow_redirects=False)
 
         assert response.status_code == 404
 
@@ -656,10 +664,7 @@ class TestUpdateMealName:
         """Test updating meal name."""
         meal = create_meal(db, test_user, name="Old Name")
 
-        response = auth_client.put(
-            f"/meals/{meal.id}/name",
-            data={"name": "New Name"}
-        )
+        response = auth_client.put(f"/meals/{meal.id}/name", data={"name": "New Name"})
 
         assert response.status_code == 200
         data = response.json()
@@ -672,10 +677,7 @@ class TestUpdateMealName:
         other_user = create_user(db, email="other@example.com")
         meal = create_meal(db, other_user)
 
-        response = auth_client.put(
-            f"/meals/{meal.id}/name",
-            data={"name": "Hacked"}
-        )
+        response = auth_client.put(f"/meals/{meal.id}/name", data={"name": "Hacked"})
 
         assert response.status_code == 403
 
@@ -683,10 +685,7 @@ class TestUpdateMealName:
         self, auth_client: TestClient, test_user: User
     ):
         """Test updating non-existent meal name."""
-        response = auth_client.put(
-            "/meals/99999/name",
-            data={"name": "Test"}
-        )
+        response = auth_client.put("/meals/99999/name", data={"name": "Test"})
 
         assert response.status_code == 404
 
@@ -705,8 +704,8 @@ class TestUpdateMealMetadata:
             data={
                 "country": "Italy",
                 "user_notes": "Delicious pasta",
-                "timestamp": "2025-06-15T18:30:00"
-            }
+                "timestamp": "2025-06-15T18:30:00",
+            },
         )
 
         assert response.status_code == 200
@@ -720,10 +719,7 @@ class TestUpdateMealMetadata:
         other_user = create_user(db, email="other@example.com")
         meal = create_meal(db, other_user)
 
-        response = auth_client.put(
-            f"/meals/{meal.id}",
-            data={"country": "Hacked"}
-        )
+        response = auth_client.put(f"/meals/{meal.id}", data={"country": "Hacked"})
 
         assert response.status_code == 403
 
@@ -731,10 +727,7 @@ class TestUpdateMealMetadata:
         self, auth_client: TestClient, test_user: User
     ):
         """Test updating non-existent meal metadata."""
-        response = auth_client.put(
-            "/meals/99999",
-            data={"country": "Test"}
-        )
+        response = auth_client.put("/meals/99999", data={"country": "Test"})
 
         assert response.status_code == 404
 
@@ -752,10 +745,7 @@ class TestUpdateIngredient:
 
         response = auth_client.put(
             f"/meals/{meal.id}/ingredients/{mi.id}",
-            data={
-                "ingredient_name": "Beef",
-                "quantity": "200g"
-            }
+            data={"ingredient_name": "Beef", "quantity": "200g"},
         )
 
         assert response.status_code == 200
@@ -772,8 +762,7 @@ class TestUpdateIngredient:
         mi = create_meal_ingredient(db, meal, ingredient)
 
         response = auth_client.put(
-            f"/meals/{meal.id}/ingredients/{mi.id}",
-            data={"ingredient_name": "Hacked"}
+            f"/meals/{meal.id}/ingredients/{mi.id}", data={"ingredient_name": "Hacked"}
         )
 
         assert response.status_code == 403
@@ -785,8 +774,7 @@ class TestUpdateIngredient:
         meal = create_meal(db, test_user)
 
         response = auth_client.put(
-            f"/meals/{meal.id}/ingredients/99999",
-            data={"ingredient_name": "Test"}
+            f"/meals/{meal.id}/ingredients/99999", data={"ingredient_name": "Test"}
         )
 
         assert response.status_code == 404
@@ -804,19 +792,15 @@ class TestUpdateIngredientState:
         mi = create_meal_ingredient(db, meal, ingredient)
 
         response = auth_client.patch(
-            f"/meals/ingredients/{mi.id}/state",
-            json={"state": "invalid"}
+            f"/meals/ingredients/{mi.id}/state", json={"state": "invalid"}
         )
 
         assert response.status_code == 400
 
-    def test_update_state_nonexistent(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_update_state_nonexistent(self, auth_client: TestClient, test_user: User):
         """Test updating state of non-existent ingredient."""
         response = auth_client.patch(
-            "/meals/ingredients/99999/state",
-            json={"state": "cooked"}
+            "/meals/ingredients/99999/state", json={"state": "cooked"}
         )
 
         assert response.status_code == 404
@@ -832,15 +816,13 @@ class TestDeleteMealWithImage:
         meal = create_meal(db, test_user, image_path="/uploads/test.jpg")
         meal_id = meal.id
 
-        with patch('app.api.meals.file_service.delete_file') as mock_delete:
+        with patch("app.api.meals.file_service.delete_file") as mock_delete:
             response = auth_client.delete(f"/meals/{meal_id}")
 
         assert response.status_code in [200, 204]
         mock_delete.assert_called_once_with("/uploads/test.jpg")
 
-    def test_delete_nonexistent_meal(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_delete_nonexistent_meal(self, auth_client: TestClient, test_user: User):
         """Test deleting non-existent meal."""
         response = auth_client.delete("/meals/99999")
 
@@ -855,8 +837,9 @@ class TestEditIngredientsWithFeedback:
     ):
         """Test that existing feedback is shown on edit page."""
         meal = create_meal(
-            db, test_user,
-            ai_suggested_ingredients=[{"name": "chicken", "state": "cooked"}]
+            db,
+            test_user,
+            ai_suggested_ingredients=[{"name": "chicken", "state": "cooked"}],
         )
 
         # Create existing feedback
@@ -865,7 +848,7 @@ class TestEditIngredientsWithFeedback:
             feature_type="meal_analysis",
             feature_id=meal.id,
             rating=4,
-            feedback_text="Good analysis"
+            feedback_text="Good analysis",
         )
         db.add(feedback)
         db.commit()

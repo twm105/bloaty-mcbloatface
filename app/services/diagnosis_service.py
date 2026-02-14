@@ -1,7 +1,8 @@
 """Diagnosis service for analyzing ingredient-symptom correlations."""
-from datetime import datetime, timedelta
+
+from datetime import datetime
 from typing import Dict, List, Optional, Tuple
-from sqlalchemy import text, and_, func
+from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -12,8 +13,6 @@ from app.models import (
     Meal,
     Symptom,
     Ingredient,
-    MealIngredient,
-    User,
 )
 from app.config import settings
 
@@ -50,7 +49,6 @@ class DiagnosisService:
         Returns:
             List of ingredient IDs that have meaningful correlations
         """
-        max_occurrences = settings.diagnosis_max_ingredient_occurrences
 
         query = text(
             """
@@ -101,7 +99,7 @@ class DiagnosisService:
             {
                 "user_id": str(user_id),
                 "min_symptom_occurrences": self.MIN_SYMPTOM_OCCURRENCES,
-            }
+            },
         )
 
         return [row[0] for row in result]
@@ -135,7 +133,9 @@ class DiagnosisService:
             .filter(
                 Symptom.user_id == user_id,
                 Symptom.tags.isnot(None),
-                text("CASE WHEN jsonb_typeof(tags) = 'array' THEN jsonb_array_length(tags) ELSE 0 END > 0"),
+                text(
+                    "CASE WHEN jsonb_typeof(tags) = 'array' THEN jsonb_array_length(tags) ELSE 0 END > 0"
+                ),
                 Symptom.start_time >= date_range_start,
                 Symptom.start_time <= date_range_end,
             )
@@ -462,24 +462,30 @@ class DiagnosisService:
             p_a_given_b = float(row[9]) if row[9] else 0.0
             lift = float(row[10]) if row[10] else 0.0
 
-            cooccurrence_data.append({
-                "ingredient_a_id": row[0],
-                "ingredient_a_name": row[1],
-                "ingredient_b_id": row[2],
-                "ingredient_b_name": row[3],
-                "both_count": row[4],
-                "a_total_meals": row[5],
-                "b_total_meals": row[6],
-                "total_meals": row[7],
-                "p_b_given_a": p_b_given_a,
-                "p_a_given_b": p_a_given_b,
-                "lift": lift,
-                # Flag high co-occurrence pairs as potential confounders
-                "is_high_cooccurrence": p_b_given_a > 0.8 or p_a_given_b > 0.8 or lift > 3.0,
-            })
+            cooccurrence_data.append(
+                {
+                    "ingredient_a_id": row[0],
+                    "ingredient_a_name": row[1],
+                    "ingredient_b_id": row[2],
+                    "ingredient_b_name": row[3],
+                    "both_count": row[4],
+                    "a_total_meals": row[5],
+                    "b_total_meals": row[6],
+                    "total_meals": row[7],
+                    "p_b_given_a": p_b_given_a,
+                    "p_a_given_b": p_a_given_b,
+                    "lift": lift,
+                    # Flag high co-occurrence pairs as potential confounders
+                    "is_high_cooccurrence": p_b_given_a > 0.8
+                    or p_a_given_b > 0.8
+                    or lift > 3.0,
+                }
+            )
 
-        print(f"DEBUG get_ingredient_cooccurrence: Found {len(cooccurrence_data)} pairs, "
-              f"{sum(1 for c in cooccurrence_data if c['is_high_cooccurrence'])} high co-occurrence")
+        print(
+            f"DEBUG get_ingredient_cooccurrence: Found {len(cooccurrence_data)} pairs, "
+            f"{sum(1 for c in cooccurrence_data if c['is_high_cooccurrence'])} high co-occurrence"
+        )
 
         return cooccurrence_data
 
@@ -501,23 +507,27 @@ class DiagnosisService:
             if not pair["is_high_cooccurrence"]:
                 continue
             if pair["ingredient_a_id"] == ingredient_id:
-                relevant.append({
-                    "with_ingredient_id": pair["ingredient_b_id"],
-                    "with_ingredient_name": pair["ingredient_b_name"],
-                    "conditional_probability": pair["p_b_given_a"],
-                    "reverse_probability": pair["p_a_given_b"],
-                    "lift": pair["lift"],
-                    "cooccurrence_meals": pair["both_count"],
-                })
+                relevant.append(
+                    {
+                        "with_ingredient_id": pair["ingredient_b_id"],
+                        "with_ingredient_name": pair["ingredient_b_name"],
+                        "conditional_probability": pair["p_b_given_a"],
+                        "reverse_probability": pair["p_a_given_b"],
+                        "lift": pair["lift"],
+                        "cooccurrence_meals": pair["both_count"],
+                    }
+                )
             elif pair["ingredient_b_id"] == ingredient_id:
-                relevant.append({
-                    "with_ingredient_id": pair["ingredient_a_id"],
-                    "with_ingredient_name": pair["ingredient_a_name"],
-                    "conditional_probability": pair["p_a_given_b"],
-                    "reverse_probability": pair["p_b_given_a"],
-                    "lift": pair["lift"],
-                    "cooccurrence_meals": pair["both_count"],
-                })
+                relevant.append(
+                    {
+                        "with_ingredient_id": pair["ingredient_a_id"],
+                        "with_ingredient_name": pair["ingredient_a_name"],
+                        "conditional_probability": pair["p_a_given_b"],
+                        "reverse_probability": pair["p_b_given_a"],
+                        "lift": pair["lift"],
+                        "cooccurrence_meals": pair["both_count"],
+                    }
+                )
 
         # Sort by lift descending
         relevant.sort(key=lambda x: x["lift"], reverse=True)
@@ -634,7 +644,9 @@ class DiagnosisService:
             return None
 
         # Get ingredient name
-        ingredient = self.db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+        ingredient = (
+            self.db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+        )
         if not ingredient:
             return None
 
@@ -657,12 +669,14 @@ class DiagnosisService:
             severity = float(row[7]) if row[7] else 0.0
             lag = float(row[8]) if row[8] else 0.0
 
-            associated_symptoms.append({
-                "name": symptom_name,
-                "frequency": occurrences,
-                "severity_avg": severity,
-                "lag_hours": lag,
-            })
+            associated_symptoms.append(
+                {
+                    "name": symptom_name,
+                    "frequency": occurrences,
+                    "severity_avg": severity,
+                    "lag_hours": lag,
+                }
+            )
 
             total_symptom_occurrences += occurrences
             immediate_total += immediate
@@ -679,7 +693,9 @@ class DiagnosisService:
         )
 
         # Step 2: Get co-occurrence data for this ingredient
-        cooccurrence_data = self._get_holistic_cooccurrence(user_id, ingredient_id, max_occurrences)
+        cooccurrence_data = self._get_holistic_cooccurrence(
+            user_id, ingredient_id, max_occurrences
+        )
 
         return {
             "ingredient_id": ingredient_id,
@@ -755,20 +771,22 @@ class DiagnosisService:
                 "user_id": str(user_id),
                 "ingredient_id": ingredient_id,
                 "max_occurrences": max_occurrences,
-            }
+            },
         )
 
         cooccurrence_data = []
         for row in result:
             prob = float(row[4]) if row[4] else 0.0
-            cooccurrence_data.append({
-                "with_ingredient_id": row[0],
-                "with_ingredient_name": row[1],
-                "cooccurrence_meals": row[2],
-                "conditional_probability": prob,
-                # Flag high co-occurrence for classification
-                "is_high_cooccurrence": prob > 0.5,
-            })
+            cooccurrence_data.append(
+                {
+                    "with_ingredient_id": row[0],
+                    "with_ingredient_name": row[1],
+                    "cooccurrence_meals": row[2],
+                    "conditional_probability": prob,
+                    # Flag high co-occurrence for classification
+                    "is_high_cooccurrence": prob > 0.5,
+                }
+            )
 
         return cooccurrence_data
 
@@ -787,11 +805,15 @@ class DiagnosisService:
         Returns:
             Dict mapping ingredient_id to aggregated data including all symptoms
         """
-        print(f"DEBUG aggregate_correlations_by_ingredient: Processing {len(correlations)} correlations")
+        print(
+            f"DEBUG aggregate_correlations_by_ingredient: Processing {len(correlations)} correlations"
+        )
         aggregated = {}
 
         for idx, corr in enumerate(correlations):
-            print(f"DEBUG Correlation {idx}: ingredient={corr['ingredient_name']}, state={corr['ingredient_state']}, times_eaten={corr['times_eaten']}, symptom_occurrences={corr['symptom_occurrences']}")
+            print(
+                f"DEBUG Correlation {idx}: ingredient={corr['ingredient_name']}, state={corr['ingredient_state']}, times_eaten={corr['times_eaten']}, symptom_occurrences={corr['symptom_occurrences']}"
+            )
             ingredient_id = corr["ingredient_id"]
             state = corr["ingredient_state"]
             key = (ingredient_id, state)
@@ -823,9 +845,13 @@ class DiagnosisService:
                 }
             )
 
-        print(f"DEBUG aggregate_correlations_by_ingredient OUTPUT: {len(aggregated)} unique ingredients")
+        print(
+            f"DEBUG aggregate_correlations_by_ingredient OUTPUT: {len(aggregated)} unique ingredients"
+        )
         for key, agg in aggregated.items():
-            print(f"  {agg['ingredient_name']} ({agg['state']}): times_eaten={agg['times_eaten']}, total_symptom_occurrences={agg['total_symptom_occurrences']}")
+            print(
+                f"  {agg['ingredient_name']} ({agg['state']}): times_eaten={agg['times_eaten']}, total_symptom_occurrences={agg['total_symptom_occurrences']}"
+            )
 
         return aggregated
 
@@ -862,16 +888,25 @@ class DiagnosisService:
             - confidence_level: 'high', 'medium', 'low', or 'insufficient_data'
         """
         # Calculate total symptom occurrences for threshold check
-        total_symptom_occurrences = sum(s.get("frequency", 0) for s in associated_symptoms)
+        total_symptom_occurrences = sum(
+            s.get("frequency", 0) for s in associated_symptoms
+        )
 
-        print(f"DEBUG calculate_confidence INPUT:")
+        print("DEBUG calculate_confidence INPUT:")
         print(f"  times_eaten: {times_eaten}, MIN_MEALS: {self.MIN_MEALS}")
-        print(f"  total_symptom_occurrences: {total_symptom_occurrences}, MIN_SYMPTOM_OCCURRENCES: {self.MIN_SYMPTOM_OCCURRENCES}")
+        print(
+            f"  total_symptom_occurrences: {total_symptom_occurrences}, MIN_SYMPTOM_OCCURRENCES: {self.MIN_SYMPTOM_OCCURRENCES}"
+        )
         print(f"  associated_symptoms: {associated_symptoms}")
-        print(f"  immediate: {immediate_count}, delayed: {delayed_count}, cumulative: {cumulative_count}")
+        print(
+            f"  immediate: {immediate_count}, delayed: {delayed_count}, cumulative: {cumulative_count}"
+        )
 
         # Minimum thresholds
-        if times_eaten < self.MIN_MEALS or total_symptom_occurrences < self.MIN_SYMPTOM_OCCURRENCES:
+        if (
+            times_eaten < self.MIN_MEALS
+            or total_symptom_occurrences < self.MIN_SYMPTOM_OCCURRENCES
+        ):
             return (0.0, "insufficient_data")
 
         # 1. Statistical confidence (50% weight)
@@ -916,14 +951,18 @@ class DiagnosisService:
         # 3. Severity weighting (20% weight)
         # Use average severity across all symptoms
         if associated_symptoms:
-            avg_severity = sum(s.get("severity_avg", 0) for s in associated_symptoms) / len(associated_symptoms)
+            avg_severity = sum(
+                s.get("severity_avg", 0) for s in associated_symptoms
+            ) / len(associated_symptoms)
         else:
             avg_severity = 0.0
         severity_component = min(avg_severity / 10, 1.0)
 
         # Combined score (always 0.0-1.0)
         confidence = (
-            0.5 * statistical_conf + 0.3 * temporal_specificity + 0.2 * severity_component
+            0.5 * statistical_conf
+            + 0.3 * temporal_specificity
+            + 0.2 * severity_component
         )
         confidence = min(1.0, max(0.0, confidence))  # Safety clamp
 
@@ -935,9 +974,13 @@ class DiagnosisService:
         else:
             level = "low"
 
-        print(f"DEBUG calculate_confidence OUTPUT:")
-        print(f"  correlation_strength: {correlation_strength}, statistical_conf: {statistical_conf}")
-        print(f"  temporal_specificity: {temporal_specificity}, severity_component: {severity_component}")
+        print("DEBUG calculate_confidence OUTPUT:")
+        print(
+            f"  correlation_strength: {correlation_strength}, statistical_conf: {statistical_conf}"
+        )
+        print(
+            f"  temporal_specificity: {temporal_specificity}, severity_component: {severity_component}"
+        )
         print(f"  final confidence: {round(confidence, 3)}, level: {level}")
 
         return (round(confidence, 3), level)
@@ -947,7 +990,7 @@ class DiagnosisService:
         user_id: str,
         date_range_start: datetime,
         date_range_end: datetime,
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> DiagnosisRun:
         """
         Run complete diagnosis analysis and store results in database.
@@ -975,7 +1018,9 @@ class DiagnosisService:
         """
         from app.services.ai_service import ClaudeService
 
-        print(f"DEBUG run_diagnosis: date_range_start={date_range_start}, date_range_end={date_range_end}")
+        print(
+            f"DEBUG run_diagnosis: date_range_start={date_range_start}, date_range_end={date_range_end}"
+        )
 
         # Step 1: Check data sufficiency
         sufficient_data, meals_count, symptoms_count = self.check_data_sufficiency(
@@ -1011,9 +1056,7 @@ class DiagnosisService:
             return diagnosis_run
 
         # Step 3: Run symptom clustering
-        clusters = self.get_symptom_clusters(
-            user_id, date_range_start, date_range_end
-        )
+        self.get_symptom_clusters(user_id, date_range_start, date_range_end)
 
         # Step 4: Aggregate correlations by ingredient
         aggregated = self.aggregate_correlations_by_ingredient(correlations)
@@ -1076,7 +1119,7 @@ class DiagnosisService:
                     ingredient_data=ingredient,
                     cooccurrence_data=ingredient_cooccurrence,
                     medical_grounding="",  # Will be fetched via web search
-                    web_search_enabled=web_search_enabled
+                    web_search_enabled=web_search_enabled,
                 )
 
                 if classification.get("root_cause", True):
@@ -1089,21 +1132,34 @@ class DiagnosisService:
                     confounded_by_id = None
                     if confounded_by_name:
                         for cooc in ingredient_cooccurrence:
-                            if cooc["with_ingredient_name"].lower() == confounded_by_name.lower():
+                            if (
+                                cooc["with_ingredient_name"].lower()
+                                == confounded_by_name.lower()
+                            ):
                                 confounded_by_id = cooc["with_ingredient_id"]
                                 break
 
-                    discounted_ingredients.append({
-                        **ingredient,
-                        "discard_justification": classification.get("discard_justification", ""),
-                        "confounded_by_id": confounded_by_id,
-                        "confounded_by_name": confounded_by_name,
-                        "medical_grounding": classification.get("medical_reasoning", ""),
-                        "cooccurrence": ingredient_cooccurrence[0] if ingredient_cooccurrence else None,
-                    })
+                    discounted_ingredients.append(
+                        {
+                            **ingredient,
+                            "discard_justification": classification.get(
+                                "discard_justification", ""
+                            ),
+                            "confounded_by_id": confounded_by_id,
+                            "confounded_by_name": confounded_by_name,
+                            "medical_grounding": classification.get(
+                                "medical_reasoning", ""
+                            ),
+                            "cooccurrence": ingredient_cooccurrence[0]
+                            if ingredient_cooccurrence
+                            else None,
+                        }
+                    )
             except Exception as e:
                 # On error, keep ingredient (err on side of showing triggers)
-                print(f"Root cause classification error for {ingredient['ingredient_name']}: {e}")
+                print(
+                    f"Root cause classification error for {ingredient['ingredient_name']}: {e}"
+                )
                 confirmed_ingredients.append(ingredient)
 
         # Update scored_ingredients to only confirmed ones
@@ -1120,7 +1176,14 @@ class DiagnosisService:
                 scored_ingredients, web_search_enabled=web_search_enabled
             )
         else:
-            ai_analysis = {"ingredient_analyses": [], "usage_stats": {"input_tokens": 0, "cached_tokens": 0, "cache_hit": False}}
+            ai_analysis = {
+                "ingredient_analyses": [],
+                "usage_stats": {
+                    "input_tokens": 0,
+                    "cached_tokens": 0,
+                    "cache_hit": False,
+                },
+            }
 
         # Update diagnosis run with Claude API stats
         diagnosis_run.claude_model = claude_service.sonnet_model
@@ -1158,7 +1221,9 @@ class DiagnosisService:
                 times_eaten=matching["times_eaten"],
                 times_followed_by_symptoms=matching["total_symptom_occurrences"],
                 state_matters=False,  # TODO: implement state significance testing
-                problematic_states=[matching["state"]] if matching.get("state") else None,
+                problematic_states=[matching["state"]]
+                if matching.get("state")
+                else None,
                 associated_symptoms=matching["associated_symptoms"],
                 ai_analysis=analysis.get("medical_context", "")
                 + "\n\nInterpretation: "
@@ -1187,7 +1252,9 @@ class DiagnosisService:
             discounted_obj = DiscountedIngredient(
                 run_id=diagnosis_run.id,
                 ingredient_id=discounted["ingredient_id"],
-                discard_justification=discounted.get("discard_justification", "Confounded by co-occurring ingredient"),
+                discard_justification=discounted.get(
+                    "discard_justification", "Confounded by co-occurring ingredient"
+                ),
                 confounded_by_ingredient_id=discounted.get("confounded_by_id"),
                 # Original correlation data
                 original_confidence_score=discounted.get("confidence_score"),
@@ -1199,10 +1266,14 @@ class DiagnosisService:
                 cumulative_correlation=discounted.get("cumulative_total"),
                 associated_symptoms=discounted.get("associated_symptoms"),
                 # Co-occurrence data
-                conditional_probability=cooc.get("conditional_probability") if cooc else None,
+                conditional_probability=cooc.get("conditional_probability")
+                if cooc
+                else None,
                 reverse_probability=cooc.get("reverse_probability") if cooc else None,
                 lift=cooc.get("lift") if cooc else None,
-                cooccurrence_meals_count=cooc.get("cooccurrence_meals") if cooc else None,
+                cooccurrence_meals_count=cooc.get("cooccurrence_meals")
+                if cooc
+                else None,
                 # Medical grounding
                 medical_grounding_summary=discounted.get("medical_grounding"),
             )

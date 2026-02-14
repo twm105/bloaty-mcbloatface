@@ -6,6 +6,7 @@ Tests the AI-powered meal center detection for circular cropping:
 - Media type detection
 - API integration with mocking
 """
+
 import pytest
 import tempfile
 from pathlib import Path
@@ -128,7 +129,7 @@ class TestDetectMealCenter:
         """Test successful meal center detection."""
         # Create a temporary image file
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
-            f.write(b'\xff\xd8\xff\xe0\x00\x10JFIF\x00')  # Minimal JPEG
+            f.write(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00")  # Minimal JPEG
             temp_path = f.name
 
         try:
@@ -137,7 +138,7 @@ class TestDetectMealCenter:
             mock_content.text = "35,65"
             mock_response.content = [mock_content]
 
-            with patch('app.services.image_crop.client') as mock_client:
+            with patch("app.services.image_crop.client") as mock_client:
                 mock_client.messages.create.return_value = mock_response
 
                 x, y = await detect_meal_center(temp_path)
@@ -151,11 +152,11 @@ class TestDetectMealCenter:
     async def test_api_error_returns_center(self):
         """Test that API errors return center coordinates."""
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
-            f.write(b'\xff\xd8\xff\xe0\x00\x10JFIF\x00')
+            f.write(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00")
             temp_path = f.name
 
         try:
-            with patch('app.services.image_crop.client') as mock_client:
+            with patch("app.services.image_crop.client") as mock_client:
                 mock_client.messages.create.side_effect = Exception("API Error")
 
                 x, y = await detect_meal_center(temp_path)
@@ -169,7 +170,7 @@ class TestDetectMealCenter:
     async def test_invalid_api_response_returns_center(self):
         """Test that invalid API response returns center coordinates."""
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
-            f.write(b'\xff\xd8\xff\xe0\x00\x10JFIF\x00')
+            f.write(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00")
             temp_path = f.name
 
         try:
@@ -178,7 +179,7 @@ class TestDetectMealCenter:
             mock_content.text = "not valid coordinates"
             mock_response.content = [mock_content]
 
-            with patch('app.services.image_crop.client') as mock_client:
+            with patch("app.services.image_crop.client") as mock_client:
                 mock_client.messages.create.return_value = mock_response
 
                 x, y = await detect_meal_center(temp_path)
@@ -194,7 +195,7 @@ class TestDetectMealCenter:
         """Test detection with PNG image."""
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             # Minimal PNG header
-            f.write(b'\x89PNG\r\n\x1a\n')
+            f.write(b"\x89PNG\r\n\x1a\n")
             temp_path = f.name
 
         try:
@@ -203,7 +204,7 @@ class TestDetectMealCenter:
             mock_content.text = "25,75"
             mock_response.content = [mock_content]
 
-            with patch('app.services.image_crop.client') as mock_client:
+            with patch("app.services.image_crop.client") as mock_client:
                 mock_client.messages.create.return_value = mock_response
 
                 x, y = await detect_meal_center(temp_path)

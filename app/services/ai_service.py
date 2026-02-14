@@ -12,9 +12,8 @@ import base64
 import asyncio
 import random
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 from datetime import datetime
-from uuid import UUID
 from functools import wraps
 
 from anthropic import Anthropic
@@ -30,7 +29,7 @@ from app.services.prompts import (
     EPISODE_CONTINUATION_SYSTEM_PROMPT,
     DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
     ROOT_CAUSE_CLASSIFICATION_PROMPT,
-    build_cached_analysis_context
+    build_cached_analysis_context,
 )
 
 
@@ -42,6 +41,7 @@ def retry_on_connection_error(max_attempts=3, base_delay=1.0):
         max_attempts: Maximum retry attempts (default 3)
         base_delay: Base delay in seconds for exponential backoff (default 1.0)
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -55,19 +55,26 @@ def retry_on_connection_error(max_attempts=3, base_delay=1.0):
 
                     if attempt < max_attempts - 1:
                         # Exponential backoff with jitter
-                        delay = base_delay * (2 ** attempt)
-                        jitter = delay * 0.1 * (2 * random.random() - 1)  # ±10% random variance
+                        delay = base_delay * (2**attempt)
+                        jitter = (
+                            delay * 0.1 * (2 * random.random() - 1)
+                        )  # ±10% random variance
                         sleep_time = delay + jitter
 
-                        print(f"Connection error on attempt {attempt + 1}/{max_attempts}, retrying in {sleep_time:.1f}s...")
+                        print(
+                            f"Connection error on attempt {attempt + 1}/{max_attempts}, retrying in {sleep_time:.1f}s..."
+                        )
                         await asyncio.sleep(sleep_time)
                     else:
                         print(f"All {max_attempts} attempts failed")
 
             # All retries exhausted, raise the last exception
-            raise ServiceUnavailableError("AI service temporarily unavailable after retries") from last_exception
+            raise ServiceUnavailableError(
+                "AI service temporarily unavailable after retries"
+            ) from last_exception
 
         return wrapper
+
     return decorator
 
 
@@ -80,10 +87,7 @@ class ClaudeService:
             timeout=settings.anthropic_timeout,  # 180 seconds total
             connect=settings.anthropic_connect_timeout,  # 10 seconds to connect
         )
-        self.client = Anthropic(
-            api_key=settings.anthropic_api_key,
-            timeout=timeout
-        )
+        self.client = Anthropic(api_key=settings.anthropic_api_key, timeout=timeout)
         self.haiku_model = settings.haiku_model
         self.sonnet_model = settings.sonnet_model
 
@@ -126,17 +130,17 @@ class ClaudeService:
                                 "source": {
                                     "type": "base64",
                                     "media_type": media_type,
-                                    "data": image_data
-                                }
+                                    "data": image_data,
+                                },
                             },
                             {
                                 "type": "text",
-                                "text": "Is this a photo of food or a meal? Answer only YES or NO."
-                            }
-                        ]
+                                "text": "Is this a photo of food or a meal? Answer only YES or NO.",
+                            },
+                        ],
                     }
                 ],
-                system=MEAL_VALIDATION_SYSTEM_PROMPT
+                system=MEAL_VALIDATION_SYSTEM_PROMPT,
             )
 
             answer = response.content[0].text.strip().upper()
@@ -145,7 +149,9 @@ class ClaudeService:
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -154,9 +160,7 @@ class ClaudeService:
             raise ValueError(f"Image validation failed: {str(e)}") from e
 
     async def analyze_meal_image(
-        self,
-        image_path: str,
-        user_notes: Optional[str] = None
+        self, image_path: str, user_notes: Optional[str] = None
     ) -> dict:
         """
         Analyze meal image with Haiku, return structured ingredients.
@@ -199,27 +203,26 @@ class ClaudeService:
                     "source": {
                         "type": "base64",
                         "media_type": media_type,
-                        "data": image_data
-                    }
+                        "data": image_data,
+                    },
                 },
                 {
                     "type": "text",
-                    "text": "Analyze this meal and identify all visible ingredients."
-                }
+                    "text": "Analyze this meal and identify all visible ingredients.",
+                },
             ]
 
             if user_notes:
-                user_message.append({
-                    "type": "text",
-                    "text": f"User notes: {user_notes}"
-                })
+                user_message.append(
+                    {"type": "text", "text": f"User notes: {user_notes}"}
+                )
 
             # Call Claude
             response = self.client.messages.create(
                 model=self.haiku_model,
                 max_tokens=1024,
                 messages=[{"role": "user", "content": user_message}],
-                system=MEAL_ANALYSIS_SYSTEM_PROMPT
+                system=MEAL_ANALYSIS_SYSTEM_PROMPT,
             )
 
             raw_response = response.content[0].text
@@ -248,13 +251,15 @@ class ClaudeService:
                 "meal_name": meal_name,
                 "ingredients": ingredients,
                 "raw_response": raw_response,
-                "model": self.haiku_model
+                "model": self.haiku_model,
             }
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -267,9 +272,7 @@ class ClaudeService:
     # =========================================================================
 
     async def clarify_symptom(
-        self,
-        raw_description: str,
-        clarification_history: list = None
+        self, raw_description: str, clarification_history: list = None
     ) -> dict:
         """
         Multi-turn symptom clarification with Sonnet (max 3 questions).
@@ -310,44 +313,50 @@ class ClaudeService:
             messages = [
                 {
                     "role": "user",
-                    "content": f"My symptom description: {raw_description}"
+                    "content": f"My symptom description: {raw_description}",
                 }
             ]
 
             # Add clarification Q&A to messages
             for item in clarification_history:
                 if not item.get("skipped", False):
-                    messages.append({
-                        "role": "assistant",
-                        "content": json.dumps({"mode": "question", "question": item["question"]})
-                    })
-                    messages.append({
-                        "role": "user",
-                        "content": item["answer"]
-                    })
+                    messages.append(
+                        {
+                            "role": "assistant",
+                            "content": json.dumps(
+                                {"mode": "question", "question": item["question"]}
+                            ),
+                        }
+                    )
+                    messages.append({"role": "user", "content": item["answer"]})
                 else:
                     # User skipped this question
-                    messages.append({
-                        "role": "assistant",
-                        "content": json.dumps({"mode": "question", "question": item["question"]})
-                    })
-                    messages.append({
-                        "role": "user",
-                        "content": "I'd prefer to skip this question."
-                    })
+                    messages.append(
+                        {
+                            "role": "assistant",
+                            "content": json.dumps(
+                                {"mode": "question", "question": item["question"]}
+                            ),
+                        }
+                    )
+                    messages.append(
+                        {"role": "user", "content": "I'd prefer to skip this question."}
+                    )
 
             # Add instruction to proceed
-            messages.append({
-                "role": "user",
-                "content": f"Questions asked so far: {len(clarification_history)}. Please proceed."
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"Questions asked so far: {len(clarification_history)}. Please proceed.",
+                }
+            )
 
             # Call Claude
             response = self.client.messages.create(
                 model=self.sonnet_model,
                 max_tokens=512,
                 messages=messages,
-                system=SYMPTOM_CLARIFICATION_SYSTEM_PROMPT
+                system=SYMPTOM_CLARIFICATION_SYSTEM_PROMPT,
             )
 
             raw_response = response.content[0].text
@@ -368,7 +377,9 @@ class ClaudeService:
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -385,7 +396,7 @@ class ClaudeService:
         tags: list,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
-        user_notes: Optional[str] = None
+        user_notes: Optional[str] = None,
     ):
         """
         Stream AI-generated medical note from symptom tags (async generator).
@@ -411,12 +422,16 @@ class ClaudeService:
             context_parts = [f"Tags: {json.dumps(tags)}"]
 
             if start_time:
-                context_parts.append(f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}")
+                context_parts.append(
+                    f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}"
+                )
 
             if end_time:
                 duration = end_time - start_time
                 hours = duration.total_seconds() / 3600
-                context_parts.append(f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)")
+                context_parts.append(
+                    f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)"
+                )
 
             if user_notes:
                 context_parts.append(f"User notes: {user_notes}")
@@ -430,10 +445,10 @@ class ClaudeService:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}"
+                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}",
                     }
                 ],
-                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT
+                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT,
             ) as stream:
                 for text in stream.text_stream:
                     yield text
@@ -441,7 +456,9 @@ class ClaudeService:
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -452,7 +469,7 @@ class ClaudeService:
         tags: list,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
-        user_notes: Optional[str] = None
+        user_notes: Optional[str] = None,
     ) -> dict:
         """
         Generate medical-note paragraph from symptom tags.
@@ -482,12 +499,16 @@ class ClaudeService:
             context_parts = [f"Tags: {json.dumps(tags)}"]
 
             if start_time:
-                context_parts.append(f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}")
+                context_parts.append(
+                    f"Start time: {start_time.strftime('%Y-%m-%d %H:%M')}"
+                )
 
             if end_time:
                 duration = end_time - start_time
                 hours = duration.total_seconds() / 3600
-                context_parts.append(f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)")
+                context_parts.append(
+                    f"End time: {end_time.strftime('%Y-%m-%d %H:%M')} (duration: {hours:.1f} hours)"
+                )
 
             if user_notes:
                 context_parts.append(f"User notes: {user_notes}")
@@ -501,10 +522,10 @@ class ClaudeService:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}"
+                        "content": f"Generate a medical note paragraph from this symptom data:\n\n{context}",
                     }
                 ],
-                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT
+                system=SYMPTOM_ELABORATION_SYSTEM_PROMPT,
             )
 
             elaboration = response.content[0].text.strip()
@@ -512,22 +533,22 @@ class ClaudeService:
             return {
                 "elaboration": elaboration,
                 "raw_response": elaboration,
-                "model": self.sonnet_model
+                "model": self.sonnet_model,
             }
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
 
     async def detect_ongoing_symptom(
-        self,
-        previous_symptom: dict,
-        current_symptom: dict
+        self, previous_symptom: dict, current_symptom: dict
     ) -> dict:
         """
         Determine if current symptom is ongoing from previous occurrence.
@@ -549,14 +570,20 @@ class ClaudeService:
                 "previous_symptom": {
                     "name": previous_symptom.get("name"),
                     "severity": previous_symptom.get("severity"),
-                    "start_time": previous_symptom.get("start_time").isoformat() if isinstance(previous_symptom.get("start_time"), datetime) else previous_symptom.get("start_time"),
-                    "end_time": previous_symptom.get("end_time").isoformat() if previous_symptom.get("end_time") else None
+                    "start_time": previous_symptom.get("start_time").isoformat()
+                    if isinstance(previous_symptom.get("start_time"), datetime)
+                    else previous_symptom.get("start_time"),
+                    "end_time": previous_symptom.get("end_time").isoformat()
+                    if previous_symptom.get("end_time")
+                    else None,
                 },
                 "current_symptom": {
                     "name": current_symptom.get("name"),
                     "severity": current_symptom.get("severity"),
-                    "time": current_symptom.get("time").isoformat() if isinstance(current_symptom.get("time"), datetime) else current_symptom.get("time")
-                }
+                    "time": current_symptom.get("time").isoformat()
+                    if isinstance(current_symptom.get("time"), datetime)
+                    else current_symptom.get("time"),
+                },
             }
 
             # Call Claude with episode continuation prompt (reuse existing logic)
@@ -566,10 +593,10 @@ class ClaudeService:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Analyze if this symptom is ongoing:\n\n{json.dumps(analysis_data, indent=2)}"
+                        "content": f"Analyze if this symptom is ongoing:\n\n{json.dumps(analysis_data, indent=2)}",
                     }
                 ],
-                system=EPISODE_CONTINUATION_SYSTEM_PROMPT  # Reuse existing prompt
+                system=EPISODE_CONTINUATION_SYSTEM_PROMPT,  # Reuse existing prompt
             )
 
             raw_response = response.content[0].text
@@ -588,19 +615,18 @@ class ClaudeService:
                     raise ValueError("Could not parse AI response as JSON")
 
             return {
-                "is_ongoing": parsed.get("is_continuation", False),  # Reuse continuation logic
+                "is_ongoing": parsed.get(
+                    "is_continuation", False
+                ),  # Reuse continuation logic
                 "confidence": parsed.get("confidence", 0.0),
-                "reasoning": parsed.get("reasoning", "")
+                "reasoning": parsed.get("reasoning", ""),
             }
 
         except Exception as e:
             raise ValueError(f"AI ongoing detection failed: {str(e)}")
 
     async def detect_episode_continuation(
-        self,
-        current_tags: list,
-        current_time: datetime,
-        previous_symptom: dict
+        self, current_tags: list, current_time: datetime, previous_symptom: dict
     ) -> dict:
         """
         Determine if current symptoms continue a previous episode.
@@ -631,10 +657,14 @@ class ClaudeService:
                 "current_time": current_time.isoformat(),
                 "previous_symptom": {
                     "tags": previous_symptom.get("tags"),
-                    "start_time": previous_symptom.get("start_time").isoformat() if previous_symptom.get("start_time") else None,
-                    "end_time": previous_symptom.get("end_time").isoformat() if previous_symptom.get("end_time") else None,
-                    "notes": previous_symptom.get("notes")
-                }
+                    "start_time": previous_symptom.get("start_time").isoformat()
+                    if previous_symptom.get("start_time")
+                    else None,
+                    "end_time": previous_symptom.get("end_time").isoformat()
+                    if previous_symptom.get("end_time")
+                    else None,
+                    "notes": previous_symptom.get("notes"),
+                },
             }
 
             # Call Claude
@@ -644,10 +674,10 @@ class ClaudeService:
                 messages=[
                     {
                         "role": "user",
-                        "content": f"Analyze if these symptoms are a continuation:\n\n{json.dumps(analysis_data, indent=2)}"
+                        "content": f"Analyze if these symptoms are a continuation:\n\n{json.dumps(analysis_data, indent=2)}",
                     }
                 ],
-                system=EPISODE_CONTINUATION_SYSTEM_PROMPT
+                system=EPISODE_CONTINUATION_SYSTEM_PROMPT,
             )
 
             raw_response = response.content[0].text
@@ -669,13 +699,15 @@ class ClaudeService:
             return {
                 "is_continuation": parsed.get("is_continuation", False),
                 "confidence": parsed.get("confidence", 0.0),
-                "reasoning": parsed.get("reasoning", "")
+                "reasoning": parsed.get("reasoning", ""),
             }
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -691,7 +723,7 @@ class ClaudeService:
         self,
         meals_data: str,
         symptoms_data: str,
-        analysis_question: str = "Identify ingredients that may be correlated with symptoms."
+        analysis_question: str = "Identify ingredients that may be correlated with symptoms.",
     ) -> dict:
         """
         Analyze meal-symptom correlations with Sonnet + prompt caching.
@@ -729,32 +761,32 @@ class ClaudeService:
                 model=self.sonnet_model,
                 max_tokens=2048,
                 system=cached_context,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": analysis_question
-                    }
-                ]
+                messages=[{"role": "user", "content": analysis_question}],
             )
 
             analysis = response.content[0].text
 
             # Extract token usage for cost tracking
             usage = response.usage
-            cache_hit = hasattr(usage, 'cache_read_input_tokens') and usage.cache_read_input_tokens > 0
+            cache_hit = (
+                hasattr(usage, "cache_read_input_tokens")
+                and usage.cache_read_input_tokens > 0
+            )
 
             return {
                 "analysis": analysis,
                 "model": self.sonnet_model,
                 "cache_hit": cache_hit,
                 "input_tokens": usage.input_tokens,
-                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0)
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
             }
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -766,9 +798,7 @@ class ClaudeService:
 
     @retry_on_connection_error(max_attempts=3, base_delay=2.0)
     async def diagnose_correlations(
-        self,
-        correlation_data: list[dict],
-        web_search_enabled: bool = True
+        self, correlation_data: list[dict], web_search_enabled: bool = True
     ) -> dict:
         """
         Analyze ingredient-symptom correlations with medical grounding via web search.
@@ -827,12 +857,9 @@ Remember to:
 2. Provide citations from reputable sources (NIH, PubMed, medical journals, RD sites)
 3. Use qualified language (correlation, not causation)
 4. Include plain-language interpretation
-5. Suggest next steps including professional consultation"""
+5. Suggest next steps including professional consultation""",
                 },
-                {
-                    "role": "assistant",
-                    "content": "{"
-                }
+                {"role": "assistant", "content": "{"},
             ]
 
             # Call Claude API with web search if enabled
@@ -845,18 +872,15 @@ Remember to:
                     {
                         "type": "text",
                         "text": DIAGNOSIS_SYSTEM_PROMPT,
-                        "cache_control": {"type": "ephemeral"}
+                        "cache_control": {"type": "ephemeral"},
                     }
-                ]
+                ],
             }
 
             # Add web search tool if enabled
             if web_search_enabled:
                 request_params["tools"] = [
-                    {
-                        "type": "web_search_20250305",
-                        "name": "web_search"
-                    }
+                    {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
             response = self.client.messages.create(**request_params)
@@ -864,11 +888,13 @@ Remember to:
             # Extract JSON from response
             response_text = ""
             for content_block in response.content:
-                if hasattr(content_block, 'text'):
+                if hasattr(content_block, "text"):
                     response_text += content_block.text
 
             if not response_text:
-                raise ValueError(f"No text content in Claude response. Content blocks: {[c.type for c in response.content]}")
+                raise ValueError(
+                    f"No text content in Claude response. Content blocks: {[c.type for c in response.content]}"
+                )
 
             response_text = response_text.strip()
 
@@ -879,14 +905,16 @@ Remember to:
             try:
                 result = json.loads(response_text)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON response from AI at line {e.lineno}, col {e.colno}: {e.msg}") from e
+                raise ValueError(
+                    f"Invalid JSON response from AI at line {e.lineno}, col {e.colno}: {e.msg}"
+                ) from e
 
             # Add usage stats
             usage = response.usage
             result["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
-                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
-                "cache_hit": getattr(usage, 'cache_read_input_tokens', 0) > 0
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
+                "cache_hit": getattr(usage, "cache_read_input_tokens", 0) > 0,
             }
 
             return result
@@ -894,7 +922,9 @@ Remember to:
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -907,7 +937,7 @@ Remember to:
         self,
         ingredient_data: dict,
         user_meal_history: list,
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> dict:
         """
         Analyze a single ingredient for symptom correlations with medical grounding.
@@ -956,7 +986,7 @@ Provide your analysis in the specified JSON format."""
             # Prepare messages with prefill
             messages = [
                 {"role": "user", "content": user_message},
-                {"role": "assistant", "content": "{"}
+                {"role": "assistant", "content": "{"},
             ]
 
             # Build request parameters
@@ -969,18 +999,15 @@ Provide your analysis in the specified JSON format."""
                     {
                         "type": "text",
                         "text": DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
-                        "cache_control": {"type": "ephemeral"}
+                        "cache_control": {"type": "ephemeral"},
                     }
-                ]
+                ],
             }
 
             # Add web search if enabled
             if web_search_enabled:
                 request_params["tools"] = [
-                    {
-                        "type": "web_search_20250305",
-                        "name": "web_search"
-                    }
+                    {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
             response = self.client.messages.create(**request_params)
@@ -988,7 +1015,7 @@ Provide your analysis in the specified JSON format."""
             # Extract JSON from response
             response_text = ""
             for content_block in response.content:
-                if hasattr(content_block, 'text'):
+                if hasattr(content_block, "text"):
                     response_text += content_block.text
 
             if not response_text:
@@ -1006,9 +1033,9 @@ Provide your analysis in the specified JSON format."""
             usage = response.usage
             result["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
-                "output_tokens": getattr(usage, 'output_tokens', 0),
-                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
-                "cache_hit": getattr(usage, 'cache_read_input_tokens', 0) > 0
+                "output_tokens": getattr(usage, "output_tokens", 0),
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
+                "cache_hit": getattr(usage, "cache_read_input_tokens", 0) > 0,
             }
 
             return result
@@ -1016,7 +1043,9 @@ Provide your analysis in the specified JSON format."""
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
@@ -1028,7 +1057,7 @@ Provide your analysis in the specified JSON format."""
         ingredient_data: dict,
         cooccurrence_data: list,
         medical_grounding: str,
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> dict:
         """
         Classify whether an ingredient is a root cause or confounder.
@@ -1067,7 +1096,7 @@ Provide your analysis in the specified JSON format."""
             # Prepare messages with prefill
             messages = [
                 {"role": "user", "content": formatted_input},
-                {"role": "assistant", "content": "{"}
+                {"role": "assistant", "content": "{"},
             ]
 
             # Build request parameters
@@ -1080,18 +1109,15 @@ Provide your analysis in the specified JSON format."""
                     {
                         "type": "text",
                         "text": ROOT_CAUSE_CLASSIFICATION_PROMPT,
-                        "cache_control": {"type": "ephemeral"}
+                        "cache_control": {"type": "ephemeral"},
                     }
-                ]
+                ],
             }
 
             # Add web search if enabled and no medical grounding provided
             if web_search_enabled and not medical_grounding:
                 request_params["tools"] = [
-                    {
-                        "type": "web_search_20250305",
-                        "name": "web_search"
-                    }
+                    {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
             response = self.client.messages.create(**request_params)
@@ -1099,7 +1125,7 @@ Provide your analysis in the specified JSON format."""
             # Extract JSON from response
             response_text = ""
             for content_block in response.content:
-                if hasattr(content_block, 'text'):
+                if hasattr(content_block, "text"):
                     response_text += content_block.text
 
             if not response_text:
@@ -1110,8 +1136,9 @@ Provide your analysis in the specified JSON format."""
 
             # Handle trailing commas (common JSON error)
             import re
-            json_text = re.sub(r',\s*}', '}', json_text)
-            json_text = re.sub(r',\s*]', ']', json_text)
+
+            json_text = re.sub(r",\s*}", "}", json_text)
+            json_text = re.sub(r",\s*]", "]", json_text)
 
             # Parse JSON
             try:
@@ -1123,8 +1150,8 @@ Provide your analysis in the specified JSON format."""
             usage = response.usage
             result["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
-                "output_tokens": getattr(usage, 'output_tokens', 0),
-                "cached_tokens": getattr(usage, 'cache_read_input_tokens', 0),
+                "output_tokens": getattr(usage, "output_tokens", 0),
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
             }
 
             return result
@@ -1132,39 +1159,38 @@ Provide your analysis in the specified JSON format."""
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
         except anthropic.RateLimitError as e:
-            raise RateLimitError("Too many requests, please try again in 1 minute") from e
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
         except anthropic.APIStatusError as e:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
 
     def _format_root_cause_input(
-        self,
-        ingredient_data: dict,
-        cooccurrence_data: list,
-        medical_grounding: str
+        self, ingredient_data: dict, cooccurrence_data: list, medical_grounding: str
     ) -> str:
         """Format input data for root cause classification."""
-        times_eaten = ingredient_data.get('times_eaten', 0)
-        symptom_count = ingredient_data.get('total_symptom_occurrences', 0)
+        times_eaten = ingredient_data.get("times_eaten", 0)
+        symptom_count = ingredient_data.get("total_symptom_occurrences", 0)
 
-        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')}
+        formatted = f"""INGREDIENT: {ingredient_data.get("ingredient_name", "Unknown")}
 
 === SYMPTOM PATTERN ===
 - Eaten {times_eaten} times, symptoms followed {symptom_count} times
-- Confidence level: {ingredient_data.get('confidence_level', 'unknown')}
+- Confidence level: {ingredient_data.get("confidence_level", "unknown")}
 
 Symptoms reported:"""
 
-        for symptom in ingredient_data.get('associated_symptoms', []):
+        for symptom in ingredient_data.get("associated_symptoms", []):
             formatted += f"\n- {symptom.get('name', 'Unknown')}: {symptom.get('frequency', 0)} times"
 
         formatted += "\n\n=== FOODS IT APPEARS WITH ==="
         if cooccurrence_data:
             for cooc in cooccurrence_data:
-                prob = cooc.get('conditional_probability', 0) * 100
-                meals = cooc.get('cooccurrence_meals', 0)
-                other = cooc.get('with_ingredient_name', 'Unknown')
+                prob = cooc.get("conditional_probability", 0) * 100
+                meals = cooc.get("cooccurrence_meals", 0)
+                other = cooc.get("with_ingredient_name", "Unknown")
 
                 # Convert probability to plain English
                 if prob >= 90:
@@ -1176,9 +1202,13 @@ Symptoms reported:"""
                 else:
                     freq_desc = "sometimes"
 
-                formatted += f"\n- {freq_desc} eaten with {other} ({meals} meals together)"
+                formatted += (
+                    f"\n- {freq_desc} eaten with {other} ({meals} meals together)"
+                )
         else:
-            formatted += "\nThis food doesn't frequently appear with other specific foods."
+            formatted += (
+                "\nThis food doesn't frequently appear with other specific foods."
+            )
 
         formatted += "\n\n=== MEDICAL CONTEXT ==="
         if medical_grounding:
@@ -1192,11 +1222,11 @@ Symptoms reported:"""
 
     def _format_single_ingredient_data(self, ingredient_data: dict) -> str:
         """Format single ingredient data for AI analysis."""
-        times_eaten = ingredient_data.get('times_eaten', 0)
-        symptom_count = ingredient_data.get('total_symptom_occurrences', 0)
-        confidence_level = ingredient_data.get('confidence_level', 'unknown')
+        times_eaten = ingredient_data.get("times_eaten", 0)
+        symptom_count = ingredient_data.get("total_symptom_occurrences", 0)
+        confidence_level = ingredient_data.get("confidence_level", "unknown")
 
-        formatted = f"""INGREDIENT: {ingredient_data.get('ingredient_name', 'Unknown')} ({ingredient_data.get('state', 'unknown')})
+        formatted = f"""INGREDIENT: {ingredient_data.get("ingredient_name", "Unknown")} ({ingredient_data.get("state", "unknown")})
 
 PATTERN SUMMARY:
 - This food was eaten {times_eaten} times in the analysis period
@@ -1204,17 +1234,19 @@ PATTERN SUMMARY:
 - Confidence level: {confidence_level}
 
 TIMING OF SYMPTOMS:
-- Within 2 hours: {ingredient_data.get('immediate_total', 0)} times
-- 4-24 hours later: {ingredient_data.get('delayed_total', 0)} times
-- More than 24 hours later: {ingredient_data.get('cumulative_total', 0)} times
+- Within 2 hours: {ingredient_data.get("immediate_total", 0)} times
+- 4-24 hours later: {ingredient_data.get("delayed_total", 0)} times
+- More than 24 hours later: {ingredient_data.get("cumulative_total", 0)} times
 
 SYMPTOMS EXPERIENCED:"""
 
-        for symptom in ingredient_data.get('associated_symptoms', []):
-            severity = symptom.get('severity_avg', 0)
-            severity_desc = "mild" if severity < 4 else "moderate" if severity < 7 else "severe"
+        for symptom in ingredient_data.get("associated_symptoms", []):
+            severity = symptom.get("severity_avg", 0)
+            severity_desc = (
+                "mild" if severity < 4 else "moderate" if severity < 7 else "severe"
+            )
             formatted += f"""
-- {symptom.get('name', 'Unknown')}: {symptom.get('frequency', 0)} times, typically {severity_desc}, usually {symptom.get('lag_hours', 0):.0f} hours after eating"""
+- {symptom.get("name", "Unknown")}: {symptom.get("frequency", 0)} times, typically {severity_desc}, usually {symptom.get("lag_hours", 0):.0f} hours after eating"""
 
         return formatted
 
@@ -1226,7 +1258,7 @@ SYMPTOMS EXPERIENCED:"""
         formatted = []
         for meal in meal_history[:10]:  # Limit to 10 meals
             ingredients = ", ".join(
-                i.get('name', 'unknown') for i in meal.get('ingredients', [])
+                i.get("name", "unknown") for i in meal.get("ingredients", [])
             )
             formatted.append(f"- {meal.get('name', 'Meal')}: {ingredients}")
 
@@ -1245,15 +1277,25 @@ SYMPTOMS EXPERIENCED:"""
         formatted = "CORRELATION DATA:\n\n"
 
         for i, item in enumerate(correlation_data, 1):
-            formatted += f"{i}. {item['ingredient_name']} ({item.get('state', 'unknown')})\n"
+            formatted += (
+                f"{i}. {item['ingredient_name']} ({item.get('state', 'unknown')})\n"
+            )
             formatted += f"   Times eaten: {item['times_eaten']}\n"
-            formatted += f"   Symptom occurrences: {item['total_symptom_occurrences']}\n"
-            formatted += f"   Temporal windows:\n"
-            formatted += f"     - Immediate (0-2hr): {item['immediate_total']} occurrences\n"
-            formatted += f"     - Delayed (4-24hr): {item['delayed_total']} occurrences\n"
-            formatted += f"     - Cumulative (24hr+): {item['cumulative_total']} occurrences\n"
-            formatted += f"   Associated symptoms:\n"
-            for symptom in item.get('associated_symptoms', []):
+            formatted += (
+                f"   Symptom occurrences: {item['total_symptom_occurrences']}\n"
+            )
+            formatted += "   Temporal windows:\n"
+            formatted += (
+                f"     - Immediate (0-2hr): {item['immediate_total']} occurrences\n"
+            )
+            formatted += (
+                f"     - Delayed (4-24hr): {item['delayed_total']} occurrences\n"
+            )
+            formatted += (
+                f"     - Cumulative (24hr+): {item['cumulative_total']} occurrences\n"
+            )
+            formatted += "   Associated symptoms:\n"
+            for symptom in item.get("associated_symptoms", []):
                 formatted += f"     - {symptom['name']}: severity {symptom['severity_avg']:.1f}/10, "
                 formatted += f"frequency {symptom['frequency']}, "
                 formatted += f"avg lag {symptom['lag_hours']:.1f}hr\n"
@@ -1269,10 +1311,14 @@ SYMPTOMS EXPERIENCED:"""
         Returns:
             Estimated token count
         """
-        total_chars = len(system_prompt) + len(formatted_data) + 200  # 200 for message overhead
+        total_chars = (
+            len(system_prompt) + len(formatted_data) + 200
+        )  # 200 for message overhead
         return total_chars // 4
 
-    def _validate_request_size(self, formatted_data: str, system_prompt: str, max_tokens: int = 100000):
+    def _validate_request_size(
+        self, formatted_data: str, system_prompt: str, max_tokens: int = 100000
+    ):
         """
         Validate request size before sending to API.
 
@@ -1309,7 +1355,7 @@ SYMPTOMS EXPERIENCED:"""
             ".jpeg": "image/jpeg",
             ".png": "image/png",
             ".gif": "image/gif",
-            ".webp": "image/webp"
+            ".webp": "image/webp",
         }
         return media_types.get(suffix, "image/jpeg")
 
@@ -1318,11 +1364,14 @@ SYMPTOMS EXPERIENCED:"""
 # CUSTOM EXCEPTIONS
 # =============================================================================
 
+
 class ServiceUnavailableError(Exception):
     """AI service is temporarily unavailable."""
+
     pass
 
 
 class RateLimitError(Exception):
     """Rate limit exceeded."""
+
     pass

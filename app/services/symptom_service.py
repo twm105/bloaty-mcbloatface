@@ -1,10 +1,11 @@
 """Business logic for symptom management."""
+
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, text
+from sqlalchemy import text
 
 from app.models.symptom import Symptom
 
@@ -21,7 +22,7 @@ class SymptomService:
         severity: Optional[int] = None,
         notes: Optional[str] = None,
         clarification_history: Optional[list] = None,
-        timestamp: Optional[datetime] = None
+        timestamp: Optional[datetime] = None,
     ) -> Symptom:
         """
         Create a new symptom entry.
@@ -46,7 +47,7 @@ class SymptomService:
             severity=severity,
             notes=notes,
             clarification_history=clarification_history or [],
-            timestamp=timestamp or datetime.utcnow()
+            timestamp=timestamp or datetime.utcnow(),
         )
         db.add(symptom)
         db.commit()
@@ -60,17 +61,17 @@ class SymptomService:
 
     @staticmethod
     def get_user_symptoms(
-        db: Session,
-        user_id: UUID,
-        limit: int = 50,
-        offset: int = 0
+        db: Session, user_id: UUID, limit: int = 50, offset: int = 0
     ) -> List[Symptom]:
         """Get all symptoms for a user, ordered by timestamp descending."""
-        return db.query(Symptom).filter(
-            Symptom.user_id == user_id
-        ).order_by(
-            Symptom.timestamp.desc()
-        ).limit(limit).offset(offset).all()
+        return (
+            db.query(Symptom)
+            .filter(Symptom.user_id == user_id)
+            .order_by(Symptom.timestamp.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
 
     @staticmethod
     def update_symptom(
@@ -80,7 +81,7 @@ class SymptomService:
         structured_type: Optional[str] = None,
         severity: Optional[int] = None,
         notes: Optional[str] = None,
-        timestamp: Optional[datetime] = None
+        timestamp: Optional[datetime] = None,
     ) -> Optional[Symptom]:
         """
         Update symptom details.
@@ -156,11 +157,13 @@ class SymptomService:
             "Indigestion",
             "Vomiting",
             "Loss of Appetite",
-            "Other"
+            "Other",
         ]
 
     @staticmethod
-    def get_most_recent_symptom_tags(db: Session, user_id: UUID, limit: int = 3) -> List[Dict]:
+    def get_most_recent_symptom_tags(
+        db: Session, user_id: UUID, limit: int = 3
+    ) -> List[Dict]:
         """
         Get most recently used symptom tags for a user.
 
@@ -187,7 +190,7 @@ class SymptomService:
             ORDER BY LOWER(tag->>'name'), last_used DESC
             LIMIT :limit
             """),
-            {"user_id": str(user_id), "limit": limit}
+            {"user_id": str(user_id), "limit": limit},
         )
 
         return [
@@ -196,7 +199,9 @@ class SymptomService:
         ]
 
     @staticmethod
-    def get_most_common_symptom_tags(db: Session, user_id: UUID, limit: int = 3) -> List[Dict]:
+    def get_most_common_symptom_tags(
+        db: Session, user_id: UUID, limit: int = 3
+    ) -> List[Dict]:
         """
         Get most frequently used symptom tags for a user.
 
@@ -224,7 +229,7 @@ class SymptomService:
             ORDER BY count DESC, avg_severity DESC
             LIMIT :limit
             """),
-            {"user_id": str(user_id), "limit": limit}
+            {"user_id": str(user_id), "limit": limit},
         )
 
         return [
@@ -233,7 +238,9 @@ class SymptomService:
         ]
 
     @staticmethod
-    def search_symptom_tags(db: Session, user_id: UUID, query: str, limit: int = 10) -> List[str]:
+    def search_symptom_tags(
+        db: Session, user_id: UUID, query: str, limit: int = 10
+    ) -> List[str]:
         """
         Autocomplete search for symptom tags.
 
@@ -264,7 +271,7 @@ class SymptomService:
             ORDER BY frequency DESC
             LIMIT :limit
             """),
-            {"user_id": str(user_id), "query": f"%{query_lower}%", "limit": limit}
+            {"user_id": str(user_id), "query": f"%{query_lower}%", "limit": limit},
         )
 
         user_tags = [row[0] for row in user_tags_result]
@@ -272,7 +279,8 @@ class SymptomService:
         # Add common symptom types that match
         common_types = SymptomService.get_common_symptom_types()
         matching_common = [
-            t.lower() for t in common_types
+            t.lower()
+            for t in common_types
             if query_lower in t.lower() and t.lower() not in user_tags
         ]
 
@@ -282,10 +290,7 @@ class SymptomService:
 
     @staticmethod
     def detect_ongoing_symptom_by_name(
-        db: Session,
-        user_id: UUID,
-        symptom_name: str,
-        lookback_hours: int = 72
+        db: Session, user_id: UUID, symptom_name: str, lookback_hours: int = 72
     ) -> Optional[Symptom]:
         """
         Find most recent symptom matching a specific name within lookback window.
@@ -317,8 +322,8 @@ class SymptomService:
             {
                 "user_id": str(user_id),
                 "cutoff_time": cutoff_time,
-                "symptom_name": symptom_name.lower()
-            }
+                "symptom_name": symptom_name.lower(),
+            },
         ).first()
 
         if symptom:
@@ -328,10 +333,7 @@ class SymptomService:
 
     @staticmethod
     def detect_similar_recent_symptoms(
-        db: Session,
-        user_id: UUID,
-        tags: List[Dict],
-        lookback_hours: int = 48
+        db: Session, user_id: UUID, tags: List[Dict], lookback_hours: int = 48
     ) -> Optional[Symptom]:
         """
         Detect if similar symptoms logged recently (potential episode continuation).
@@ -372,8 +374,8 @@ class SymptomService:
             {
                 "user_id": str(user_id),
                 "cutoff_time": cutoff_time,
-                "tag_names": tag_names
-            }
+                "tag_names": tag_names,
+            },
         ).first()
 
         if recent_symptoms:
@@ -387,7 +389,7 @@ class SymptomService:
         user_id: UUID,
         tags: List[Dict],
         ai_generated_text: Optional[str] = None,
-        final_notes: Optional[str] = None
+        final_notes: Optional[str] = None,
     ) -> Symptom:
         """
         Create symptom with tag-based schema (now supports per-symptom times).
@@ -447,9 +449,11 @@ class SymptomService:
 
         # Set deprecated fields for backward compatibility
         ai_elaborated = ai_generated_text is not None
-        user_edited = (ai_generated_text is not None and
-                      final_notes is not None and
-                      ai_generated_text != final_notes)
+        user_edited = (
+            ai_generated_text is not None
+            and final_notes is not None
+            and ai_generated_text != final_notes
+        )
 
         symptom = Symptom(
             user_id=user_id,
@@ -468,7 +472,7 @@ class SymptomService:
             ai_elaborated=ai_elaborated,
             ai_elaboration_response=ai_generated_text,
             user_edited_elaboration=user_edited,
-            timestamp=global_start_time
+            timestamp=global_start_time,
         )
 
         db.add(symptom)

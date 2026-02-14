@@ -1,4 +1,5 @@
 """API endpoints for meal logging and management."""
+
 from datetime import datetime
 from typing import Optional
 
@@ -13,7 +14,11 @@ from app.models.meal_ingredient import IngredientState
 from app.models.user_feedback import UserFeedback
 from app.services.meal_service import meal_service
 from app.services.file_service import file_service
-from app.services.ai_service import ClaudeService, ServiceUnavailableError, RateLimitError
+from app.services.ai_service import (
+    ClaudeService,
+    ServiceUnavailableError,
+    RateLimitError,
+)
 from app.services.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/meals", tags=["meals"])
@@ -26,7 +31,9 @@ claude_service = ClaudeService()
 @router.get("/log", response_class=HTMLResponse)
 async def meal_log_page(request: Request, user: User = Depends(get_current_user)):
     """Meal logging page."""
-    return templates.TemplateResponse("meals/log.html", {"request": request, "user": user})
+    return templates.TemplateResponse(
+        "meals/log.html", {"request": request, "user": user}
+    )
 
 
 @router.post("/create")
@@ -37,7 +44,7 @@ async def create_meal(
     country: Optional[str] = Form(None),
     meal_timestamp: Optional[str] = Form(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Create a new meal entry with optional image.
@@ -69,14 +76,11 @@ async def create_meal(
         image_path=image_path,
         user_notes=user_notes,
         country=country,
-        timestamp=timestamp
+        timestamp=timestamp,
     )
 
     # Redirect to ingredient editing
-    return RedirectResponse(
-        url=f"/meals/{meal.id}/edit-ingredients",
-        status_code=303
-    )
+    return RedirectResponse(url=f"/meals/{meal.id}/edit-ingredients", status_code=303)
 
 
 @router.get("/{meal_id}/edit-ingredients", response_class=HTMLResponse)
@@ -84,7 +88,7 @@ async def edit_ingredients_page(
     request: Request,
     meal_id: int,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Page for adding/editing meal ingredients."""
     meal = meal_service.get_meal(db, meal_id)
@@ -116,8 +120,10 @@ async def edit_ingredients_page(
             "user": user,
             "ingredient_states": [state.value for state in IngredientState],
             "existing_rating": existing_feedback.rating if existing_feedback else 0,
-            "existing_feedback": existing_feedback.feedback_text if existing_feedback else "",
-        }
+            "existing_feedback": existing_feedback.feedback_text
+            if existing_feedback
+            else "",
+        },
     )
 
 
@@ -126,7 +132,7 @@ async def analyze_meal_image(
     request: Request,
     meal_id: int,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Analyze meal image with Claude AI and return ingredient suggestions.
@@ -145,7 +151,9 @@ async def analyze_meal_image(
         raise HTTPException(status_code=403, detail="Access denied")
 
     if not meal.image_path:
-        raise HTTPException(status_code=400, detail="No image associated with this meal")
+        raise HTTPException(
+            status_code=400, detail="No image associated with this meal"
+        )
 
     try:
         # Step 1: Validate that image contains food
@@ -156,14 +164,13 @@ async def analyze_meal_image(
                 {
                     "request": request,
                     "error": "This doesn't appear to be a food image. Please upload a photo of your meal.",
-                    "show_manual_entry": True
-                }
+                    "show_manual_entry": True,
+                },
             )
 
         # Step 2: Analyze image for ingredients and meal name
         result = await claude_service.analyze_meal_image(
-            image_path=meal.image_path,
-            user_notes=meal.user_notes
+            image_path=meal.image_path, user_notes=meal.user_notes
         )
 
         # Store AI analysis results for evals/data science
@@ -171,22 +178,22 @@ async def analyze_meal_image(
 
         # Update meal with AI-suggested name and store original suggestions
         meal.name = result["meal_name"]
-        meal.name_source = 'ai'  # Track that name came from AI
+        meal.name_source = "ai"  # Track that name came from AI
         meal.ai_suggested_ingredients = result["ingredients"]  # Store for evals
         db.commit()
 
         # Auto-accept: Add all AI-suggested ingredients to the meal with source='ai'
         for suggestion in result["ingredients"]:
             try:
-                ingredient_state = IngredientState(suggestion['state'])
+                ingredient_state = IngredientState(suggestion["state"])
                 meal_service.add_ingredient_to_meal(
                     db=db,
                     meal_id=meal_id,
-                    ingredient_name=suggestion['name'],
+                    ingredient_name=suggestion["name"],
                     state=ingredient_state,
-                    quantity_description=suggestion.get('quantity'),
-                    confidence=suggestion.get('confidence'),
-                    source='ai'
+                    quantity_description=suggestion.get("quantity"),
+                    confidence=suggestion.get("confidence"),
+                    source="ai",
                 )
             except (ValueError, KeyError):
                 # Skip malformed suggestions
@@ -199,7 +206,7 @@ async def analyze_meal_image(
         from fastapi.responses import HTMLResponse
 
         # Build complete status bar + content section wrapped in #ai-container
-        response_html = f'''
+        response_html = f"""
         <div id="ai-container">
             <!-- Complete status bar (replaces analyzing bar) -->
             <div style="
@@ -231,23 +238,23 @@ async def analyze_meal_image(
             <section style="margin-bottom: 1.5rem;">
                 <h3>Ingredients</h3>
                 <div id="ingredients-list">
-        '''
+        """
 
         # Build all ingredient items
         ingredients_parts = [response_html]
         for mi in meal.meal_ingredients:
             ingredient_partial = templates.TemplateResponse(
                 "meals/partials/ingredient_item.html",
-                {"request": {}, "meal_ingredient": mi}
+                {"request": {}, "meal_ingredient": mi},
             )
             ingredients_parts.append(ingredient_partial.body.decode())
 
-        ingredients_parts.append('''
+        ingredients_parts.append("""
                 </div>
             </section>
             </div>
         </div>
-        ''')
+        """)
 
         return HTMLResponse(content="".join(ingredients_parts))
 
@@ -257,8 +264,8 @@ async def analyze_meal_image(
             {
                 "request": request,
                 "error": "AI service is temporarily unavailable. Please try again in a moment.",
-                "show_manual_entry": True
-            }
+                "show_manual_entry": True,
+            },
         )
     except RateLimitError:
         return templates.TemplateResponse(
@@ -266,8 +273,8 @@ async def analyze_meal_image(
             {
                 "request": request,
                 "error": "Too many requests. Please wait a minute and try again.",
-                "show_manual_entry": True
-            }
+                "show_manual_entry": True,
+            },
         )
     except Exception as e:
         return templates.TemplateResponse(
@@ -275,8 +282,8 @@ async def analyze_meal_image(
             {
                 "request": request,
                 "error": f"Analysis failed: {str(e)}",
-                "show_manual_entry": True
-            }
+                "show_manual_entry": True,
+            },
         )
 
 
@@ -287,7 +294,7 @@ async def add_ingredient(
     state: str = Form(...),
     quantity: Optional[str] = Form(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add an ingredient to a meal."""
     # Validate meal exists
@@ -311,16 +318,13 @@ async def add_ingredient(
         meal_id=meal_id,
         ingredient_name=ingredient_name,
         state=ingredient_state,
-        quantity_description=quantity
+        quantity_description=quantity,
     )
 
     # Return HTML partial for htmx
     return templates.TemplateResponse(
         "meals/partials/ingredient_item.html",
-        {
-            "request": {},
-            "meal_ingredient": meal_ingredient
-        }
+        {"request": {}, "meal_ingredient": meal_ingredient},
     )
 
 
@@ -329,7 +333,7 @@ async def remove_ingredient(
     meal_id: int,
     meal_ingredient_id: int,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Remove an ingredient from a meal."""
     # Verify ownership
@@ -343,14 +347,13 @@ async def remove_ingredient(
 
     # Return empty response - htmx will remove the element
     from fastapi.responses import Response
+
     return Response(status_code=200)
 
 
 @router.post("/{meal_id}/complete")
 async def complete_meal(
-    meal_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    meal_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Publish meal and redirect to history."""
     # Verify ownership before publishing
@@ -370,18 +373,13 @@ async def complete_meal(
 async def meal_history_page(
     request: Request,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Meal history page."""
     meals = meal_service.get_user_meals(db, user.id, limit=50)
 
     return templates.TemplateResponse(
-        "meals/history.html",
-        {
-            "request": request,
-            "user": user,
-            "meals": meals
-        }
+        "meals/history.html", {"request": request, "user": user, "meals": meals}
     )
 
 
@@ -390,7 +388,7 @@ async def update_meal_name(
     meal_id: int,
     name: str = Form(...),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update meal name (inline editing)."""
     # Verify ownership
@@ -412,7 +410,7 @@ async def update_meal_metadata(
     user_notes: Optional[str] = Form(None),
     timestamp: Optional[str] = Form(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update meal metadata (country, notes, timestamp) - inline editing."""
     # Verify ownership
@@ -430,7 +428,7 @@ async def update_meal_metadata(
         meal_id=meal_id,
         country=country,
         user_notes=user_notes,
-        timestamp=parsed_timestamp
+        timestamp=parsed_timestamp,
     )
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
@@ -439,7 +437,7 @@ async def update_meal_metadata(
         "status": "updated",
         "country": meal.country,
         "user_notes": meal.user_notes,
-        "timestamp": meal.timestamp.isoformat() if meal.timestamp else None
+        "timestamp": meal.timestamp.isoformat() if meal.timestamp else None,
     }
 
 
@@ -450,7 +448,7 @@ async def update_ingredient(
     ingredient_name: Optional[str] = Form(None),
     quantity: Optional[str] = Form(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update ingredient name or quantity (inline editing)."""
     # Verify ownership
@@ -462,7 +460,7 @@ async def update_ingredient(
         db=db,
         meal_ingredient_id=meal_ingredient_id,
         ingredient_name=ingredient_name,
-        quantity_description=quantity
+        quantity_description=quantity,
     )
 
     if not meal_ingredient:
@@ -471,7 +469,7 @@ async def update_ingredient(
     return {
         "status": "updated",
         "ingredient_name": meal_ingredient.ingredient.name,
-        "quantity": meal_ingredient.quantity_description
+        "quantity": meal_ingredient.quantity_description,
     }
 
 
@@ -480,7 +478,7 @@ async def update_ingredient_state(
     meal_ingredient_id: int,
     request: Request,
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update ingredient state (raw/cooked/processed)."""
     data = await request.json()
@@ -491,9 +489,7 @@ async def update_ingredient_state(
 
     # Update state
     meal_ingredient = meal_service.update_ingredient_state(
-        db=db,
-        meal_ingredient_id=meal_ingredient_id,
-        state=IngredientState(new_state)
+        db=db, meal_ingredient_id=meal_ingredient_id, state=IngredientState(new_state)
     )
 
     if not meal_ingredient:
@@ -504,9 +500,7 @@ async def update_ingredient_state(
 
 @router.delete("/{meal_id}")
 async def delete_meal(
-    meal_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    meal_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Delete a meal."""
     # Get meal to delete image file
@@ -525,4 +519,5 @@ async def delete_meal(
 
     # Return empty response - htmx will remove the element
     from fastapi.responses import Response
+
     return Response(status_code=200)

@@ -4,35 +4,37 @@ Integration tests for SSE (Server-Sent Events) functionality.
 Tests the SSE streaming endpoint, publisher, and subscriber used for
 real-time diagnosis progress updates.
 """
+
 import pytest
 import json
 from datetime import datetime, timezone, timedelta
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models import DiagnosisRun
-from app.models.user import User
-from tests.factories import create_user, create_diagnosis_run
 
 
 # =============================================================================
 # SSE Publisher Tests
 # =============================================================================
 
+
 class TestSSEPublisher:
     """Tests for SSEPublisher class."""
 
     def test_publish_progress(self):
         """Test publishing progress events."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
             from app.services.sse_publisher import SSEPublisher
 
             publisher = SSEPublisher()
-            publisher.publish_progress(run_id=1, completed=5, total=10, ingredient="onion")
+            publisher.publish_progress(
+                run_id=1, completed=5, total=10, ingredient="onion"
+            )
 
             mock_redis.publish.assert_called_once()
             call_args = mock_redis.publish.call_args
@@ -47,18 +49,14 @@ class TestSSEPublisher:
 
     def test_publish_result(self):
         """Test publishing result events."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
             from app.services.sse_publisher import SSEPublisher
 
             publisher = SSEPublisher()
-            result_dict = {
-                "id": 1,
-                "ingredient_name": "onion",
-                "confidence_score": 0.8
-            }
+            result_dict = {"id": 1, "ingredient_name": "onion", "confidence_score": 0.8}
             publisher.publish_result(run_id=1, result_dict=result_dict)
 
             call_args = mock_redis.publish.call_args
@@ -69,7 +67,7 @@ class TestSSEPublisher:
 
     def test_publish_discounted(self):
         """Test publishing discounted ingredient events."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
@@ -79,7 +77,7 @@ class TestSSEPublisher:
             discounted_dict = {
                 "id": 1,
                 "ingredient_name": "garlic",
-                "discard_justification": "Confounded by onion"
+                "discard_justification": "Confounded by onion",
             }
             publisher.publish_discounted(run_id=1, discounted_dict=discounted_dict)
 
@@ -91,7 +89,7 @@ class TestSSEPublisher:
 
     def test_publish_complete(self):
         """Test publishing completion events."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
@@ -109,7 +107,7 @@ class TestSSEPublisher:
 
     def test_publish_error(self):
         """Test publishing error events."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
@@ -126,7 +124,7 @@ class TestSSEPublisher:
 
     def test_close(self):
         """Test closing the publisher."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_redis_module.from_url.return_value = mock_redis
 
@@ -139,7 +137,7 @@ class TestSSEPublisher:
 
     def test_get_channel(self):
         """Test channel name generation."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis_module.from_url.return_value = MagicMock()
 
             from app.services.sse_publisher import SSEPublisher
@@ -154,12 +152,13 @@ class TestSSEPublisher:
 # SSE Subscriber Tests
 # =============================================================================
 
+
 class TestSSESubscriber:
     """Tests for SSESubscriber class."""
 
     def test_init_subscribes_to_channel(self):
         """Test that subscriber subscribes to correct channel."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_pubsub = MagicMock()
             mock_redis.pubsub.return_value = mock_pubsub
@@ -175,14 +174,20 @@ class TestSSESubscriber:
     @pytest.mark.asyncio
     async def test_listen_yields_events(self):
         """Test that listen yields events from pubsub."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_pubsub = MagicMock()
 
             # Simulate pubsub messages
             messages = [
-                {"type": "message", "data": json.dumps({"event": "progress", "data": {"completed": 1}})},
-                {"type": "message", "data": json.dumps({"event": "complete", "data": {"run_id": 1}})},
+                {
+                    "type": "message",
+                    "data": json.dumps({"event": "progress", "data": {"completed": 1}}),
+                },
+                {
+                    "type": "message",
+                    "data": json.dumps({"event": "complete", "data": {"run_id": 1}}),
+                },
             ]
             mock_pubsub.get_message.side_effect = messages + [None]
             mock_redis.pubsub.return_value = mock_pubsub
@@ -205,12 +210,17 @@ class TestSSESubscriber:
     @pytest.mark.asyncio
     async def test_listen_handles_error_event(self):
         """Test that listen stops on error event."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_pubsub = MagicMock()
 
             messages = [
-                {"type": "message", "data": json.dumps({"event": "error", "data": {"message": "Test error"}})},
+                {
+                    "type": "message",
+                    "data": json.dumps(
+                        {"event": "error", "data": {"message": "Test error"}}
+                    ),
+                },
             ]
             mock_pubsub.get_message.side_effect = messages
             mock_redis.pubsub.return_value = mock_pubsub
@@ -230,13 +240,16 @@ class TestSSESubscriber:
     @pytest.mark.asyncio
     async def test_listen_skips_invalid_json(self):
         """Test that invalid JSON messages are skipped."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_pubsub = MagicMock()
 
             messages = [
                 {"type": "message", "data": "not json"},  # Invalid
-                {"type": "message", "data": json.dumps({"event": "complete", "data": {}})},
+                {
+                    "type": "message",
+                    "data": json.dumps({"event": "complete", "data": {}}),
+                },
             ]
             mock_pubsub.get_message.side_effect = messages + [None]
             mock_redis.pubsub.return_value = mock_pubsub
@@ -258,7 +271,7 @@ class TestSSESubscriber:
 
     def test_close(self):
         """Test that close cleans up resources."""
-        with patch('app.services.sse_publisher.redis') as mock_redis_module:
+        with patch("app.services.sse_publisher.redis") as mock_redis_module:
             mock_redis = MagicMock()
             mock_pubsub = MagicMock()
             mock_redis.pubsub.return_value = mock_pubsub
@@ -277,6 +290,7 @@ class TestSSESubscriber:
 # =============================================================================
 # SSE Endpoint Tests
 # =============================================================================
+
 
 class TestDiagnosisSSEEndpoint:
     """Tests for the /diagnosis/stream/{run_id} SSE endpoint."""
@@ -306,7 +320,7 @@ class TestDiagnosisSSEEndpoint:
             date_range_end=datetime.now(timezone.utc),
             sufficient_data=True,
             total_ingredients=3,
-            completed_ingredients=0
+            completed_ingredients=0,
         )
         db.add(run)
         db.flush()
@@ -329,21 +343,18 @@ class TestDiagnosisSSEEndpoint:
             sufficient_data=True,
             total_ingredients=3,
             completed_ingredients=3,
-            completed_at=datetime.now(timezone.utc)
+            completed_at=datetime.now(timezone.utc),
         )
         db.add(run)
         db.flush()
 
         # Use regular HTTP client since TestClient doesn't support SSE well
         response = auth_client.get(
-            f"/diagnosis/stream/{run.id}",
-            headers={"Accept": "text/event-stream"}
+            f"/diagnosis/stream/{run.id}", headers={"Accept": "text/event-stream"}
         )
         assert response.status_code == 200
 
-    def test_stream_failed_run(
-        self, auth_client: TestClient, db: Session, test_user
-    ):
+    def test_stream_failed_run(self, auth_client: TestClient, db: Session, test_user):
         """Test streaming a failed run returns error immediately."""
         run = DiagnosisRun(
             user_id=test_user.id,
@@ -355,14 +366,13 @@ class TestDiagnosisSSEEndpoint:
             sufficient_data=True,
             total_ingredients=3,
             completed_ingredients=1,
-            error_message="Analysis failed due to API error"
+            error_message="Analysis failed due to API error",
         )
         db.add(run)
         db.flush()
 
         response = auth_client.get(
-            f"/diagnosis/stream/{run.id}",
-            headers={"Accept": "text/event-stream"}
+            f"/diagnosis/stream/{run.id}", headers={"Accept": "text/event-stream"}
         )
         assert response.status_code == 200
 
@@ -370,6 +380,7 @@ class TestDiagnosisSSEEndpoint:
 # =============================================================================
 # Diagnosis Status Endpoint Tests
 # =============================================================================
+
 
 class TestDiagnosisStatusEndpoint:
     """Tests for the /diagnosis/status/{run_id} endpoint."""
@@ -397,7 +408,7 @@ class TestDiagnosisStatusEndpoint:
             date_range_end=datetime.now(timezone.utc),
             sufficient_data=True,
             total_ingredients=3,
-            completed_ingredients=1
+            completed_ingredients=1,
         )
         db.add(run)
         db.flush()
@@ -420,7 +431,7 @@ class TestDiagnosisStatusEndpoint:
             sufficient_data=True,
             total_ingredients=3,
             completed_ingredients=1,
-            started_at=started
+            started_at=started,
         )
         db.add(run)
         db.flush()
@@ -451,7 +462,7 @@ class TestDiagnosisStatusEndpoint:
             total_ingredients=3,
             completed_ingredients=3,
             started_at=datetime.now(timezone.utc) - timedelta(minutes=5),
-            completed_at=completed
+            completed_at=completed,
         )
         db.add(run)
         db.flush()
@@ -463,9 +474,7 @@ class TestDiagnosisStatusEndpoint:
         assert data["status"] == "completed"
         assert data["completed_at"] is not None
 
-    def test_status_failed_run(
-        self, auth_client: TestClient, db: Session, test_user
-    ):
+    def test_status_failed_run(self, auth_client: TestClient, db: Session, test_user):
         """Test status for failed run includes error message."""
         run = DiagnosisRun(
             user_id=test_user.id,
@@ -477,7 +486,7 @@ class TestDiagnosisStatusEndpoint:
             sufficient_data=True,
             total_ingredients=3,
             completed_ingredients=1,
-            error_message="API connection failed"
+            error_message="API connection failed",
         )
         db.add(run)
         db.flush()
@@ -494,6 +503,7 @@ class TestDiagnosisStatusEndpoint:
 # SSE Streaming Generator Tests
 # =============================================================================
 
+
 class TestSSEStreamingGenerator:
     """Tests for the SSE streaming generator functionality."""
 
@@ -501,7 +511,6 @@ class TestSSEStreamingGenerator:
         self, auth_client: TestClient, db: Session, test_user
     ):
         """Test streaming a running run with mocked subscriber."""
-        import asyncio
 
         run = DiagnosisRun(
             user_id=test_user.id,
@@ -512,7 +521,7 @@ class TestSSEStreamingGenerator:
             date_range_end=datetime.now(timezone.utc),
             sufficient_data=True,
             total_ingredients=3,
-            completed_ingredients=1
+            completed_ingredients=1,
         )
         db.add(run)
         db.flush()
@@ -531,10 +540,9 @@ class TestSSEStreamingGenerator:
         mock_subscriber.listen = mock_listen
         mock_subscriber.close = MagicMock()
 
-        with patch('app.api.diagnosis_sse.SSESubscriber', return_value=mock_subscriber):
+        with patch("app.api.diagnosis_sse.SSESubscriber", return_value=mock_subscriber):
             response = auth_client.get(
-                f"/diagnosis/stream/{run.id}",
-                headers={"Accept": "text/event-stream"}
+                f"/diagnosis/stream/{run.id}", headers={"Accept": "text/event-stream"}
             )
             assert response.status_code == 200
 
@@ -551,7 +559,7 @@ class TestSSEStreamingGenerator:
             date_range_end=datetime.now(timezone.utc),
             sufficient_data=True,
             total_ingredients=5,
-            completed_ingredients=2
+            completed_ingredients=2,
         )
         db.add(run)
         db.flush()
@@ -564,10 +572,9 @@ class TestSSEStreamingGenerator:
         mock_subscriber.listen = mock_listen
         mock_subscriber.close = MagicMock()
 
-        with patch('app.api.diagnosis_sse.SSESubscriber', return_value=mock_subscriber):
+        with patch("app.api.diagnosis_sse.SSESubscriber", return_value=mock_subscriber):
             response = auth_client.get(
-                f"/diagnosis/stream/{run.id}",
-                headers={"Accept": "text/event-stream"}
+                f"/diagnosis/stream/{run.id}", headers={"Accept": "text/event-stream"}
             )
             assert response.status_code == 200
 
@@ -586,6 +593,5 @@ class TestSSEStreamingGenerator:
         mock_subscriber.close = MagicMock()
 
         # The generator should handle CancelledError and call close()
-        from app.api.diagnosis_sse import stream_diagnosis_progress
 
         # We can't easily test this via HTTP, but we've verified the code path exists

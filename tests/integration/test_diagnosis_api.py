@@ -7,16 +7,21 @@ Tests the full diagnosis flow including:
 - Feedback submission
 - Result management
 """
-import pytest
-from datetime import datetime, timedelta, timezone
+
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import patch, MagicMock
 
-from app.models import User, DiagnosisRun, DiagnosisResult, UserFeedback
+from app.models import User, DiagnosisRun, DiagnosisResult
 from tests.factories import (
-    create_user, create_meal, create_symptom, create_ingredient,
-    create_meal_ingredient, create_diagnosis_run, create_diagnosis_result
+    create_user,
+    create_meal,
+    create_symptom,
+    create_ingredient,
+    create_meal_ingredient,
+    create_diagnosis_run,
+    create_diagnosis_result,
 )
 
 
@@ -37,11 +42,7 @@ class TestDiagnosisAuthentication:
 
     def test_analyze_endpoint_requires_auth(self, client: TestClient):
         """Test that analyze endpoint requires authentication."""
-        response = client.post(
-            "/diagnosis/analyze",
-            json={},
-            follow_redirects=False
-        )
+        response = client.post("/diagnosis/analyze", json={}, follow_redirects=False)
 
         assert response.status_code in [302, 303, 307, 401]
 
@@ -57,14 +58,18 @@ class TestDiagnosisPage:
 
         assert response.status_code == 200
         # Should show insufficient data page
-        assert "insufficient" in response.text.lower() or "need" in response.text.lower()
+        assert (
+            "insufficient" in response.text.lower() or "need" in response.text.lower()
+        )
 
     def test_diagnosis_page_shows_results(
         self, auth_client: TestClient, test_user: User, db: Session
     ):
         """Test diagnosis page shows results when available."""
         # Create a diagnosis run with results
-        run = create_diagnosis_run(db, test_user, status="completed", sufficient_data=True)
+        run = create_diagnosis_run(
+            db, test_user, status="completed", sufficient_data=True
+        )
         ingredient = create_ingredient(db, name="Onion")
         create_diagnosis_result(db, run, ingredient, confidence_score=0.85)
 
@@ -73,9 +78,7 @@ class TestDiagnosisPage:
         assert response.status_code == 200
         # Should show results page with ingredient
 
-    def test_methodology_page_renders(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_methodology_page_renders(self, auth_client: TestClient, test_user: User):
         """Test methodology page renders."""
         response = auth_client.get("/diagnosis/methodology")
 
@@ -89,10 +92,7 @@ class TestDiagnosisAnalysis:
         self, auth_client: TestClient, test_user: User, db: Session
     ):
         """Test analysis returns insufficient data when not enough meals/symptoms."""
-        response = auth_client.post(
-            "/diagnosis/analyze",
-            json={"async_mode": False}
-        )
+        response = auth_client.post("/diagnosis/analyze", json={"async_mode": False})
 
         assert response.status_code == 200
         data = response.json()
@@ -110,13 +110,10 @@ class TestDiagnosisAnalysis:
         for i in range(3):
             create_symptom(db, test_user, tags=[{"name": "test", "severity": 5}])
 
-        response = auth_client.post(
-            "/diagnosis/analyze",
-            json={"async_mode": False}
-        )
+        response = auth_client.post("/diagnosis/analyze", json={"async_mode": False})
 
         assert response.status_code == 200
-        data = response.json()
+        response.json()
         # Should return with message about no correlations or insufficient data
 
     def test_analyze_with_correlations(
@@ -132,9 +129,10 @@ class TestDiagnosisAnalysis:
 
             # Create symptom shortly after meal
             create_symptom(
-                db, test_user,
+                db,
+                test_user,
                 tags=[{"name": "bloating", "severity": 7}],
-                timestamp=meal.timestamp + timedelta(hours=1)
+                timestamp=meal.timestamp + timedelta(hours=1),
             )
 
         with patch("app.api.diagnosis.DiagnosisService") as MockService:
@@ -145,16 +143,13 @@ class TestDiagnosisAnalysis:
                 "ingredient_id": ingredient.id,
                 "ingredient_name": "Trigger Food",
                 "confidence_score": 0.8,
-                "confidence_level": "high"
+                "confidence_level": "high",
             }
             mock_instance.MIN_MEALS = 3
             mock_instance.MIN_SYMPTOM_OCCURRENCES = 2
             MockService.return_value = mock_instance
 
-            response = auth_client.post(
-                "/diagnosis/analyze",
-                json={"async_mode": True}
-            )
+            response = auth_client.post("/diagnosis/analyze", json={"async_mode": True})
 
             assert response.status_code == 200
             data = response.json()
@@ -166,11 +161,7 @@ class TestDiagnosisAnalysis:
         """Test analysis with custom minimum thresholds."""
         response = auth_client.post(
             "/diagnosis/analyze",
-            json={
-                "min_meals": 1,
-                "min_symptom_occurrences": 1,
-                "async_mode": False
-            }
+            json={"min_meals": 1, "min_symptom_occurrences": 1, "async_mode": False},
         )
 
         assert response.status_code == 200
@@ -192,8 +183,8 @@ class TestDiagnosisFeedback:
             json={
                 "result_id": result.id,
                 "rating": 4,
-                "feedback_text": "This seems accurate"
-            }
+                "feedback_text": "This seems accurate",
+            },
         )
 
         assert response.status_code == 200
@@ -213,8 +204,8 @@ class TestDiagnosisFeedback:
             json={
                 "result_id": result.id,
                 "rating": 10,  # Invalid: > 5
-                "feedback_text": "Test"
-            }
+                "feedback_text": "Test",
+            },
         )
 
         assert response.status_code == 400
@@ -224,11 +215,7 @@ class TestDiagnosisFeedback:
     ):
         """Test feedback for non-existent result."""
         response = auth_client.post(
-            "/diagnosis/feedback",
-            json={
-                "result_id": 99999,
-                "rating": 3
-            }
+            "/diagnosis/feedback", json={"result_id": 99999, "rating": 3}
         )
 
         assert response.status_code == 404
@@ -243,11 +230,7 @@ class TestDiagnosisFeedback:
         result = create_diagnosis_result(db, run, ingredient)
 
         response = auth_client.post(
-            "/diagnosis/feedback",
-            json={
-                "result_id": result.id,
-                "rating": 3
-            }
+            "/diagnosis/feedback", json={"result_id": result.id, "rating": 3}
         )
 
         assert response.status_code == 404
@@ -262,8 +245,7 @@ class TestDiagnosisFeedback:
 
         # Submit initial feedback
         auth_client.post(
-            "/diagnosis/feedback",
-            json={"result_id": result.id, "rating": 3}
+            "/diagnosis/feedback", json={"result_id": result.id, "rating": 3}
         )
 
         # Update feedback
@@ -272,8 +254,8 @@ class TestDiagnosisFeedback:
             json={
                 "result_id": result.id,
                 "rating": 5,
-                "feedback_text": "Updated opinion"
-            }
+                "feedback_text": "Updated opinion",
+            },
         )
 
         assert response.status_code == 200
@@ -298,14 +280,12 @@ class TestDiagnosisReset:
         assert data["success"] is True
 
         # Verify data is deleted
-        remaining = db.query(DiagnosisRun).filter(
-            DiagnosisRun.user_id == test_user.id
-        ).count()
+        remaining = (
+            db.query(DiagnosisRun).filter(DiagnosisRun.user_id == test_user.id).count()
+        )
         assert remaining == 0
 
-    def test_reset_empty_data(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_reset_empty_data(self, auth_client: TestClient, test_user: User):
         """Test reset when no diagnosis data exists."""
         response = auth_client.post("/diagnosis/reset")
 
@@ -318,9 +298,7 @@ class TestDiagnosisReset:
 class TestDiagnosisResultDeletion:
     """Tests for deleting individual results."""
 
-    def test_delete_result(
-        self, auth_client: TestClient, test_user: User, db: Session
-    ):
+    def test_delete_result(self, auth_client: TestClient, test_user: User, db: Session):
         """Test deleting a diagnosis result."""
         run = create_diagnosis_run(db, test_user)
         ingredient = create_ingredient(db, name="Test")
@@ -332,14 +310,12 @@ class TestDiagnosisResultDeletion:
         assert response.status_code == 200
 
         # Verify result is deleted
-        remaining = db.query(DiagnosisResult).filter(
-            DiagnosisResult.id == result_id
-        ).first()
+        remaining = (
+            db.query(DiagnosisResult).filter(DiagnosisResult.id == result_id).first()
+        )
         assert remaining is None
 
-    def test_delete_nonexistent_result(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_delete_nonexistent_result(self, auth_client: TestClient, test_user: User):
         """Test deleting non-existent result."""
         response = auth_client.delete("/diagnosis/results/99999")
 
@@ -359,7 +335,7 @@ class TestDiagnosisResultDeletion:
         assert response.status_code == 404
 
         # Verify result still exists
-        remaining = db.query(DiagnosisResult).filter(
-            DiagnosisResult.id == result.id
-        ).first()
+        remaining = (
+            db.query(DiagnosisResult).filter(DiagnosisResult.id == result.id).first()
+        )
         assert remaining is not None

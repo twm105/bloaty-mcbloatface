@@ -1,4 +1,5 @@
 """Unified feedback API endpoints for rating features (meals, diagnosis, etc.)."""
+
 from datetime import datetime
 from typing import Optional
 
@@ -20,15 +21,15 @@ router = APIRouter(prefix="/feedback", tags=["feedback"])
 # Valid feature types and their validation functions
 FEATURE_VALIDATORS = {
     "meal_analysis": lambda db, user_id, feature_id: (
-        db.query(Meal)
-        .filter(Meal.id == feature_id, Meal.user_id == user_id)
-        .first() is not None
+        db.query(Meal).filter(Meal.id == feature_id, Meal.user_id == user_id).first()
+        is not None
     ),
     "diagnosis_result": lambda db, user_id, feature_id: (
         db.query(DiagnosisResult)
         .join(DiagnosisRun)
         .filter(DiagnosisResult.id == feature_id, DiagnosisRun.user_id == user_id)
-        .first() is not None
+        .first()
+        is not None
     ),
 }
 
@@ -55,7 +56,7 @@ async def submit_feedback(
     if feature_type not in FEATURE_VALIDATORS:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid feature_type. Must be one of: {list(FEATURE_VALIDATORS.keys())}"
+            detail=f"Invalid feature_type. Must be one of: {list(FEATURE_VALIDATORS.keys())}",
         )
 
     # Validate that feature exists and belongs to user

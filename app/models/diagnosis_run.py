@@ -1,6 +1,7 @@
 """DiagnosisRun model for tracking analysis execution."""
+
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Numeric, Text
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -12,13 +13,24 @@ class DiagnosisRun(Base):
     __tablename__ = "diagnosis_runs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    run_timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    run_timestamp = Column(
+        DateTime, nullable=False, default=datetime.utcnow, index=True
+    )
 
     # Async processing status
-    status = Column(String, nullable=False, default="pending")  # pending, processing, completed, failed
+    status = Column(
+        String, nullable=False, default="pending"
+    )  # pending, processing, completed, failed
     total_ingredients = Column(Integer, nullable=True)  # Total ingredients to analyze
-    completed_ingredients = Column(Integer, nullable=False, default=0)  # Progress counter
+    completed_ingredients = Column(
+        Integer, nullable=False, default=0
+    )  # Progress counter
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
@@ -41,8 +53,12 @@ class DiagnosisRun(Base):
 
     # Relationships
     user = relationship("User", back_populates="diagnosis_runs")
-    results = relationship("DiagnosisResult", back_populates="run", cascade="all, delete-orphan")
-    discounted_ingredients = relationship("DiscountedIngredient", back_populates="run", cascade="all, delete-orphan")
+    results = relationship(
+        "DiagnosisResult", back_populates="run", cascade="all, delete-orphan"
+    )
+    discounted_ingredients = relationship(
+        "DiscountedIngredient", back_populates="run", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<DiagnosisRun(id={self.id}, user_id={self.user_id}, status={self.status})>"

@@ -4,10 +4,10 @@ Unit tests for diagnosis_worker - background Dramatiq worker for ingredient anal
 Tests the analyze_ingredient and finalize_diagnosis_run actors with mocked
 dependencies (database, AI service, SSE publisher).
 """
+
 import pytest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
-import json
+from unittest.mock import MagicMock, patch
 
 from app.services.ai_service import ServiceUnavailableError, RateLimitError
 
@@ -15,6 +15,7 @@ from app.services.ai_service import ServiceUnavailableError, RateLimitError
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def mock_db_session():
@@ -78,7 +79,7 @@ def sample_ingredient_data():
         "associated_symptoms": [
             {"name": "bloating", "severity_avg": 7.0, "frequency": 4, "lag_hours": 1.5}
         ],
-        "cooccurrence": []
+        "cooccurrence": [],
     }
 
 
@@ -90,7 +91,7 @@ def sample_diagnosis_result():
         "recommendations_summary": "Consider elimination diet.",
         "processing_suggestions": {
             "cooked_vs_raw": "Cooking may reduce symptoms",
-            "alternatives": ["shallots", "chives"]
+            "alternatives": ["shallots", "chives"],
         },
         "alternative_meals": [],
         "citations": [
@@ -98,21 +99,22 @@ def sample_diagnosis_result():
                 "url": "https://www.nih.gov/fodmap",
                 "title": "FODMAP Diet Information",
                 "source_type": "nih",
-                "snippet": "Information about FODMAP foods"
+                "snippet": "Information about FODMAP foods",
             }
         ],
         "usage_stats": {
             "input_tokens": 800,
             "output_tokens": 400,
             "cached_tokens": 0,
-            "cache_hit": False
-        }
+            "cache_hit": False,
+        },
     }
 
 
 # =============================================================================
 # analyze_ingredient Tests
 # =============================================================================
+
 
 class TestAnalyzeIngredient:
     """Tests for the analyze_ingredient actor."""
@@ -124,22 +126,32 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
-        sample_diagnosis_result
+        sample_diagnosis_result,
     ):
         """Test successful ingredient analysis."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService') as mock_usage_service_cls, \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             # Setup
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             # Mock root cause classification (not a confounder)
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},  # classify_root_cause
-                sample_diagnosis_result  # diagnose_single_ingredient
+                sample_diagnosis_result,  # diagnose_single_ingredient
             ]
 
             # Import after patching
@@ -150,7 +162,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify
@@ -165,25 +177,37 @@ class TestAnalyzeIngredient:
         mock_diagnosis_run,
         mock_claude_service,
         mock_sse_publisher,
-        sample_ingredient_data
+        sample_ingredient_data,
     ):
         """Test that confounders are properly discounted."""
         # Add co-occurrence data that suggests confounding
-        sample_ingredient_data["cooccurrence"] = [{
-            "with_ingredient_id": 2,
-            "with_ingredient_name": "garlic",
-            "conditional_probability": 0.95,
-            "reverse_probability": 0.8,
-            "lift": 2.5,
-            "cooccurrence_meals": 5
-        }]
+        sample_ingredient_data["cooccurrence"] = [
+            {
+                "with_ingredient_id": 2,
+                "with_ingredient_name": "garlic",
+                "conditional_probability": 0.95,
+                "reverse_probability": 0.8,
+                "lift": 2.5,
+                "cooccurrence_meals": 5,
+            }
+        ]
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService') as mock_usage_service_cls, \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             # Mock root cause classification as confounder
@@ -191,7 +215,7 @@ class TestAnalyzeIngredient:
                 "root_cause": False,
                 "discard_justification": "High co-occurrence with garlic",
                 "confounded_by": "garlic",
-                "medical_reasoning": "Garlic is the likely trigger"
+                "medical_reasoning": "Garlic is the likely trigger",
             }
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -200,7 +224,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify discounted ingredient was published
@@ -210,16 +234,20 @@ class TestAnalyzeIngredient:
             mock_sse_publisher.publish_result.assert_not_called()
 
     def test_diagnosis_run_not_found(
-        self,
-        mock_db_session,
-        mock_sse_publisher,
-        sample_ingredient_data
+        self, mock_db_session, mock_sse_publisher, sample_ingredient_data
     ):
         """Test error when diagnosis run is not found."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService'):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+        ):
             # No diagnosis run found
             mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -230,7 +258,7 @@ class TestAnalyzeIngredient:
                     run_id=999,
                     ingredient_data=sample_ingredient_data,
                     user_meal_history=[],
-                    web_search_enabled=True
+                    web_search_enabled=True,
                 )
 
     def test_ai_service_unavailable(
@@ -239,21 +267,31 @@ class TestAnalyzeIngredient:
         mock_diagnosis_run,
         mock_claude_service,
         mock_sse_publisher,
-        sample_ingredient_data
+        sample_ingredient_data,
     ):
         """Test handling of AI service unavailability."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService') as mock_usage_service_cls, \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             # First call (classify_root_cause) succeeds, second (diagnose) fails
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},
-                ServiceUnavailableError("AI service down")
+                ServiceUnavailableError("AI service down"),
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -263,7 +301,7 @@ class TestAnalyzeIngredient:
                     run_id=1,
                     ingredient_data=sample_ingredient_data,
                     user_meal_history=[],
-                    web_search_enabled=True
+                    web_search_enabled=True,
                 )
 
             # Verify error was published
@@ -275,20 +313,30 @@ class TestAnalyzeIngredient:
         mock_diagnosis_run,
         mock_claude_service,
         mock_sse_publisher,
-        sample_ingredient_data
+        sample_ingredient_data,
     ):
         """Test handling of rate limit error."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService') as mock_usage_service_cls, \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},
-                RateLimitError("Too many requests")
+                RateLimitError("Too many requests"),
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -298,7 +346,7 @@ class TestAnalyzeIngredient:
                     run_id=1,
                     ingredient_data=sample_ingredient_data,
                     user_meal_history=[],
-                    web_search_enabled=True
+                    web_search_enabled=True,
                 )
 
             # Verify rate limit error was published
@@ -311,24 +359,34 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
-        sample_diagnosis_result
+        sample_diagnosis_result,
     ):
         """Test that last ingredient analysis completes the run."""
         # Set up as last ingredient
         mock_diagnosis_run.total_ingredients = 1
         mock_diagnosis_run.completed_ingredients = 1  # Will be this after increment
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService'), \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result
+                sample_diagnosis_result,
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -337,7 +395,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify completion was published
@@ -351,21 +409,31 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
-        sample_diagnosis_result
+        sample_diagnosis_result,
     ):
         """Test that root cause classification error doesn't stop analysis."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService'), \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             # Classification fails, but diagnosis should still proceed
             mock_run_async.side_effect = [
                 Exception("Classification failed"),  # classify_root_cause fails
-                sample_diagnosis_result  # diagnose_single_ingredient succeeds
+                sample_diagnosis_result,  # diagnose_single_ingredient succeeds
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -375,7 +443,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify result was still published
@@ -388,20 +456,30 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
-        sample_diagnosis_result
+        sample_diagnosis_result,
     ):
         """Test that citations are created from AI response."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService'), \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch("app.workers.diagnosis_worker.AIUsageService"),
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result
+                sample_diagnosis_result,
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -410,7 +488,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify db.add was called for citations
@@ -424,22 +502,34 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
-        sample_diagnosis_result
+        sample_diagnosis_result,
     ):
         """Test that AI usage is logged."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher), \
-             patch('app.workers.diagnosis_worker.AIUsageService') as mock_usage_service_cls, \
-             patch('app.services.ai_service.ClaudeService', return_value=mock_claude_service), \
-             patch('app.workers.diagnosis_worker.run_async') as mock_run_async:
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.AIUsageService"
+            ) as mock_usage_service_cls,
+            patch(
+                "app.services.ai_service.ClaudeService",
+                return_value=mock_claude_service,
+            ),
+            patch("app.workers.diagnosis_worker.run_async") as mock_run_async,
+        ):
             mock_usage_service = MagicMock()
             mock_usage_service_cls.return_value = mock_usage_service
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
                 {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result
+                sample_diagnosis_result,
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -448,7 +538,7 @@ class TestAnalyzeIngredient:
                 run_id=1,
                 ingredient_data=sample_ingredient_data,
                 user_meal_history=[],
-                web_search_enabled=True
+                web_search_enabled=True,
             )
 
             # Verify usage was logged
@@ -459,22 +549,27 @@ class TestAnalyzeIngredient:
 # finalize_diagnosis_run Tests
 # =============================================================================
 
+
 class TestFinalizeDiagnosisRun:
     """Tests for the finalize_diagnosis_run actor."""
 
     def test_successful_finalization(
-        self,
-        mock_db_session,
-        mock_diagnosis_run,
-        mock_sse_publisher
+        self, mock_db_session, mock_diagnosis_run, mock_sse_publisher
     ):
         """Test successful diagnosis run finalization."""
         mock_diagnosis_run.status = "running"
         mock_diagnosis_run.results = [MagicMock(), MagicMock()]  # 2 results
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             from app.workers.diagnosis_worker import finalize_diagnosis_run
@@ -487,17 +582,21 @@ class TestFinalizeDiagnosisRun:
             mock_db_session.commit.assert_called()
 
     def test_already_completed_skipped(
-        self,
-        mock_db_session,
-        mock_diagnosis_run,
-        mock_sse_publisher
+        self, mock_db_session, mock_diagnosis_run, mock_sse_publisher
     ):
         """Test that already completed runs are skipped."""
         mock_diagnosis_run.status = "completed"
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             from app.workers.diagnosis_worker import finalize_diagnosis_run
@@ -507,15 +606,18 @@ class TestFinalizeDiagnosisRun:
             # Should not publish complete again
             mock_sse_publisher.publish_complete.assert_not_called()
 
-    def test_run_not_found(
-        self,
-        mock_db_session,
-        mock_sse_publisher
-    ):
+    def test_run_not_found(self, mock_db_session, mock_sse_publisher):
         """Test error when run is not found."""
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
             from app.workers.diagnosis_worker import finalize_diagnosis_run
@@ -524,17 +626,21 @@ class TestFinalizeDiagnosisRun:
                 finalize_diagnosis_run(run_id=999)
 
     def test_error_marks_run_as_failed(
-        self,
-        mock_db_session,
-        mock_diagnosis_run,
-        mock_sse_publisher
+        self, mock_db_session, mock_diagnosis_run, mock_sse_publisher
     ):
         """Test that errors mark the run as failed."""
         mock_diagnosis_run.status = "running"
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+        ):
             # Return run on first query, but fail on commit
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
             mock_db_session.commit.side_effect = [Exception("DB Error"), None]
@@ -548,18 +654,22 @@ class TestFinalizeDiagnosisRun:
             mock_sse_publisher.publish_error.assert_called()
 
     def test_cleanup_closes_resources(
-        self,
-        mock_db_session,
-        mock_diagnosis_run,
-        mock_sse_publisher
+        self, mock_db_session, mock_diagnosis_run, mock_sse_publisher
     ):
         """Test that resources are cleaned up."""
         mock_diagnosis_run.status = "running"
         mock_diagnosis_run.results = []
 
-        with patch('app.workers.diagnosis_worker.SessionLocal', return_value=mock_db_session), \
-             patch('app.workers.diagnosis_worker.SSEPublisher', return_value=mock_sse_publisher):
-
+        with (
+            patch(
+                "app.workers.diagnosis_worker.SessionLocal",
+                return_value=mock_db_session,
+            ),
+            patch(
+                "app.workers.diagnosis_worker.SSEPublisher",
+                return_value=mock_sse_publisher,
+            ),
+        ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             from app.workers.diagnosis_worker import finalize_diagnosis_run
@@ -574,6 +684,7 @@ class TestFinalizeDiagnosisRun:
 # =============================================================================
 # run_async Helper Tests
 # =============================================================================
+
 
 class TestRunAsync:
     """Tests for the run_async helper function."""

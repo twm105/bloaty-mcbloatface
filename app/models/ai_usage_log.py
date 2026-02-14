@@ -1,6 +1,16 @@
 """AIUsageLog model for tracking AI API usage and costs."""
+
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Numeric, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Boolean,
+    Text,
+    Numeric,
+    ForeignKey,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
 
@@ -11,11 +21,18 @@ class AIUsageLog(Base):
     __tablename__ = "ai_usage_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
 
     # Service identification
-    service_type = Column(String, nullable=False)  # 'meal_analysis', 'diagnosis', 'symptom_elaboration', etc.
+    service_type = Column(
+        String, nullable=False
+    )  # 'meal_analysis', 'diagnosis', 'symptom_elaboration', etc.
     model = Column(String, nullable=False)  # e.g., 'claude-sonnet-4-5-20250929'
 
     # Token usage
@@ -27,8 +44,12 @@ class AIUsageLog(Base):
     estimated_cost_cents = Column(Numeric(10, 4), nullable=False, default=0)
 
     # Request linking
-    request_id = Column(String, index=True, nullable=True)  # Links to diagnosis_run.id, meal.id, etc.
-    request_type = Column(String, nullable=True)  # 'diagnosis_run', 'meal', 'symptom', etc.
+    request_id = Column(
+        String, index=True, nullable=True
+    )  # Links to diagnosis_run.id, meal.id, etc.
+    request_type = Column(
+        String, nullable=True
+    )  # 'diagnosis_run', 'meal', 'symptom', etc.
 
     # Feature flags
     web_search_enabled = Column(Boolean, default=False)

@@ -1,8 +1,8 @@
 """FastAPI dependencies for authentication."""
+
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -10,10 +10,7 @@ from app.models.user import User
 from app.services.auth import get_auth_provider
 
 
-async def get_current_user(
-    request: Request,
-    db: Session = Depends(get_db)
-) -> User:
+async def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     """
     Get the currently authenticated user.
 
@@ -25,16 +22,14 @@ async def get_current_user(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
 
     return user
 
 
 async def get_optional_user(
-    request: Request,
-    db: Session = Depends(get_db)
+    request: Request, db: Session = Depends(get_db)
 ) -> Optional[User]:
     """
     Get the current user if authenticated, None otherwise.
@@ -45,9 +40,7 @@ async def get_optional_user(
     return await auth_provider.get_user_from_request(db, request)
 
 
-async def require_admin(
-    user: User = Depends(get_current_user)
-) -> User:
+async def require_admin(user: User = Depends(get_current_user)) -> User:
     """
     Require the current user to be an admin.
 
@@ -55,8 +48,7 @@ async def require_admin(
     """
     if not user.is_admin:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
         )
     return user
 
@@ -71,11 +63,7 @@ class RequireAuthPage:
     def __init__(self, admin_required: bool = False):
         self.admin_required = admin_required
 
-    async def __call__(
-        self,
-        request: Request,
-        db: Session = Depends(get_db)
-    ) -> User:
+    async def __call__(self, request: Request, db: Session = Depends(get_db)) -> User:
         auth_provider = get_auth_provider()
         user = await auth_provider.get_user_from_request(db, request)
 
@@ -86,13 +74,12 @@ class RequireAuthPage:
                 return_url += f"?{request.url.query}"
             raise HTTPException(
                 status_code=status.HTTP_307_TEMPORARY_REDIRECT,
-                headers={"Location": f"/auth/login?next={return_url}"}
+                headers={"Location": f"/auth/login?next={return_url}"},
             )
 
         if self.admin_required and not user.is_admin:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin access required"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
             )
 
         return user

@@ -3,9 +3,9 @@ Mock services for testing AI functionality.
 
 These mocks provide deterministic responses for testing without API calls.
 """
+
 from datetime import datetime
 from typing import Any, Dict, List, Optional, AsyncIterator
-import json
 
 
 class MockClaudeService:
@@ -40,10 +40,9 @@ class MockClaudeService:
         """Record a method call for assertion."""
         if method not in self.calls:
             self.calls[method] = []
-        self.calls[method].append({
-            "timestamp": datetime.utcnow().isoformat(),
-            "kwargs": kwargs
-        })
+        self.calls[method].append(
+            {"timestamp": datetime.utcnow().isoformat(), "kwargs": kwargs}
+        )
 
     def reset(self):
         """Reset all recorded calls and responses."""
@@ -74,15 +73,11 @@ class MockClaudeService:
         self._validate_meal_image_response = is_valid
 
     async def analyze_meal_image(
-        self,
-        image_path: str,
-        user_notes: Optional[str] = None
+        self, image_path: str, user_notes: Optional[str] = None
     ) -> dict:
         """Mock meal image analysis."""
         self._record_call(
-            "analyze_meal_image",
-            image_path=image_path,
-            user_notes=user_notes
+            "analyze_meal_image", image_path=image_path, user_notes=user_notes
         )
 
         if self._raise_error:
@@ -101,23 +96,23 @@ class MockClaudeService:
                     "name": "chicken breast",
                     "state": "cooked",
                     "quantity": "150g",
-                    "confidence": 0.92
+                    "confidence": 0.92,
                 },
                 {
                     "name": "rice",
                     "state": "cooked",
                     "quantity": "1 cup",
-                    "confidence": 0.88
+                    "confidence": 0.88,
                 },
                 {
                     "name": "broccoli",
                     "state": "cooked",
                     "quantity": "1/2 cup",
-                    "confidence": 0.85
-                }
+                    "confidence": 0.85,
+                },
             ],
             "raw_response": "{}",
-            "model": self.haiku_model
+            "model": self.haiku_model,
         }
 
     def set_analyze_meal_image_response(self, response: Dict):
@@ -133,7 +128,7 @@ class MockClaudeService:
         tags: list,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
-        user_notes: Optional[str] = None
+        user_notes: Optional[str] = None,
     ) -> dict:
         """Mock symptom elaboration."""
         self._record_call(
@@ -141,7 +136,7 @@ class MockClaudeService:
             tags=tags,
             start_time=start_time,
             end_time=end_time,
-            user_notes=user_notes
+            user_notes=user_notes,
         )
 
         if self._raise_error:
@@ -155,7 +150,9 @@ class MockClaudeService:
         # Generate default response based on tags
         tag_names = [t.get("name", "symptom") for t in tags]
         severity = max(t.get("severity", 5) for t in tags)
-        severity_word = "mild" if severity < 4 else "moderate" if severity < 7 else "severe"
+        severity_word = (
+            "mild" if severity < 4 else "moderate" if severity < 7 else "severe"
+        )
 
         return {
             "elaboration": (
@@ -164,7 +161,7 @@ class MockClaudeService:
                 "Recommend monitoring for recurrence and potential dietary triggers."
             ),
             "raw_response": "",
-            "model": self.sonnet_model
+            "model": self.sonnet_model,
         }
 
     def set_elaborate_symptom_tags_response(self, response: Dict):
@@ -176,7 +173,7 @@ class MockClaudeService:
         tags: list,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
-        user_notes: Optional[str] = None
+        user_notes: Optional[str] = None,
     ) -> AsyncIterator[str]:
         """Mock streaming symptom elaboration."""
         self._record_call(
@@ -184,7 +181,7 @@ class MockClaudeService:
             tags=tags,
             start_time=start_time,
             end_time=end_time,
-            user_notes=user_notes
+            user_notes=user_notes,
         )
 
         if self._raise_error:
@@ -201,20 +198,17 @@ class MockClaudeService:
         text = response.get("elaboration", "")
         chunk_size = 20
         for i in range(0, len(text), chunk_size):
-            yield text[i:i + chunk_size]
+            yield text[i : i + chunk_size]
 
     async def detect_episode_continuation(
-        self,
-        current_tags: list,
-        current_time: datetime,
-        previous_symptom: dict
+        self, current_tags: list, current_time: datetime, previous_symptom: dict
     ) -> dict:
         """Mock episode continuation detection."""
         self._record_call(
             "detect_episode_continuation",
             current_tags=current_tags,
             current_time=current_time,
-            previous_symptom=previous_symptom
+            previous_symptom=previous_symptom,
         )
 
         if self._raise_error:
@@ -237,9 +231,9 @@ class MockClaudeService:
             "confidence": 0.85 if is_continuation else 0.15,
             "reasoning": (
                 "Similar symptoms reported within episode window."
-                if is_continuation else
-                "Different symptom pattern detected."
-            )
+                if is_continuation
+                else "Different symptom pattern detected."
+            ),
         }
 
     def set_detect_episode_continuation_response(self, response: Dict):
@@ -247,15 +241,13 @@ class MockClaudeService:
         self._detect_episode_continuation_response = response
 
     async def detect_ongoing_symptom(
-        self,
-        previous_symptom: dict,
-        current_symptom: dict
+        self, previous_symptom: dict, current_symptom: dict
     ) -> dict:
         """Mock ongoing symptom detection."""
         self._record_call(
             "detect_ongoing_symptom",
             previous_symptom=previous_symptom,
-            current_symptom=current_symptom
+            current_symptom=current_symptom,
         )
 
         if self._raise_error:
@@ -271,7 +263,9 @@ class MockClaudeService:
         return {
             "is_ongoing": is_ongoing,
             "confidence": 0.9 if is_ongoing else 0.1,
-            "reasoning": "Symptom names match." if is_ongoing else "Different symptoms."
+            "reasoning": "Symptom names match."
+            if is_ongoing
+            else "Different symptoms.",
         }
 
     # =========================================================================
@@ -279,15 +273,13 @@ class MockClaudeService:
     # =========================================================================
 
     async def diagnose_correlations(
-        self,
-        correlation_data: list,
-        web_search_enabled: bool = True
+        self, correlation_data: list, web_search_enabled: bool = True
     ) -> dict:
         """Mock correlation diagnosis."""
         self._record_call(
             "diagnose_correlations",
             correlation_data=correlation_data,
-            web_search_enabled=web_search_enabled
+            web_search_enabled=web_search_enabled,
         )
 
         if self._raise_error:
@@ -302,43 +294,45 @@ class MockClaudeService:
         analyses = []
         for item in correlation_data:
             ingredient_name = item.get("ingredient_name", "Unknown")
-            analyses.append({
-                "ingredient_name": ingredient_name,
-                "medical_context": (
-                    f"{ingredient_name} is known to cause digestive issues in "
-                    "some individuals, particularly those with sensitivities."
-                ),
-                "interpretation": (
-                    f"The correlation data suggests a potential link between "
-                    f"{ingredient_name} consumption and reported symptoms."
-                ),
-                "recommendations": (
-                    f"Consider temporarily eliminating {ingredient_name} "
-                    "from your diet and monitoring symptoms."
-                ),
-                "citations": [
-                    {
-                        "url": "https://pubmed.ncbi.nlm.nih.gov/12345678/",
-                        "title": f"Food Intolerance: {ingredient_name}",
-                        "source_type": "medical_journal",
-                        "snippet": f"Study on {ingredient_name} sensitivity.",
-                        "relevance": 0.85
-                    }
-                ]
-            })
+            analyses.append(
+                {
+                    "ingredient_name": ingredient_name,
+                    "medical_context": (
+                        f"{ingredient_name} is known to cause digestive issues in "
+                        "some individuals, particularly those with sensitivities."
+                    ),
+                    "interpretation": (
+                        f"The correlation data suggests a potential link between "
+                        f"{ingredient_name} consumption and reported symptoms."
+                    ),
+                    "recommendations": (
+                        f"Consider temporarily eliminating {ingredient_name} "
+                        "from your diet and monitoring symptoms."
+                    ),
+                    "citations": [
+                        {
+                            "url": "https://pubmed.ncbi.nlm.nih.gov/12345678/",
+                            "title": f"Food Intolerance: {ingredient_name}",
+                            "source_type": "medical_journal",
+                            "snippet": f"Study on {ingredient_name} sensitivity.",
+                            "relevance": 0.85,
+                        }
+                    ],
+                }
+            )
 
         return {
             "ingredient_analyses": analyses,
             "overall_summary": "Analysis complete. Potential triggers identified.",
             "caveats": [
                 "This analysis is based on correlation, not causation.",
-                "Consult a healthcare professional for diagnosis."
+                "Consult a healthcare professional for diagnosis.",
             ],
             "usage_stats": {
                 "input_tokens": 1500,
                 "cached_tokens": 0,
-                "cache_hit": False
-            }
+                "cache_hit": False,
+            },
         }
 
     def set_diagnose_correlations_response(self, response: Dict):
@@ -349,14 +343,14 @@ class MockClaudeService:
         self,
         ingredient_data: dict,
         user_meal_history: list,
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> dict:
         """Mock single ingredient diagnosis."""
         self._record_call(
             "diagnose_single_ingredient",
             ingredient_data=ingredient_data,
             user_meal_history=user_meal_history,
-            web_search_enabled=web_search_enabled
+            web_search_enabled=web_search_enabled,
         )
 
         if self._raise_error:
@@ -380,7 +374,7 @@ class MockClaudeService:
             ),
             "processing_suggestions": {
                 "cooked_vs_raw": "Cooking may reduce symptom severity.",
-                "alternatives": ["substitute A", "substitute B"]
+                "alternatives": ["substitute A", "substitute B"],
             },
             "alternative_meals": [],
             "citations": [
@@ -388,15 +382,15 @@ class MockClaudeService:
                     "url": "https://www.nih.gov/example",
                     "title": "Food Sensitivity Overview",
                     "source_type": "nih",
-                    "snippet": "General information on food sensitivities."
+                    "snippet": "General information on food sensitivities.",
                 }
             ],
             "usage_stats": {
                 "input_tokens": 800,
                 "output_tokens": 400,
                 "cached_tokens": 0,
-                "cache_hit": False
-            }
+                "cache_hit": False,
+            },
         }
 
     def set_diagnose_single_ingredient_response(self, response: Dict):
@@ -408,7 +402,7 @@ class MockClaudeService:
         ingredient_data: dict,
         cooccurrence_data: list,
         medical_grounding: str,
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> dict:
         """Mock root cause classification."""
         self._record_call(
@@ -416,7 +410,7 @@ class MockClaudeService:
             ingredient_data=ingredient_data,
             cooccurrence_data=cooccurrence_data,
             medical_grounding=medical_grounding,
-            web_search_enabled=web_search_enabled
+            web_search_enabled=web_search_enabled,
         )
 
         if self._raise_error:
@@ -439,19 +433,16 @@ class MockClaudeService:
 
         return {
             "root_cause": is_root_cause,
-            "discard_justification": None if is_root_cause else (
-                f"High co-occurrence with {confounded_by}"
-            ),
+            "discard_justification": None
+            if is_root_cause
+            else (f"High co-occurrence with {confounded_by}"),
             "confounded_by": confounded_by,
             "medical_reasoning": (
                 "Medical evidence supports this as a likely trigger."
-                if is_root_cause else
-                f"Likely confounded by {confounded_by}."
+                if is_root_cause
+                else f"Likely confounded by {confounded_by}."
             ),
-            "usage_stats": {
-                "input_tokens": 500,
-                "output_tokens": 200
-            }
+            "usage_stats": {"input_tokens": 500, "output_tokens": 200},
         }
 
     def set_classify_root_cause_response(self, response: Dict):
@@ -463,15 +454,13 @@ class MockClaudeService:
     # =========================================================================
 
     async def clarify_symptom(
-        self,
-        raw_description: str,
-        clarification_history: Optional[list] = None
+        self, raw_description: str, clarification_history: Optional[list] = None
     ) -> dict:
         """Mock symptom clarification."""
         self._record_call(
             "clarify_symptom",
             raw_description=raw_description,
-            clarification_history=clarification_history
+            clarification_history=clarification_history,
         )
 
         if self._raise_error:
@@ -488,11 +477,11 @@ class MockClaudeService:
             questions = [
                 "When did you first notice the symptoms?",
                 "How severe would you rate the symptoms on a scale of 1-10?",
-                "Did you notice any triggers?"
+                "Did you notice any triggers?",
             ]
             return {
                 "mode": "question",
-                "question": questions[num_questions % len(questions)]
+                "question": questions[num_questions % len(questions)],
             }
         else:
             # Complete with structured data
@@ -501,8 +490,8 @@ class MockClaudeService:
                 "structured": {
                     "type": "bloating",
                     "severity": 6,
-                    "notes": raw_description
-                }
+                    "notes": raw_description,
+                },
             }
 
     # =========================================================================
@@ -513,14 +502,14 @@ class MockClaudeService:
         self,
         meals_data: str,
         symptoms_data: str,
-        analysis_question: str = "Identify ingredients that may be correlated with symptoms."
+        analysis_question: str = "Identify ingredients that may be correlated with symptoms.",
     ) -> dict:
         """Mock pattern analysis."""
         self._record_call(
             "analyze_patterns",
             meals_data=meals_data,
             symptoms_data=symptoms_data,
-            analysis_question=analysis_question
+            analysis_question=analysis_question,
         )
 
         if self._raise_error:
@@ -538,7 +527,7 @@ class MockClaudeService:
             "model": self.sonnet_model,
             "cache_hit": False,
             "input_tokens": 2000,
-            "cached_tokens": 0
+            "cached_tokens": 0,
         }
 
 
@@ -551,31 +540,35 @@ def create_mock_with_error(error: Exception) -> MockClaudeService:
 
 
 def create_mock_for_meal_analysis(
-    ingredients: List[Dict[str, Any]],
-    meal_name: str = "Test Meal"
+    ingredients: List[Dict[str, Any]], meal_name: str = "Test Meal"
 ) -> MockClaudeService:
     """Create a mock configured for meal analysis testing."""
     mock = MockClaudeService()
-    mock.set_analyze_meal_image_response({
-        "meal_name": meal_name,
-        "ingredients": ingredients,
-        "raw_response": "{}",
-        "model": mock.haiku_model
-    })
+    mock.set_analyze_meal_image_response(
+        {
+            "meal_name": meal_name,
+            "ingredients": ingredients,
+            "raw_response": "{}",
+            "model": mock.haiku_model,
+        }
+    )
     return mock
 
 
 def create_mock_for_diagnosis(
-    is_root_cause: bool = True,
-    confounded_by: Optional[str] = None
+    is_root_cause: bool = True, confounded_by: Optional[str] = None
 ) -> MockClaudeService:
     """Create a mock configured for diagnosis testing."""
     mock = MockClaudeService()
-    mock.set_classify_root_cause_response({
-        "root_cause": is_root_cause,
-        "discard_justification": None if is_root_cause else f"Confounded by {confounded_by}",
-        "confounded_by": confounded_by,
-        "medical_reasoning": "Test reasoning",
-        "usage_stats": {"input_tokens": 100, "output_tokens": 50}
-    })
+    mock.set_classify_root_cause_response(
+        {
+            "root_cause": is_root_cause,
+            "discard_justification": None
+            if is_root_cause
+            else f"Confounded by {confounded_by}",
+            "confounded_by": confounded_by,
+            "medical_reasoning": "Test reasoning",
+            "usage_stats": {"input_tokens": 100, "output_tokens": 50},
+        }
+    )
     return mock

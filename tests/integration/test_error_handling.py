@@ -7,8 +7,7 @@ Tests graceful handling of:
 - File upload validation
 - Malformed requests
 """
-import pytest
-from datetime import datetime
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import patch, MagicMock, AsyncMock
@@ -77,16 +76,13 @@ class TestClaudeAPIErrors:
             )
 
             response = auth_client.post(
-                f"/meals/{meal.id}/analyze-image",
-                follow_redirects=False
+                f"/meals/{meal.id}/analyze-image", follow_redirects=False
             )
 
             # Should return error page, not crash (200 with error HTML)
             assert response.status_code == 200
 
-    def test_rate_limit_on_elaborate(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_rate_limit_on_elaborate(self, auth_client: TestClient, test_user: User):
         """Test graceful handling of rate limiting."""
         with patch("app.api.symptoms.claude_service") as mock_service:
             mock_service.elaborate_symptom_tags = AsyncMock(
@@ -95,7 +91,7 @@ class TestClaudeAPIErrors:
 
             response = auth_client.post(
                 "/symptoms/tags/elaborate",
-                json={"tags": [{"name": "test", "severity": 5}]}
+                json={"tags": [{"name": "test", "severity": 5}]},
             )
 
             # Should return appropriate error
@@ -119,8 +115,7 @@ class TestClaudeAPIErrors:
             MockService.return_value = mock_instance
 
             response = auth_client.post(
-                "/diagnosis/analyze",
-                json={"async_mode": False}
+                "/diagnosis/analyze", json={"async_mode": False}
             )
 
             # Should handle error gracefully
@@ -139,20 +134,18 @@ class TestFileUploadErrors:
             "/meals/create",
             files={"image": ("test.txt", BytesIO(b"not an image"), "text/plain")},
             data={"user_notes": "Test meal"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         # Should reject invalid file type
         assert response.status_code in [400, 415, 422]
 
-    def test_meal_create_without_image(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_meal_create_without_image(self, auth_client: TestClient, test_user: User):
         """Test meal creation without image succeeds."""
         response = auth_client.post(
             "/meals/create",
             data={"user_notes": "Test meal without image"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         # Should succeed and redirect to edit-ingredients
@@ -169,7 +162,7 @@ class TestMalformedRequests:
         response = auth_client.post(
             "/symptoms/tags/elaborate",
             content="not valid json",
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         assert response.status_code == 422
@@ -182,7 +175,7 @@ class TestMalformedRequests:
                 "description": "Test"
                 # Missing symptom_type and severity
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 422
@@ -194,9 +187,9 @@ class TestMalformedRequests:
             data={
                 "description": "Test",
                 "symptom_type": "digestive",
-                "severity": 100  # Out of range
+                "severity": 100,  # Out of range
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 400
@@ -207,8 +200,8 @@ class TestMalformedRequests:
             "/symptoms/detect-episode",
             json={
                 "tags": [{"name": "test", "severity": 5}],
-                "start_time": "not a date"
-            }
+                "start_time": "not a date",
+            },
         )
 
         assert response.status_code in [400, 422, 500]
@@ -220,7 +213,7 @@ class TestMalformedRequests:
         response = auth_client.post(
             "/symptoms/create-tagged",
             data={"tags_json": json.dumps([])},  # Empty tags
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         # May succeed or fail gracefully
@@ -252,9 +245,7 @@ class TestAuthorizationErrors:
 
         assert response.status_code in [403, 404]
 
-    def test_non_admin_create_invite(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_non_admin_create_invite(self, auth_client: TestClient, test_user: User):
         """Test non-admin cannot create invites."""
         response = auth_client.post("/auth/invite")
 

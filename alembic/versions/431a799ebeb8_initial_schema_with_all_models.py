@@ -5,12 +5,9 @@ Revises: a02d9fd847b2
 Create Date: 2026-01-27 22:28:10.486293
 
 """
-from alembic import op
-import sqlalchemy as sa
 
-
-revision = '431a799ebeb8'
-down_revision = 'a02d9fd847b2'
+revision = "431a799ebeb8"
+down_revision = "a02d9fd847b2"
 branch_labels = None
 depends_on = None
 

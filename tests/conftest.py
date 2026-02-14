@@ -8,10 +8,11 @@ Implements the transaction rollback pattern from TESTING.md:
 - Authenticated client fixtures
 - API response caching options
 """
+
 import os
 import hashlib
 import subprocess
-from typing import Generator, Optional
+from typing import Generator
 from datetime import datetime, timedelta, timezone
 import secrets
 
@@ -19,7 +20,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
@@ -30,19 +30,20 @@ from app.models import User, Session as UserSession, Invite
 # pytest Configuration
 # =============================================================================
 
+
 def pytest_addoption(parser):
     """Add custom pytest command line options."""
     parser.addoption(
         "--use-cached-responses",
         action="store_true",
         default=True,
-        help="Use cached API responses (default)"
+        help="Use cached API responses (default)",
     )
     parser.addoption(
         "--refresh-api-cache",
         action="store_true",
         default=False,
-        help="Refresh API response cache (incurs costs)"
+        help="Refresh API response cache (incurs costs)",
     )
 
 
@@ -75,12 +76,12 @@ def configure_api_cache(request):
 # Database Fixtures
 # =============================================================================
 
+
 def get_worktree_suffix() -> str:
     """Get a unique suffix based on the current worktree for test isolation."""
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
         )
         path = result.stdout.strip()
         return hashlib.sha256(path.encode()).hexdigest()[:8]
@@ -175,6 +176,7 @@ def db(test_engine) -> Generator[Session, None, None]:
 # TestClient Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def client(db: Session) -> Generator[TestClient, None, None]:
     """
@@ -182,6 +184,7 @@ def client(db: Session) -> Generator[TestClient, None, None]:
 
     The database session is injected into the app's get_db dependency.
     """
+
     def override_get_db():
         try:
             yield db
@@ -200,20 +203,18 @@ def client(db: Session) -> Generator[TestClient, None, None]:
 # Authentication Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def test_user(db: Session) -> User:
     """Create a test user."""
     import bcrypt
 
     password_hash = bcrypt.hashpw(
-        "testpassword123".encode('utf-8'),
-        bcrypt.gensalt()
-    ).decode('utf-8')
+        "testpassword123".encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
 
     user = User(
-        email="testuser@example.com",
-        password_hash=password_hash,
-        is_admin=False
+        email="testuser@example.com", password_hash=password_hash, is_admin=False
     )
     db.add(user)
     db.flush()
@@ -226,15 +227,10 @@ def admin_user(db: Session) -> User:
     import bcrypt
 
     password_hash = bcrypt.hashpw(
-        "adminpassword123".encode('utf-8'),
-        bcrypt.gensalt()
-    ).decode('utf-8')
+        "adminpassword123".encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
 
-    user = User(
-        email="admin@example.com",
-        password_hash=password_hash,
-        is_admin=True
-    )
+    user = User(email="admin@example.com", password_hash=password_hash, is_admin=True)
     db.add(user)
     db.flush()
     return user
@@ -249,7 +245,7 @@ def test_session(db: Session, test_user: User) -> UserSession:
         token=token,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         user_agent="pytest-test-client",
-        ip_address="127.0.0.1"
+        ip_address="127.0.0.1",
     )
     db.add(session)
     db.flush()
@@ -265,7 +261,7 @@ def admin_session(db: Session, admin_user: User) -> UserSession:
         token=token,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         user_agent="pytest-test-client",
-        ip_address="127.0.0.1"
+        ip_address="127.0.0.1",
     )
     db.add(session)
     db.flush()
@@ -273,7 +269,9 @@ def admin_session(db: Session, admin_user: User) -> UserSession:
 
 
 @pytest.fixture
-def auth_client(db: Session, test_session: UserSession) -> Generator[TestClient, None, None]:
+def auth_client(
+    db: Session, test_session: UserSession
+) -> Generator[TestClient, None, None]:
     """
     Authenticated TestClient for regular user.
 
@@ -297,7 +295,9 @@ def auth_client(db: Session, test_session: UserSession) -> Generator[TestClient,
 
 
 @pytest.fixture
-def admin_client(db: Session, admin_session: UserSession) -> Generator[TestClient, None, None]:
+def admin_client(
+    db: Session, admin_session: UserSession
+) -> Generator[TestClient, None, None]:
     """
     Authenticated TestClient for admin user.
 
@@ -332,6 +332,7 @@ def auth_headers(test_session: UserSession) -> dict:
 # Test Data Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def valid_invite(db: Session, admin_user: User) -> Invite:
     """Create a valid invite token."""
@@ -339,7 +340,7 @@ def valid_invite(db: Session, admin_user: User) -> Invite:
     invite = Invite(
         token=token,
         created_by=admin_user.id,
-        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
     )
     db.add(invite)
     db.flush()
@@ -349,6 +350,7 @@ def valid_invite(db: Session, admin_user: User) -> Invite:
 # =============================================================================
 # Mock Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def mock_claude_service(monkeypatch):
@@ -362,10 +364,7 @@ def mock_claude_service(monkeypatch):
     mock_service = MockClaudeService()
 
     # Patch the ClaudeService import in services
-    monkeypatch.setattr(
-        "app.services.ai_service.ClaudeService",
-        lambda: mock_service
-    )
+    monkeypatch.setattr("app.services.ai_service.ClaudeService", lambda: mock_service)
 
     return mock_service
 
@@ -374,17 +373,18 @@ def mock_claude_service(monkeypatch):
 # pytest markers
 # =============================================================================
 
+
 def pytest_configure(config):
     """Configure custom pytest markers."""
     config.addinivalue_line(
-        "markers", "security: marks tests as security tests (deselect with '-m not security')"
+        "markers",
+        "security: marks tests as security tests (deselect with '-m not security')",
     )
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m not slow')"
     )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "ai_integration: marks tests that use real AI API (use --refresh-api-cache to refresh)"
+        "markers",
+        "ai_integration: marks tests that use real AI API (use --refresh-api-cache to refresh)",
     )

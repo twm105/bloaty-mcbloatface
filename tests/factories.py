@@ -4,9 +4,9 @@ Factory functions for creating test data.
 These factories create model instances with sensible defaults.
 Use db.flush() to get IDs without committing (for transaction rollback).
 """
+
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Dict, Any
-from uuid import UUID, uuid4
 import secrets
 
 import bcrypt
@@ -32,12 +32,13 @@ from app.models import (
 # User Factory
 # =============================================================================
 
+
 def create_user(
     db: Session,
     email: Optional[str] = None,
     password: str = "testpassword123",
     is_admin: bool = False,
-    **overrides
+    **overrides,
 ) -> User:
     """
     Create a test user with hashed password.
@@ -55,10 +56,9 @@ def create_user(
     if email is None:
         email = f"testuser_{secrets.token_hex(4)}@example.com"
 
-    password_hash = bcrypt.hashpw(
-        password.encode('utf-8'),
-        bcrypt.gensalt()
-    ).decode('utf-8')
+    password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode(
+        "utf-8"
+    )
 
     defaults = {
         "email": email.lower(),
@@ -77,13 +77,14 @@ def create_user(
 # Session Factory
 # =============================================================================
 
+
 def create_session(
     db: Session,
     user: User,
     expires_in: timedelta = timedelta(days=7),
     user_agent: str = "pytest-test-client",
     ip_address: str = "127.0.0.1",
-    **overrides
+    **overrides,
 ) -> UserSession:
     """
     Create a user session.
@@ -118,13 +119,14 @@ def create_session(
 # Invite Factory
 # =============================================================================
 
+
 def create_invite(
     db: Session,
     creator: User,
     expires_in: timedelta = timedelta(days=7),
     used: bool = False,
     used_by: Optional[User] = None,
-    **overrides
+    **overrides,
 ) -> Invite:
     """
     Create an invite token.
@@ -161,11 +163,12 @@ def create_invite(
 # Ingredient Factory
 # =============================================================================
 
+
 def create_ingredient(
     db: Session,
     name: Optional[str] = None,
     normalized_name: Optional[str] = None,
-    **overrides
+    **overrides,
 ) -> Ingredient:
     """
     Create an ingredient.
@@ -201,13 +204,14 @@ def create_ingredient(
 # Meal Factory
 # =============================================================================
 
+
 def create_meal(
     db: Session,
     user: User,
     name: Optional[str] = None,
     status: str = "published",
     timestamp: Optional[datetime] = None,
-    **overrides
+    **overrides,
 ) -> Meal:
     """
     Create a meal.
@@ -248,6 +252,7 @@ def create_meal(
 # MealIngredient Factory
 # =============================================================================
 
+
 def create_meal_ingredient(
     db: Session,
     meal: Meal,
@@ -256,7 +261,7 @@ def create_meal_ingredient(
     quantity_description: Optional[str] = None,
     confidence: Optional[float] = None,
     source: str = "manual",
-    **overrides
+    **overrides,
 ) -> MealIngredient:
     """
     Create a meal-ingredient link.
@@ -294,6 +299,7 @@ def create_meal_ingredient(
 # Symptom Factory
 # =============================================================================
 
+
 def create_symptom(
     db: Session,
     user: User,
@@ -304,7 +310,7 @@ def create_symptom(
     start_time: Optional[datetime] = None,
     end_time: Optional[datetime] = None,
     episode_id: Optional[int] = None,
-    **overrides
+    **overrides,
 ) -> Symptom:
     """
     Create a symptom entry.
@@ -365,6 +371,7 @@ def create_symptom(
 # Diagnosis Factory Functions
 # =============================================================================
 
+
 def create_diagnosis_run(
     db: Session,
     user: User,
@@ -374,7 +381,7 @@ def create_diagnosis_run(
     status: str = "completed",
     date_range_start: Optional[datetime] = None,
     date_range_end: Optional[datetime] = None,
-    **overrides
+    **overrides,
 ) -> DiagnosisRun:
     """
     Create a diagnosis run.
@@ -428,7 +435,7 @@ def create_diagnosis_result(
     times_eaten: int = 5,
     times_followed_by_symptoms: int = 4,
     associated_symptoms: Optional[List[Dict]] = None,
-    **overrides
+    **overrides,
 ) -> DiagnosisResult:
     """
     Create a diagnosis result.
@@ -481,7 +488,7 @@ def create_diagnosis_citation(
     source_type: str = "medical_journal",
     snippet: Optional[str] = None,
     relevance_score: float = 0.85,
-    **overrides
+    **overrides,
 ) -> DiagnosisCitation:
     """
     Create a diagnosis citation.
@@ -519,6 +526,7 @@ def create_diagnosis_citation(
 # UserFeedback Factory
 # =============================================================================
 
+
 def create_user_feedback(
     db: Session,
     user: User,
@@ -526,7 +534,7 @@ def create_user_feedback(
     feature_id: int = 1,
     rating: int = 4,
     feedback_text: Optional[str] = None,
-    **overrides
+    **overrides,
 ) -> UserFeedback:
     """
     Create user feedback.
@@ -563,13 +571,14 @@ def create_user_feedback(
 # Composite Factories (for complex test scenarios)
 # =============================================================================
 
+
 def create_meal_with_ingredients(
     db: Session,
     user: User,
     ingredients: List[Dict[str, Any]],
     meal_name: Optional[str] = None,
     timestamp: Optional[datetime] = None,
-    **meal_overrides
+    **meal_overrides,
 ) -> Meal:
     """
     Create a meal with multiple ingredients.
@@ -593,9 +602,11 @@ def create_meal_with_ingredients(
         name = ing_spec["name"]
         normalized = Ingredient.normalize_name(name)
 
-        ingredient = db.query(Ingredient).filter(
-            Ingredient.normalized_name == normalized
-        ).first()
+        ingredient = (
+            db.query(Ingredient)
+            .filter(Ingredient.normalized_name == normalized)
+            .first()
+        )
 
         if not ingredient:
             ingredient = create_ingredient(db, name=name)
@@ -605,9 +616,7 @@ def create_meal_with_ingredients(
         quantity = ing_spec.get("quantity")
 
         create_meal_ingredient(
-            db, meal, ingredient,
-            state=state,
-            quantity_description=quantity
+            db, meal, ingredient, state=state, quantity_description=quantity
         )
 
     return meal
@@ -644,10 +653,7 @@ def create_symptom_episode(
     for i in range(occurrences):
         time = start_time + timedelta(hours=i * hours_between)
         symptom = create_symptom(
-            db, user,
-            tags=tags,
-            start_time=time,
-            episode_id=prev_id
+            db, user, tags=tags, start_time=time, episode_id=prev_id
         )
         symptoms.append(symptom)
         prev_id = symptom.id
@@ -683,9 +689,7 @@ def create_test_scenario_onion_intolerance(
         # Create meal
         meal_time = base_time + timedelta(days=i, hours=i * 3 % 12 + 8)  # Vary times
         meal = create_meal(
-            db, user,
-            name=f"Meal with onion {i+1}",
-            timestamp=meal_time
+            db, user, name=f"Meal with onion {i + 1}", timestamp=meal_time
         )
         create_meal_ingredient(db, meal, onion, state=IngredientState.RAW)
         meals.append(meal)
@@ -695,9 +699,10 @@ def create_test_scenario_onion_intolerance(
         symptom_time = meal_time + timedelta(hours=lag_hours)
         severity = 5 + i % 5  # Vary severity 5-9
         symptom = create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": severity}],
-            start_time=symptom_time
+            start_time=symptom_time,
         )
         symptoms.append(symptom)
 

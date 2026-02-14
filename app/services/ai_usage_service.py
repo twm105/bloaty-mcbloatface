@@ -3,6 +3,7 @@ AI Usage tracking service for monitoring API costs.
 
 Logs all AI API calls with token usage and calculates estimated costs.
 """
+
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -19,11 +20,7 @@ class AIUsageService:
         self.db = db
 
     def calculate_cost_cents(
-        self,
-        model: str,
-        input_tokens: int,
-        output_tokens: int,
-        cached_tokens: int = 0
+        self, model: str, input_tokens: int, output_tokens: int, cached_tokens: int = 0
     ) -> Decimal:
         """
         Calculate estimated cost in cents for an API call.
@@ -73,7 +70,7 @@ class AIUsageService:
         request_type: Optional[str] = None,
         web_search_enabled: bool = False,
         success: bool = True,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
     ) -> AIUsageLog:
         """
         Log an AI API usage event.
@@ -98,7 +95,7 @@ class AIUsageService:
             model=model,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
-            cached_tokens=cached_tokens
+            cached_tokens=cached_tokens,
         )
 
         log_entry = AIUsageLog(
@@ -114,7 +111,7 @@ class AIUsageService:
             request_type=request_type,
             web_search_enabled=web_search_enabled,
             success=success,
-            error_message=error_message
+            error_message=error_message,
         )
 
         self.db.add(log_entry)
@@ -139,18 +136,14 @@ class AIUsageService:
             self.db.query(func.sum(AIUsageLog.estimated_cost_cents))
             .filter(
                 AIUsageLog.request_id == str(run_id),
-                AIUsageLog.request_type == "diagnosis_run"
+                AIUsageLog.request_type == "diagnosis_run",
             )
             .scalar()
         )
 
         return result or Decimal("0")
 
-    def get_usage_summary(
-        self,
-        user_id: Optional[str] = None,
-        days: int = 30
-    ) -> dict:
+    def get_usage_summary(self, user_id: Optional[str] = None, days: int = 30) -> dict:
         """
         Get usage summary for a user over the past N days.
 
@@ -186,5 +179,5 @@ class AIUsageService:
             "total_cached_tokens": result.total_cached_tokens or 0,
             "total_cost_cents": float(result.total_cost_cents or 0),
             "total_cost_dollars": round(float(result.total_cost_cents or 0) / 100, 2),
-            "period_days": days
+            "period_days": days,
         }

@@ -8,7 +8,7 @@ allowing for smart circular cropping in the meal history view.
 import base64
 import logging
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple
 
 from anthropic import Anthropic
 
@@ -85,8 +85,8 @@ If there's a plate or bowl, center on the dish.
 
 Example response: 45,52
 
-Do not include any other text, explanation, or formatting."""
-                        }
+Do not include any other text, explanation, or formatting.""",
+                        },
                     ],
                 }
             ],

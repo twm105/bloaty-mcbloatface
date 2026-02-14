@@ -5,13 +5,13 @@ Tests the database seeding functionality for:
 - Ingredient categories
 - MVP user
 """
+
 import pytest
 from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import Session
 
 from app.models import User, IngredientCategory
 from app.models.user_settings import UserSettings
-from tests.factories import create_user
 
 
 class TestSeedCategories:
@@ -26,7 +26,7 @@ class TestSeedCategories:
         db.commit()
 
         # Run with mocked SessionLocal returning our test db
-        with patch('app.seed_categories.SessionLocal', return_value=db):
+        with patch("app.seed_categories.SessionLocal", return_value=db):
             seed_categories()
 
         # Check categories were created
@@ -45,17 +45,13 @@ class TestSeedCategories:
         from app.seed_categories import seed_categories
 
         # Create one category first
-        category = IngredientCategory(
-            name="Test",
-            normalized_name="test",
-            level=0
-        )
+        category = IngredientCategory(name="Test", normalized_name="test", level=0)
         db.add(category)
         db.commit()
 
         initial_count = db.query(IngredientCategory).count()
 
-        with patch('app.seed_categories.SessionLocal', return_value=db):
+        with patch("app.seed_categories.SessionLocal", return_value=db):
             seed_categories()
 
         # Should not have added more categories
@@ -74,7 +70,7 @@ class TestSeedCategories:
         mock_db.query.return_value.count.return_value = 0
         mock_db.commit.side_effect = Exception("Database error")
 
-        with patch('app.seed_categories.SessionLocal', return_value=mock_db):
+        with patch("app.seed_categories.SessionLocal", return_value=mock_db):
             with pytest.raises(Exception, match="Database error"):
                 seed_categories()
 
@@ -93,7 +89,7 @@ class TestSeedUser:
         db.query(UserSettings).filter(UserSettings.user_id == MVP_USER_ID).delete()
         db.commit()
 
-        with patch('app.seed_user.SessionLocal', return_value=db):
+        with patch("app.seed_user.SessionLocal", return_value=db):
             seed_user()
 
         # Check user was created
@@ -102,7 +98,9 @@ class TestSeedUser:
         assert user.id == MVP_USER_ID
 
         # Check settings were created
-        settings = db.query(UserSettings).filter(UserSettings.user_id == MVP_USER_ID).first()
+        settings = (
+            db.query(UserSettings).filter(UserSettings.user_id == MVP_USER_ID).first()
+        )
         assert settings is not None
         assert settings.disclaimer_acknowledged is False
 
@@ -116,7 +114,7 @@ class TestSeedUser:
         db.commit()
 
         # Running again should not fail
-        with patch('app.seed_user.SessionLocal', return_value=db):
+        with patch("app.seed_user.SessionLocal", return_value=db):
             seed_user()
 
         # Still just one user
@@ -131,7 +129,7 @@ class TestSeedUser:
         mock_db.query.return_value.filter.return_value.first.return_value = None
         mock_db.commit.side_effect = Exception("Database error")
 
-        with patch('app.seed_user.SessionLocal', return_value=mock_db):
+        with patch("app.seed_user.SessionLocal", return_value=mock_db):
             with pytest.raises(Exception, match="Database error"):
                 seed_user()
 

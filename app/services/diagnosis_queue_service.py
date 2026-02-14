@@ -4,11 +4,12 @@ Service for enqueuing diagnosis tasks via Dramatiq.
 Handles the orchestration of per-ingredient analysis tasks,
 including task creation, grouping, and completion callbacks.
 """
+
 from datetime import datetime
 from typing import List, Dict
 from sqlalchemy.orm import Session
 
-from app.models import DiagnosisRun, Meal, MealIngredient
+from app.models import DiagnosisRun, Meal
 from app.workers.diagnosis_worker import analyze_ingredient, finalize_diagnosis_run
 
 
@@ -22,7 +23,7 @@ class DiagnosisQueueService:
         self,
         diagnosis_run: DiagnosisRun,
         scored_ingredients: List[Dict],
-        web_search_enabled: bool = True
+        web_search_enabled: bool = True,
     ) -> int:
         """
         Enqueue per-ingredient analysis tasks.
@@ -58,7 +59,7 @@ class DiagnosisQueueService:
                 run_id=diagnosis_run.id,
                 ingredient_data=ingredient_data,
                 user_meal_history=user_meal_history,
-                web_search_enabled=web_search_enabled
+                web_search_enabled=web_search_enabled,
             )
             messages.append(msg)
 
@@ -67,7 +68,7 @@ class DiagnosisQueueService:
         # In production, use Dramatiq groups/pipelines for proper completion handling
         finalize_diagnosis_run.send_with_options(
             args=(diagnosis_run.id,),
-            delay=len(scored_ingredients) * 30000  # Estimate 30s per ingredient
+            delay=len(scored_ingredients) * 30000,  # Estimate 30s per ingredient
         )
 
         return len(messages)
@@ -88,10 +89,7 @@ class DiagnosisQueueService:
         """
         meals = (
             self.db.query(Meal)
-            .filter(
-                Meal.user_id == user_id,
-                Meal.status == "published"
-            )
+            .filter(Meal.user_id == user_id, Meal.status == "published")
             .order_by(Meal.timestamp.desc())
             .limit(limit)
             .all()
@@ -102,17 +100,21 @@ class DiagnosisQueueService:
             ingredients = []
             for mi in meal.meal_ingredients:
                 if mi.ingredient:
-                    ingredients.append({
-                        "name": mi.ingredient.normalized_name,
-                        "state": mi.state.value if mi.state else None
-                    })
+                    ingredients.append(
+                        {
+                            "name": mi.ingredient.normalized_name,
+                            "state": mi.state.value if mi.state else None,
+                        }
+                    )
 
-            result.append({
-                "id": meal.id,
-                "name": meal.name or "Untitled Meal",
-                "timestamp": meal.timestamp.isoformat() if meal.timestamp else None,
-                "ingredients": ingredients
-            })
+            result.append(
+                {
+                    "id": meal.id,
+                    "name": meal.name or "Untitled Meal",
+                    "timestamp": meal.timestamp.isoformat() if meal.timestamp else None,
+                    "ingredients": ingredients,
+                }
+            )
 
         return result
 
@@ -137,5 +139,5 @@ class DiagnosisQueueService:
             "completed_ingredients": run.completed_ingredients,
             "started_at": run.started_at.isoformat() if run.started_at else None,
             "completed_at": run.completed_at.isoformat() if run.completed_at else None,
-            "error_message": run.error_message
+            "error_message": run.error_message,
         }

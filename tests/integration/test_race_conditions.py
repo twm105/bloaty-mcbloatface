@@ -6,15 +6,13 @@ Tests scenarios where multiple operations might conflict:
 - Simultaneous meal updates
 - Session management under load
 """
-import pytest
-import asyncio
-import threading
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import User, Ingredient, Meal
-from tests.factories import create_user, create_meal, create_ingredient
+from app.models import User, Ingredient
+from tests.factories import create_meal
 
 
 class TestIngredientRaceConditions:
@@ -33,10 +31,7 @@ class TestIngredientRaceConditions:
             try:
                 response = auth_client.post(
                     f"/meals/{meal.id}/ingredients/add",
-                    data={
-                        "ingredient_name": "Chicken",
-                        "state": "cooked"
-                    }
+                    data={"ingredient_name": "Chicken", "state": "cooked"},
                 )
                 return response.status_code
             except Exception as e:
@@ -62,17 +57,15 @@ class TestIngredientRaceConditions:
         # Add same ingredient twice
         auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
-            data={"ingredient_name": "Tomato", "state": "raw"}
+            data={"ingredient_name": "Tomato", "state": "raw"},
         )
         auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
-            data={"ingredient_name": "Tomato", "state": "raw"}
+            data={"ingredient_name": "Tomato", "state": "raw"},
         )
 
         # Check ingredient table for duplicates
-        tomatoes = db.query(Ingredient).filter(
-            Ingredient.name.ilike("tomato")
-        ).all()
+        tomatoes = db.query(Ingredient).filter(Ingredient.name.ilike("tomato")).all()
 
         # Should have exactly one unique ingredient (normalized)
         assert len(tomatoes) <= 2  # Might have raw and cooked variants
@@ -90,8 +83,7 @@ class TestMealRaceConditions:
         def update_meal_name(name: str):
             try:
                 response = auth_client.put(
-                    f"/meals/{meal.id}/name",
-                    data={"name": name}
+                    f"/meals/{meal.id}/name", data={"name": name}
                 )
                 return response.status_code
             except Exception as e:
@@ -100,8 +92,7 @@ class TestMealRaceConditions:
         # Run concurrent updates
         with ThreadPoolExecutor(max_workers=3) as executor:
             futures = [
-                executor.submit(update_meal_name, f"Meal Update {i}")
-                for i in range(3)
+                executor.submit(update_meal_name, f"Meal Update {i}") for i in range(3)
             ]
             results = [f.result() for f in as_completed(futures)]
 
@@ -122,8 +113,7 @@ class TestMealRaceConditions:
 
         def update_meal_name():
             return auth_client.put(
-                f"/meals/{meal_id}/name",
-                data={"name": "Updated Name"}
+                f"/meals/{meal_id}/name", data={"name": "Updated Name"}
             )
 
         # Run delete and update concurrently
@@ -142,18 +132,13 @@ class TestMealRaceConditions:
 class TestSessionRaceConditions:
     """Tests for session management race conditions."""
 
-    def test_concurrent_logout(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_concurrent_logout(self, auth_client: TestClient, test_user: User):
         """Test multiple concurrent logout attempts."""
         results = []
 
         def logout():
             try:
-                response = auth_client.post(
-                    "/auth/logout",
-                    follow_redirects=False
-                )
+                response = auth_client.post("/auth/logout", follow_redirects=False)
                 return response.status_code
             except Exception as e:
                 return str(e)
@@ -185,11 +170,11 @@ class TestSymptomRaceConditions:
                 response = auth_client.post(
                     "/symptoms/create-tagged",
                     data={
-                        "tags_json": json.dumps([
-                            {"name": f"symptom_{i}", "severity": 5}
-                        ])
+                        "tags_json": json.dumps(
+                            [{"name": f"symptom_{i}", "severity": 5}]
+                        )
                     },
-                    follow_redirects=False
+                    follow_redirects=False,
                 )
                 return response.status_code
             except Exception as e:
@@ -217,8 +202,7 @@ class TestDiagnosisRaceConditions:
         def start_diagnosis():
             try:
                 response = auth_client.post(
-                    "/diagnosis/analyze",
-                    json={"async_mode": False}
+                    "/diagnosis/analyze", json={"async_mode": False}
                 )
                 return response.status_code
             except Exception as e:

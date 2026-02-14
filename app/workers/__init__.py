@@ -4,6 +4,7 @@ Dramatiq worker infrastructure for async task processing.
 This module sets up the Redis broker for Dramatiq workers and provides
 shared configuration for all worker modules.
 """
+
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 

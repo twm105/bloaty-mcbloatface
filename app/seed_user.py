@@ -1,4 +1,5 @@
 """Seed stub user for MVP single-user mode."""
+
 import uuid
 from app.database import SessionLocal
 from app.models.user import User
@@ -17,7 +18,7 @@ def seed_user():
         # Check if user already exists
         existing = db.query(User).filter(User.id == MVP_USER_ID).first()
         if existing:
-            print(f"MVP user already exists. Skipping.")
+            print("MVP user already exists. Skipping.")
             return
 
         # Create stub user
@@ -32,7 +33,7 @@ def seed_user():
             user_id=MVP_USER_ID,
             disclaimer_acknowledged=False,
             data_processing_consent=False,
-            privacy_policy_version="1.0"
+            privacy_policy_version="1.0",
         )
         db.add(settings)
 

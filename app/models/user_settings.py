@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Numeric, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -8,10 +17,13 @@ from app.database import Base
 
 class UserSettings(Base):
     """User settings including GDPR consent tracking and optional demographics."""
+
     __tablename__ = "user_settings"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Medical Disclaimer
     disclaimer_acknowledged = Column(Boolean, default=False)
@@ -38,6 +50,4 @@ class UserSettings(Base):
     # Relationships
     user = relationship("User", back_populates="settings")
 
-    __table_args__ = (
-        UniqueConstraint('user_id', name='uq_user_settings_user_id'),
-    )
+    __table_args__ = (UniqueConstraint("user_id", name="uq_user_settings_user_id"),)

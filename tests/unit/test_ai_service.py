@@ -7,15 +7,12 @@ Tests AI functionality using mocked Claude API responses:
 - Episode detection
 - Retry logic and error handling
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
-import json
-import tempfile
+from unittest.mock import MagicMock
 
 from app.services.ai_service import (
-    ClaudeService,
     ServiceUnavailableError,
     RateLimitError,
     retry_on_connection_error,
@@ -70,9 +67,8 @@ class TestMealImageAnalysis:
     @pytest.mark.asyncio
     async def test_analyze_meal_image_with_notes(self, mock_claude_service):
         """Test meal analysis with user notes."""
-        result = await mock_claude_service.analyze_meal_image(
-            "/path/to/meal.jpg",
-            user_notes="This is a grilled chicken salad"
+        await mock_claude_service.analyze_meal_image(
+            "/path/to/meal.jpg", user_notes="This is a grilled chicken salad"
         )
 
         # Verify the call was made with notes
@@ -84,14 +80,21 @@ class TestMealImageAnalysis:
     async def test_analyze_meal_image_custom_response(self, mock_claude_service):
         """Test with custom configured response."""
         custom_ingredients = [
-            {"name": "salmon", "state": "cooked", "quantity": "200g", "confidence": 0.95}
+            {
+                "name": "salmon",
+                "state": "cooked",
+                "quantity": "200g",
+                "confidence": 0.95,
+            }
         ]
-        mock_claude_service.set_analyze_meal_image_response({
-            "meal_name": "Grilled Salmon",
-            "ingredients": custom_ingredients,
-            "raw_response": "{}",
-            "model": "test-model"
-        })
+        mock_claude_service.set_analyze_meal_image_response(
+            {
+                "meal_name": "Grilled Salmon",
+                "ingredients": custom_ingredients,
+                "raw_response": "{}",
+                "model": "test-model",
+            }
+        )
 
         result = await mock_claude_service.analyze_meal_image("/path/to/meal.jpg")
 
@@ -113,16 +116,16 @@ class TestSymptomElaboration:
     @pytest.mark.asyncio
     async def test_elaborate_symptom_tags_basic(self, mock_claude_service):
         """Test basic symptom elaboration."""
-        tags = [
-            {"name": "bloating", "severity": 7},
-            {"name": "gas", "severity": 5}
-        ]
+        tags = [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}]
 
         result = await mock_claude_service.elaborate_symptom_tags(tags)
 
         assert "elaboration" in result
         assert "model" in result
-        assert "bloating" in result["elaboration"].lower() or "severe" in result["elaboration"].lower()
+        assert (
+            "bloating" in result["elaboration"].lower()
+            or "severe" in result["elaboration"].lower()
+        )
 
     @pytest.mark.asyncio
     async def test_elaborate_symptom_tags_with_times(self, mock_claude_service):
@@ -132,9 +135,7 @@ class TestSymptomElaboration:
         end = datetime.now(timezone.utc)
 
         result = await mock_claude_service.elaborate_symptom_tags(
-            tags,
-            start_time=start,
-            end_time=end
+            tags, start_time=start, end_time=end
         )
 
         assert "elaboration" in result
@@ -142,11 +143,13 @@ class TestSymptomElaboration:
     @pytest.mark.asyncio
     async def test_elaborate_symptom_tags_custom_response(self, mock_claude_service):
         """Test with custom configured response."""
-        mock_claude_service.set_elaborate_symptom_tags_response({
-            "elaboration": "Custom elaboration text.",
-            "raw_response": "",
-            "model": "test-model"
-        })
+        mock_claude_service.set_elaborate_symptom_tags_response(
+            {
+                "elaboration": "Custom elaboration text.",
+                "raw_response": "",
+                "model": "test-model",
+            }
+        )
 
         tags = [{"name": "nausea", "severity": 4}]
         result = await mock_claude_service.elaborate_symptom_tags(tags)
@@ -183,7 +186,7 @@ class TestEpisodeDetection:
             "tags": [{"name": "bloating", "severity": 7}],
             "start_time": datetime.now(timezone.utc) - timedelta(hours=4),
             "end_time": None,
-            "notes": "Initial bloating episode"
+            "notes": "Initial bloating episode",
         }
 
         result = await mock_claude_service.detect_episode_continuation(
@@ -205,7 +208,7 @@ class TestEpisodeDetection:
             "tags": [{"name": "bloating", "severity": 7}],
             "start_time": datetime.now(timezone.utc) - timedelta(hours=4),
             "end_time": None,
-            "notes": None
+            "notes": None,
         }
 
         result = await mock_claude_service.detect_episode_continuation(
@@ -234,8 +237,7 @@ class TestSymptomClarification:
     async def test_clarify_symptom_asks_questions(self, mock_claude_service):
         """Test that clarification asks follow-up questions."""
         result = await mock_claude_service.clarify_symptom(
-            "I feel sick",
-            clarification_history=[]
+            "I feel sick", clarification_history=[]
         )
 
         assert result["mode"] == "question"
@@ -245,13 +247,16 @@ class TestSymptomClarification:
     async def test_clarify_symptom_completes_after_questions(self, mock_claude_service):
         """Test that clarification completes after enough questions."""
         history = [
-            {"question": "When did it start?", "answer": "2 hours ago", "skipped": False},
-            {"question": "How severe?", "answer": "7 out of 10", "skipped": False}
+            {
+                "question": "When did it start?",
+                "answer": "2 hours ago",
+                "skipped": False,
+            },
+            {"question": "How severe?", "answer": "7 out of 10", "skipped": False},
         ]
 
         result = await mock_claude_service.clarify_symptom(
-            "I have stomach pain",
-            clarification_history=history
+            "I have stomach pain", clarification_history=history
         )
 
         assert result["mode"] == "complete"
@@ -274,8 +279,13 @@ class TestDiagnosis:
                 "delayed_total": 1,
                 "cumulative_total": 0,
                 "associated_symptoms": [
-                    {"name": "bloating", "severity_avg": 7.0, "frequency": 4, "lag_hours": 1.5}
-                ]
+                    {
+                        "name": "bloating",
+                        "severity_avg": 7.0,
+                        "frequency": 4,
+                        "lag_hours": 1.5,
+                    }
+                ],
             }
         ]
 
@@ -298,7 +308,7 @@ class TestDiagnosis:
             "cumulative_total": 0,
             "associated_symptoms": [
                 {"name": "gas", "severity_avg": 6.0, "frequency": 8, "lag_hours": 6.0}
-            ]
+            ],
         }
         meal_history = []
 
@@ -318,7 +328,7 @@ class TestDiagnosis:
             "confidence_level": "high",
             "times_eaten": 5,
             "total_symptom_occurrences": 4,
-            "associated_symptoms": [{"name": "bloating", "frequency": 4}]
+            "associated_symptoms": [{"name": "bloating", "frequency": 4}],
         }
         cooccurrence_data = []  # No high co-occurrence
 
@@ -337,13 +347,13 @@ class TestDiagnosis:
             "confidence_level": "high",
             "times_eaten": 5,
             "total_symptom_occurrences": 4,
-            "associated_symptoms": [{"name": "bloating", "frequency": 4}]
+            "associated_symptoms": [{"name": "bloating", "frequency": 4}],
         }
         cooccurrence_data = [
             {
                 "with_ingredient_name": "onion",
                 "conditional_probability": 0.95,  # Very high co-occurrence
-                "cooccurrence_meals": 5
+                "cooccurrence_meals": 5,
             }
         ]
 
@@ -364,9 +374,7 @@ class TestPatternAnalysis:
         meals_data = "Meal data here..."
         symptoms_data = "Symptom data here..."
 
-        result = await mock_claude_service.analyze_patterns(
-            meals_data, symptoms_data
-        )
+        result = await mock_claude_service.analyze_patterns(meals_data, symptoms_data)
 
         assert "analysis" in result
         assert "model" in result
@@ -427,9 +435,7 @@ class TestCallTracking:
         start = datetime.now(timezone.utc)
 
         await mock_claude_service.elaborate_symptom_tags(
-            tags,
-            start_time=start,
-            user_notes="Test notes"
+            tags, start_time=start, user_notes="Test notes"
         )
 
         calls = mock_claude_service.calls.get("elaborate_symptom_tags", [])

@@ -6,7 +6,9 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     redis_url: str = "redis://redis:6379/0"
 
-    haiku_model: str = "claude-sonnet-4-5-20250929"  # Using Sonnet 4.5 for faster meal analysis
+    haiku_model: str = (
+        "claude-sonnet-4-5-20250929"  # Using Sonnet 4.5 for faster meal analysis
+    )
     sonnet_model: str = "claude-sonnet-4-5-20250929"
 
     # Anthropic API timeout settings (seconds)
@@ -20,7 +22,9 @@ class Settings(BaseSettings):
     # Diagnosis thresholds
     diagnosis_min_meals: int = 2
     diagnosis_min_symptom_occurrences: int = 2
-    diagnosis_max_ingredient_occurrences: int = 15  # Max meal logs per ingredient for holistic analysis
+    diagnosis_max_ingredient_occurrences: int = (
+        15  # Max meal logs per ingredient for holistic analysis
+    )
 
     # Auth settings
     session_secret_key: str = ""  # Required in production
@@ -30,7 +34,9 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        extra = "ignore"  # Allow extra env vars (e.g., POSTGRES_PASSWORD, BACKUP_S3_BUCKET)
+        extra = (
+            "ignore"  # Allow extra env vars (e.g., POSTGRES_PASSWORD, BACKUP_S3_BUCKET)
+        )
 
 
 settings = Settings()

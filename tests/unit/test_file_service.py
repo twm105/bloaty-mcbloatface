@@ -6,17 +6,18 @@ Tests file handling including:
 - Image optimization and EXIF handling
 - Safe file deletion
 """
+
 import pytest
 import tempfile
 import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 from io import BytesIO
 
 from PIL import Image
 from fastapi import UploadFile
 
-from app.services.file_service import FileService, file_service
+from app.services.file_service import FileService
 
 
 class TestFileServiceInit:
@@ -26,7 +27,7 @@ class TestFileServiceInit:
         """Test that upload directory is created on init."""
         with tempfile.TemporaryDirectory() as tmpdir:
             upload_dir = os.path.join(tmpdir, "uploads", "meals")
-            service = FileService(upload_dir=upload_dir)
+            FileService(upload_dir=upload_dir)
 
             assert os.path.exists(upload_dir)
 
@@ -48,8 +49,7 @@ class TestFileTypeValidation:
 
             # Create a mock UploadFile with JPEG content
             mock_file = create_mock_upload_file(
-                content_type="image/jpeg",
-                filename="test.jpg"
+                content_type="image/jpeg", filename="test.jpg"
             )
 
             path = await service.save_meal_image(mock_file)
@@ -62,8 +62,7 @@ class TestFileTypeValidation:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="image/png",
-                filename="test.png"
+                content_type="image/png", filename="test.png"
             )
 
             path = await service.save_meal_image(mock_file)
@@ -76,8 +75,7 @@ class TestFileTypeValidation:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="image/webp",
-                filename="test.webp"
+                content_type="image/webp", filename="test.webp"
             )
 
             path = await service.save_meal_image(mock_file)
@@ -90,8 +88,7 @@ class TestFileTypeValidation:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="application/pdf",
-                filename="test.pdf"
+                content_type="application/pdf", filename="test.pdf"
             )
 
             with pytest.raises(ValueError, match="Invalid file type"):
@@ -104,8 +101,7 @@ class TestFileTypeValidation:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="text/plain",
-                filename="test.txt"
+                content_type="text/plain", filename="test.txt"
             )
 
             with pytest.raises(ValueError):
@@ -122,8 +118,7 @@ class TestFileSaving:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="image/jpeg",
-                filename="test.jpg"
+                content_type="image/jpeg", filename="test.jpg"
             )
 
             path = await service.save_meal_image(mock_file)
@@ -137,12 +132,10 @@ class TestFileSaving:
             service = FileService(upload_dir=tmpdir)
 
             mock_file1 = create_mock_upload_file(
-                content_type="image/jpeg",
-                filename="test.jpg"
+                content_type="image/jpeg", filename="test.jpg"
             )
             mock_file2 = create_mock_upload_file(
-                content_type="image/jpeg",
-                filename="test.jpg"
+                content_type="image/jpeg", filename="test.jpg"
             )
 
             path1 = await service.save_meal_image(mock_file1)
@@ -157,8 +150,7 @@ class TestFileSaving:
             service = FileService(upload_dir=tmpdir)
 
             mock_file = create_mock_upload_file(
-                content_type="image/png",
-                filename="test.png"
+                content_type="image/png", filename="test.png"
             )
 
             path = await service.save_meal_image(mock_file)
@@ -176,7 +168,7 @@ class TestImageOptimization:
 
             # Create a large image
             large_image_path = os.path.join(tmpdir, "large.jpg")
-            img = Image.new('RGB', (4000, 3000), color='red')
+            img = Image.new("RGB", (4000, 3000), color="red")
             img.save(large_image_path)
 
             # Optimize it
@@ -193,7 +185,7 @@ class TestImageOptimization:
 
             # Create a small image
             small_image_path = os.path.join(tmpdir, "small.jpg")
-            img = Image.new('RGB', (800, 600), color='blue')
+            img = Image.new("RGB", (800, 600), color="blue")
             img.save(small_image_path)
 
             # Optimize it
@@ -211,7 +203,7 @@ class TestImageOptimization:
 
             # Create an RGBA image
             rgba_path = os.path.join(tmpdir, "rgba.png")
-            img = Image.new('RGBA', (100, 100), color=(255, 0, 0, 128))
+            img = Image.new("RGBA", (100, 100), color=(255, 0, 0, 128))
             img.save(rgba_path)
 
             # Optimize it
@@ -228,7 +220,7 @@ class TestImageOptimization:
 
             # Create a corrupt "image" file
             corrupt_path = os.path.join(tmpdir, "corrupt.jpg")
-            with open(corrupt_path, 'wb') as f:
+            with open(corrupt_path, "wb") as f:
                 f.write(b"not an image")
 
             # Should not raise, just print warning
@@ -248,7 +240,7 @@ class TestFileDeletion:
 
             # Create a file
             file_path = os.path.join(tmpdir, "test.jpg")
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 f.write("test")
 
             result = service.delete_file(file_path)
@@ -306,21 +298,19 @@ class TestFileUrlConversion:
 
 # Helper function to create mock UploadFile
 def create_mock_upload_file(
-    content_type: str,
-    filename: str,
-    content: bytes = None
+    content_type: str, filename: str, content: bytes = None
 ) -> UploadFile:
     """Create a mock UploadFile for testing."""
     if content is None:
         # Create a minimal valid image
-        img = Image.new('RGB', (100, 100), color='red')
+        img = Image.new("RGB", (100, 100), color="red")
         buffer = BytesIO()
-        if 'png' in content_type:
-            img.save(buffer, format='PNG')
-        elif 'webp' in content_type:
-            img.save(buffer, format='WEBP')
+        if "png" in content_type:
+            img.save(buffer, format="PNG")
+        elif "webp" in content_type:
+            img.save(buffer, format="WEBP")
         else:
-            img.save(buffer, format='JPEG')
+            img.save(buffer, format="JPEG")
         content = buffer.getvalue()
 
     mock_file = MagicMock(spec=UploadFile)

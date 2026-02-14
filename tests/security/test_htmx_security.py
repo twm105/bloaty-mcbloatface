@@ -6,12 +6,13 @@ Tests htmx-specific security concerns:
 - CSRF protection
 - Request origin validation
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models import User
-from tests.factories import create_user, create_meal, create_symptom, create_ingredient
+from tests.factories import create_user, create_meal
 
 
 @pytest.mark.security
@@ -29,22 +30,20 @@ class TestPartialResponseEscaping:
         response = auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
             data={"ingredient_name": xss_payload, "state": "raw"},
-            headers={"HX-Request": "true"}  # htmx request
+            headers={"HX-Request": "true"},  # htmx request
         )
 
         # Response should have escaped content
         if response.status_code == 200:
             assert "<script>" not in response.text or "&lt;script&gt;" in response.text
 
-    def test_symptom_tag_partial_xss(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_symptom_tag_partial_xss(self, auth_client: TestClient, test_user: User):
         """Test XSS in symptom tag suggestions is escaped."""
         xss_payload = "<img src=x onerror=alert(1)>"
 
         response = auth_client.get(
             f"/symptoms/tags/autocomplete?q={xss_payload}",
-            headers={"HX-Request": "true"}
+            headers={"HX-Request": "true"},
         )
 
         # Should not contain unescaped payload
@@ -58,10 +57,7 @@ class TestPartialResponseEscaping:
         xss_payload = "'\"><script>alert(1)</script>"
         create_meal(db, test_user, name=xss_payload)
 
-        response = auth_client.get(
-            "/meals/history",
-            headers={"HX-Request": "true"}
-        )
+        response = auth_client.get("/meals/history", headers={"HX-Request": "true"})
 
         assert response.status_code == 200
         # Script should be escaped
@@ -85,9 +81,7 @@ class TestCSRFProtection:
     def test_post_without_session(self, client: TestClient, db: Session):
         """Test that POST operations require valid session."""
         response = client.post(
-            "/symptoms/create-tagged",
-            data={"tags_json": "[]"},
-            follow_redirects=False
+            "/symptoms/create-tagged", data={"tags_json": "[]"}, follow_redirects=False
         )
 
         assert response.status_code in [302, 303, 307, 401]
@@ -115,8 +109,7 @@ class TestHtmxHeaders:
 
         # With HX-Request - may get partial
         partial_response = auth_client.get(
-            "/meals/history",
-            headers={"HX-Request": "true"}
+            "/meals/history", headers={"HX-Request": "true"}
         )
 
         # Both should succeed
@@ -132,10 +125,7 @@ class TestHtmxHeaders:
         # Try to inject malicious target
         response = auth_client.get(
             f"/meals/{meal.id}/edit-ingredients",
-            headers={
-                "HX-Request": "true",
-                "HX-Target": "<script>alert(1)</script>"
-            }
+            headers={"HX-Request": "true", "HX-Target": "<script>alert(1)</script>"},
         )
 
         assert response.status_code == 200
@@ -147,9 +137,7 @@ class TestHtmxHeaders:
 class TestResponseHeaders:
     """Tests for security response headers."""
 
-    def test_content_type_header(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_content_type_header(self, auth_client: TestClient, test_user: User):
         """Test that responses have correct Content-Type."""
         # HTML response
         html_response = auth_client.get("/meals/history")
@@ -159,9 +147,7 @@ class TestResponseHeaders:
         json_response = auth_client.get("/symptoms/tags/common")
         assert "application/json" in json_response.headers.get("content-type", "")
 
-    def test_xss_protection_headers(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_xss_protection_headers(self, auth_client: TestClient, test_user: User):
         """Test for X-XSS-Protection or CSP headers."""
         response = auth_client.get("/meals/history")
 
@@ -174,7 +160,7 @@ class TestResponseHeaders:
             "X-XSS-Protection",
             "X-Content-Type-Options",
             "Content-Security-Policy",
-            "X-Frame-Options"
+            "X-Frame-Options",
         ]
 
         # At minimum, verify we can check these headers
@@ -197,7 +183,7 @@ class TestHtmxSwapSecurity:
         response = auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
             data={"ingredient_name": xss_payload, "state": "raw"},
-            headers={"HX-Request": "true"}
+            headers={"HX-Request": "true"},
         )
 
         # Should not contain unescaped hx-swap-oob
@@ -216,9 +202,13 @@ class TestHtmxSwapSecurity:
         response = auth_client.post(
             f"/meals/{meal.id}/ingredients/add",
             data={"ingredient_name": malicious_name, "state": "raw"},
-            headers={"HX-Request": "true"}
+            headers={"HX-Request": "true"},
         )
 
         # Attributes should be escaped (either &quot; or &#34; is acceptable)
         if response.status_code == 200:
-            assert 'hx-get=' not in response.text or '&quot;' in response.text or '&#34;' in response.text
+            assert (
+                "hx-get=" not in response.text
+                or "&quot;" in response.text
+                or "&#34;" in response.text
+            )

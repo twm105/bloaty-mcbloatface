@@ -7,12 +7,12 @@ Tests the full symptom management flow including:
 - Episode and ongoing detection
 - AI elaboration endpoints
 """
-import pytest
+
 import json
 from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 
 from app.models import User, Symptom
 from tests.factories import create_user, create_symptom
@@ -66,8 +66,7 @@ class TestCommonTags:
         # Create some symptoms with tags
         for i in range(3):
             create_symptom(
-                db, test_user,
-                tags=[{"name": "custom_symptom", "severity": 5}]
+                db, test_user, tags=[{"name": "custom_symptom", "severity": 5}]
             )
 
         response = auth_client.get("/symptoms/tags/common")
@@ -103,9 +102,7 @@ class TestTagAutocomplete:
         data = response.json()
         assert "suggestions" in data
 
-    def test_autocomplete_empty_query(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_autocomplete_empty_query(self, auth_client: TestClient, test_user: User):
         """Test autocomplete with empty query."""
         response = auth_client.get("/symptoms/tags/autocomplete?q=")
 
@@ -120,19 +117,16 @@ class TestSymptomCreation:
         self, auth_client: TestClient, test_user: User, db: Session
     ):
         """Test creating a symptom with tags."""
-        tags = [
-            {"name": "bloating", "severity": 7},
-            {"name": "gas", "severity": 5}
-        ]
+        tags = [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}]
 
         response = auth_client.post(
             "/symptoms/create-tagged",
             data={
                 "tags_json": json.dumps(tags),
                 "ai_generated_text": "AI elaboration text",
-                "final_notes": "Final notes"
+                "final_notes": "Final notes",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -147,7 +141,7 @@ class TestSymptomCreation:
             data={
                 "tags_json": "not valid json",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 400
@@ -162,9 +156,9 @@ class TestSymptomCreation:
                 "description": "Stomach pain",
                 "symptom_type": "digestive",
                 "severity": 6,
-                "notes": "After eating"
+                "notes": "After eating",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -180,7 +174,7 @@ class TestSymptomCreation:
                 "symptom_type": "other",
                 "severity": 15,  # Invalid: > 10
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 400
@@ -189,9 +183,7 @@ class TestSymptomCreation:
 class TestSymptomHistory:
     """Tests for symptom history page."""
 
-    def test_history_renders_empty(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_history_renders_empty(self, auth_client: TestClient, test_user: User):
         """Test history page renders with no symptoms."""
         response = auth_client.get("/symptoms/history")
 
@@ -208,9 +200,7 @@ class TestSymptomHistory:
         assert response.status_code == 200
         assert "headache" in response.text.lower()
 
-    def test_history_success_param(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_history_success_param(self, auth_client: TestClient, test_user: User):
         """Test history with success parameter."""
         response = auth_client.get("/symptoms/history?success=true")
 
@@ -241,9 +231,7 @@ class TestSymptomViewing:
 
         assert response.status_code in [403, 404]
 
-    def test_edit_nonexistent_symptom(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_edit_nonexistent_symptom(self, auth_client: TestClient, test_user: User):
         """Test editing non-existent symptom."""
         response = auth_client.get("/symptoms/99999/edit")
 
@@ -263,8 +251,8 @@ class TestSymptomUpdates:
             f"/symptoms/{symptom.id}",
             json={
                 "tags": [{"name": "updated_tag", "severity": 8}],
-                "notes": "Updated notes"
-            }
+                "notes": "Updated notes",
+            },
         )
 
         assert response.status_code == 200
@@ -280,9 +268,9 @@ class TestSymptomUpdates:
             data={
                 "description": "Updated description",
                 "symptom_type": "digestive",
-                "severity": 5
+                "severity": 5,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -295,8 +283,7 @@ class TestSymptomUpdates:
         symptom = create_symptom(db, other_user)
 
         response = auth_client.put(
-            f"/symptoms/{symptom.id}",
-            json={"tags": [{"name": "hack", "severity": 1}]}
+            f"/symptoms/{symptom.id}", json={"tags": [{"name": "hack", "severity": 1}]}
         )
 
         assert response.status_code in [403, 404]
@@ -330,9 +317,7 @@ class TestSymptomDeletion:
 
         assert response.status_code in [403, 404]
 
-    def test_delete_nonexistent_symptom(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_delete_nonexistent_symptom(self, auth_client: TestClient, test_user: User):
         """Test deleting non-existent symptom."""
         response = auth_client.delete("/symptoms/99999")
 
@@ -351,8 +336,8 @@ class TestElaborationEndpoints:
                 "/symptoms/tags/elaborate",
                 json={
                     "tags": [{"name": "bloating", "severity": 7}],
-                    "start_time": "2026-01-30T14:00:00"
-                }
+                    "start_time": "2026-01-30T14:00:00",
+                },
             )
 
             assert response.status_code == 200
@@ -367,9 +352,7 @@ class TestElaborationEndpoints:
         with patch("app.api.symptoms.claude_service", mock_claude_service):
             response = auth_client.post(
                 "/symptoms/tags/elaborate-stream",
-                json={
-                    "tags": [{"name": "nausea", "severity": 5}]
-                }
+                json={"tags": [{"name": "nausea", "severity": 5}]},
             )
 
             # Streaming response
@@ -388,8 +371,8 @@ class TestEpisodeDetection:
                 "/symptoms/detect-episode",
                 json={
                     "tags": [{"name": "bloating", "severity": 6}],
-                    "start_time": datetime.now(timezone.utc).isoformat()
-                }
+                    "start_time": datetime.now(timezone.utc).isoformat(),
+                },
             )
 
             assert response.status_code == 200
@@ -402,9 +385,10 @@ class TestEpisodeDetection:
         """Test episode detection with recent similar symptoms."""
         # Create a recent symptom
         create_symptom(
-            db, test_user,
+            db,
+            test_user,
             tags=[{"name": "bloating", "severity": 7}],
-            timestamp=datetime.now(timezone.utc) - timedelta(hours=2)
+            timestamp=datetime.now(timezone.utc) - timedelta(hours=2),
         )
 
         with patch("app.api.symptoms.claude_service", mock_claude_service):
@@ -412,8 +396,8 @@ class TestEpisodeDetection:
                 "/symptoms/detect-episode",
                 json={
                     "tags": [{"name": "bloating", "severity": 6}],
-                    "start_time": datetime.now(timezone.utc).isoformat()
-                }
+                    "start_time": datetime.now(timezone.utc).isoformat(),
+                },
             )
 
             assert response.status_code == 200
@@ -432,10 +416,7 @@ class TestOngoingSymptomDetection:
         with patch("app.api.symptoms.claude_service", mock_claude_service):
             response = auth_client.post(
                 "/symptoms/detect-ongoing",
-                json={
-                    "symptom_name": "headache",
-                    "symptom_severity": 5
-                }
+                json={"symptom_name": "headache", "symptom_severity": 5},
             )
 
             assert response.status_code == 200
@@ -449,18 +430,16 @@ class TestOngoingSymptomDetection:
         """Test ongoing detection with recent similar symptom."""
         # Create a recent symptom with same name
         create_symptom(
-            db, test_user,
+            db,
+            test_user,
             tags=[{"name": "headache", "severity": 6}],
-            timestamp=datetime.now(timezone.utc) - timedelta(hours=12)
+            timestamp=datetime.now(timezone.utc) - timedelta(hours=12),
         )
 
         with patch("app.api.symptoms.claude_service", mock_claude_service):
             response = auth_client.post(
                 "/symptoms/detect-ongoing",
-                json={
-                    "symptom_name": "headache",
-                    "symptom_severity": 5
-                }
+                json={"symptom_name": "headache", "symptom_severity": 5},
             )
 
             assert response.status_code == 200
@@ -474,9 +453,10 @@ class TestOngoingSymptomDetection:
         """Test ongoing detection with different symptom names."""
         # Create a recent symptom with different name
         create_symptom(
-            db, test_user,
+            db,
+            test_user,
             tags=[{"name": "migraine", "severity": 7}],
-            timestamp=datetime.now(timezone.utc) - timedelta(hours=6)
+            timestamp=datetime.now(timezone.utc) - timedelta(hours=6),
         )
 
         with patch("app.api.symptoms.claude_service", mock_claude_service):
@@ -484,8 +464,8 @@ class TestOngoingSymptomDetection:
                 "/symptoms/detect-ongoing",
                 json={
                     "symptom_name": "migraine",  # Same name
-                    "symptom_severity": 5
-                }
+                    "symptom_severity": 5,
+                },
             )
 
             assert response.status_code == 200
@@ -505,9 +485,10 @@ class TestCommonTagsFilling:
         # Create 5 different symptoms with different tags
         for i in range(5):
             create_symptom(
-                db, test_user,
+                db,
+                test_user,
                 tags=[{"name": f"symptom_{i}", "severity": 5}],
-                timestamp=datetime.now(timezone.utc) - timedelta(hours=i)
+                timestamp=datetime.now(timezone.utc) - timedelta(hours=i),
             )
 
         response = auth_client.get("/symptoms/tags/common")
@@ -523,16 +504,14 @@ class TestCommonTagsFilling:
         """Test hybrid of recent and common tags."""
         # Create repeated symptom (common)
         for _ in range(5):
-            create_symptom(
-                db, test_user,
-                tags=[{"name": "bloating", "severity": 6}]
-            )
+            create_symptom(db, test_user, tags=[{"name": "bloating", "severity": 6}])
 
         # Create recent but different symptom
         create_symptom(
-            db, test_user,
+            db,
+            test_user,
             tags=[{"name": "nausea", "severity": 4}],
-            timestamp=datetime.now(timezone.utc) - timedelta(minutes=5)
+            timestamp=datetime.now(timezone.utc) - timedelta(minutes=5),
         )
 
         response = auth_client.get("/symptoms/tags/common")
@@ -558,8 +537,8 @@ class TestElaborationWithTimestamps:
                     "tags": [{"name": "bloating", "severity": 7}],
                     "start_time": "2026-01-30T14:00:00",
                     "end_time": "2026-01-30T18:00:00",
-                    "user_notes": "Lasted 4 hours"
-                }
+                    "user_notes": "Lasted 4 hours",
+                },
             )
 
             assert response.status_code == 200
@@ -574,8 +553,8 @@ class TestElaborationWithTimestamps:
                 json={
                     "tags": [{"name": "nausea", "severity": 5}],
                     "start_time": "2026-01-30T10:00:00",
-                    "end_time": "2026-01-30T12:00:00"
-                }
+                    "end_time": "2026-01-30T12:00:00",
+                },
             )
 
             assert response.status_code == 200
@@ -595,8 +574,8 @@ class TestUpdateSymptomTimestamps:
             json={
                 "tags": [{"name": "updated", "severity": 5}],
                 "start_time": "2026-01-30T10:00:00Z",
-                "end_time": "2026-01-30T14:00:00Z"
-            }
+                "end_time": "2026-01-30T14:00:00Z",
+            },
         )
 
         assert response.status_code == 200
@@ -612,8 +591,8 @@ class TestUpdateSymptomTimestamps:
             json={
                 "tags": [{"name": "updated", "severity": 5}],
                 "start_time": "not-a-timestamp",
-                "end_time": 12345  # Wrong type
-            }
+                "end_time": 12345,  # Wrong type
+            },
         )
 
         # Should still succeed, just ignore invalid timestamps
@@ -623,18 +602,12 @@ class TestUpdateSymptomTimestamps:
 class TestLegacySymptomUpdateErrors:
     """Tests for legacy symptom update error handling."""
 
-    def test_update_nonexistent_symptom(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_update_nonexistent_symptom(self, auth_client: TestClient, test_user: User):
         """Test updating non-existent symptom."""
         response = auth_client.post(
             "/symptoms/99999/update",
-            data={
-                "description": "Updated",
-                "symptom_type": "other",
-                "severity": 5
-            },
-            follow_redirects=False
+            data={"description": "Updated", "symptom_type": "other", "severity": 5},
+            follow_redirects=False,
         )
 
         assert response.status_code == 404
@@ -648,12 +621,8 @@ class TestLegacySymptomUpdateErrors:
 
         response = auth_client.post(
             f"/symptoms/{symptom.id}/update",
-            data={
-                "description": "Hacked",
-                "symptom_type": "other",
-                "severity": 5
-            },
-            follow_redirects=False
+            data={"description": "Hacked", "symptom_type": "other", "severity": 5},
+            follow_redirects=False,
         )
 
         assert response.status_code == 403
@@ -670,9 +639,9 @@ class TestLegacySymptomUpdateErrors:
                 "description": "Updated",
                 "symptom_type": "digestive",
                 "severity": 6,
-                "symptom_timestamp": "2026-01-30T15:00:00"
+                "symptom_timestamp": "2026-01-30T15:00:00",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -689,9 +658,9 @@ class TestLegacySymptomUpdateErrors:
                 "description": "Updated",
                 "symptom_type": "digestive",
                 "severity": 6,
-                "symptom_timestamp": "not-valid"
+                "symptom_timestamp": "not-valid",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         # Should succeed, just ignore invalid timestamp
@@ -708,9 +677,9 @@ class TestLegacySymptomUpdateErrors:
             data={
                 "description": "Updated",
                 "symptom_type": "digestive",
-                "severity": 15  # Invalid
+                "severity": 15,  # Invalid
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 400

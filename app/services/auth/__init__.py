@@ -14,6 +14,7 @@ Usage:
     async def protected_route(user: User = Depends(get_current_user)):
         ...
 """
+
 from app.services.auth.base import AuthProvider
 from app.services.auth.local_provider import local_auth_provider
 

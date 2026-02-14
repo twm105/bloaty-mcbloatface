@@ -7,12 +7,13 @@ Tests security aspects including:
 - Token handling
 - Admin privilege escalation prevention
 """
+
 import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import User, Session as UserSession, Invite
+from app.models import User, Session as UserSession
 from tests.factories import create_user, create_session, create_invite
 
 
@@ -36,9 +37,7 @@ class TestSessionSecurity:
         for token in tokens:
             assert len(token) >= 32
 
-    def test_expired_session_rejected(
-        self, client: TestClient, db: Session
-    ):
+    def test_expired_session_rejected(self, client: TestClient, db: Session):
         """Test that expired sessions are rejected."""
         user = create_user(db)
         session = create_session(db, user, expires_in=timedelta(days=-1))
@@ -66,17 +65,13 @@ class TestSessionSecurity:
 
         # Session should be deleted from database
         db.expire_all()
-        remaining = db.query(UserSession).filter(
-            UserSession.token == token
-        ).first()
+        remaining = db.query(UserSession).filter(UserSession.token == token).first()
         assert remaining is None
 
-    def test_session_not_shared_between_users(
-        self, client: TestClient, db: Session
-    ):
+    def test_session_not_shared_between_users(self, client: TestClient, db: Session):
         """Test that one user's session can't be used by another."""
         user1 = create_user(db, email="user1@example.com")
-        user2 = create_user(db, email="user2@example.com")
+        create_user(db, email="user2@example.com")
 
         session1 = create_session(db, user1)
 
@@ -97,6 +92,7 @@ class TestAccessControl:
         """Test user cannot access another user's meals."""
         other_user = create_user(db, email="other@example.com")
         from tests.factories import create_meal
+
         meal = create_meal(db, other_user, name="Private Meal")
 
         response = auth_client.get(f"/meals/{meal.id}/edit-ingredients")
@@ -109,6 +105,7 @@ class TestAccessControl:
         """Test user cannot modify another user's data."""
         other_user = create_user(db, email="other@example.com")
         from tests.factories import create_symptom
+
         symptom = create_symptom(db, other_user)
 
         response = auth_client.delete(f"/symptoms/{symptom.id}")
@@ -175,9 +172,9 @@ class TestInviteSecurity:
                 "email": "new@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -195,9 +192,9 @@ class TestInviteSecurity:
                 "email": "new@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -211,9 +208,9 @@ class TestInviteSecurity:
                 "email": "new@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": "completely_made_up_token"
+                "invite": "completely_made_up_token",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -232,9 +229,7 @@ class TestPasswordSecurity:
         assert user.password_hash != "secret123"
         assert "$2b$" in user.password_hash  # bcrypt prefix
 
-    def test_password_minimum_length_enforced(
-        self, client: TestClient, db: Session
-    ):
+    def test_password_minimum_length_enforced(self, client: TestClient, db: Session):
         """Test that short passwords are rejected."""
         admin = create_user(db, is_admin=True)
         invite = create_invite(db, admin)
@@ -245,9 +240,9 @@ class TestPasswordSecurity:
                 "email": "new@example.com",
                 "password": "short",
                 "password_confirm": "short",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -262,9 +257,9 @@ class TestPasswordSecurity:
             data={
                 "current_password": "wrong_password",
                 "new_password": "newpassword456",
-                "new_password_confirm": "newpassword456"
+                "new_password_confirm": "newpassword456",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -283,9 +278,7 @@ class TestAdminPrivilegeEscalation:
         # ensure it's protected. For now, we verify the user isn't admin.
         assert test_user.is_admin is False
 
-    def test_admin_cannot_delete_self(
-        self, admin_client: TestClient, admin_user: User
-    ):
+    def test_admin_cannot_delete_self(self, admin_client: TestClient, admin_user: User):
         """Test that admin cannot delete their own account."""
         response = admin_client.delete(f"/auth/users/{admin_user.id}")
 

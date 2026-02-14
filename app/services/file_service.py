@@ -1,5 +1,5 @@
 """File handling service for meal image uploads."""
-import os
+
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -32,7 +32,9 @@ class FileService:
         # Validate file type
         allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
         if file.content_type not in allowed_types:
-            raise ValueError(f"Invalid file type: {file.content_type}. Allowed: {allowed_types}")
+            raise ValueError(
+                f"Invalid file type: {file.content_type}. Allowed: {allowed_types}"
+            )
 
         # Generate unique filename
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")

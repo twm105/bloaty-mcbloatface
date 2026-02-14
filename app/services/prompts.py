@@ -325,6 +325,7 @@ Format the disclaimer in a visually distinct section (use --- separator and incl
 # HELPER: Prompt caching system prompt structure
 # =============================================================================
 
+
 def build_cached_analysis_context(meals_data: str, symptoms_data: str) -> list:
     """
     Build the cached context for pattern analysis.
@@ -336,13 +337,13 @@ def build_cached_analysis_context(meals_data: str, symptoms_data: str) -> list:
         {
             "type": "text",
             "text": PATTERN_ANALYSIS_SYSTEM_PROMPT,
-            "cache_control": {"type": "ephemeral"}
+            "cache_control": {"type": "ephemeral"},
         },
         {
             "type": "text",
             "text": f"USER DATA:\n\n{meals_data}\n\n{symptoms_data}",
-            "cache_control": {"type": "ephemeral"}
-        }
+            "cache_control": {"type": "ephemeral"},
+        },
     ]
 
 

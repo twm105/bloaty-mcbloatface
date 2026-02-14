@@ -7,14 +7,14 @@ Tests authentication functionality including:
 - User creation
 - Password changes
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
-import bcrypt
+from unittest.mock import MagicMock
 
 from sqlalchemy.orm import Session
 
-from app.services.auth.local_provider import LocalAuthProvider, local_auth_provider
+from app.services.auth.local_provider import LocalAuthProvider
 from app.models import User, Session as UserSession
 from tests.factories import create_user, create_session
 
@@ -173,9 +173,7 @@ class TestUserCreation:
         """Test basic user creation."""
         provider = LocalAuthProvider()
 
-        user = await provider.create_user(
-            db, "new@example.com", "password123"
-        )
+        user = await provider.create_user(db, "new@example.com", "password123")
 
         assert user.id is not None
         assert user.email == "new@example.com"
@@ -188,8 +186,7 @@ class TestUserCreation:
         provider = LocalAuthProvider()
 
         user = await provider.create_user(
-            db, "admin@example.com", "password123",
-            is_admin=True
+            db, "admin@example.com", "password123", is_admin=True
         )
 
         assert user.is_admin is True
@@ -199,9 +196,7 @@ class TestUserCreation:
         """Test that email is lowercased."""
         provider = LocalAuthProvider()
 
-        user = await provider.create_user(
-            db, "Test@EXAMPLE.com", "password123"
-        )
+        user = await provider.create_user(db, "Test@EXAMPLE.com", "password123")
 
         assert user.email == "test@example.com"
 
@@ -210,9 +205,7 @@ class TestUserCreation:
         """Test that password is hashed."""
         provider = LocalAuthProvider()
 
-        user = await provider.create_user(
-            db, "test@example.com", "plainpassword"
-        )
+        user = await provider.create_user(db, "test@example.com", "plainpassword")
 
         assert user.password_hash != "plainpassword"
         assert user.password_hash.startswith("$2b$")
@@ -234,9 +227,7 @@ class TestSessionManagement:
         assert len(token) >= 32
 
         # Verify session in database
-        session = db.query(UserSession).filter(
-            UserSession.token == token
-        ).first()
+        session = db.query(UserSession).filter(UserSession.token == token).first()
         assert session is not None
         assert session.user_id == user.id
 
@@ -249,9 +240,7 @@ class TestSessionManagement:
 
         token = await provider.create_session(db, user, request)
 
-        session = db.query(UserSession).filter(
-            UserSession.token == token
-        ).first()
+        session = db.query(UserSession).filter(UserSession.token == token).first()
         assert session.expires_at > datetime.now(timezone.utc)
 
     @pytest.mark.asyncio
@@ -260,15 +249,12 @@ class TestSessionManagement:
         provider = LocalAuthProvider()
         user = create_user(db)
         request = create_mock_request(
-            user_agent="TestBrowser/1.0",
-            client_ip="192.168.1.1"
+            user_agent="TestBrowser/1.0", client_ip="192.168.1.1"
         )
 
         token = await provider.create_session(db, user, request)
 
-        session = db.query(UserSession).filter(
-            UserSession.token == token
-        ).first()
+        session = db.query(UserSession).filter(UserSession.token == token).first()
         assert session.user_agent == "TestBrowser/1.0"
         assert session.ip_address == "192.168.1.1"
 
@@ -283,9 +269,10 @@ class TestSessionManagement:
 
         assert result is True
         # Verify session is deleted
-        assert db.query(UserSession).filter(
-            UserSession.token == session.token
-        ).first() is None
+        assert (
+            db.query(UserSession).filter(UserSession.token == session.token).first()
+            is None
+        )
 
     @pytest.mark.asyncio
     async def test_revoke_nonexistent_session(self, db: Session):
@@ -310,9 +297,7 @@ class TestSessionManagement:
 
         assert count == 3
         # Verify all sessions are deleted
-        assert db.query(UserSession).filter(
-            UserSession.user_id == user.id
-        ).count() == 0
+        assert db.query(UserSession).filter(UserSession.user_id == user.id).count() == 0
 
     @pytest.mark.asyncio
     async def test_revoke_all_sessions_except_current(self, db: Session):
@@ -330,9 +315,10 @@ class TestSessionManagement:
 
         assert count == 2
         # Current session should remain
-        assert db.query(UserSession).filter(
-            UserSession.token == current_token
-        ).first() is not None
+        assert (
+            db.query(UserSession).filter(UserSession.token == current_token).first()
+            is not None
+        )
 
 
 class TestGetUserFromRequest:
@@ -358,8 +344,9 @@ class TestGetUserFromRequest:
         provider = LocalAuthProvider()
         user = create_user(db)
         session = create_session(
-            db, user,
-            expires_in=timedelta(days=-1)  # Already expired
+            db,
+            user,
+            expires_in=timedelta(days=-1),  # Already expired
         )
 
         request = create_mock_request(cookies={"bloaty_session": session.token})
@@ -432,9 +419,7 @@ class TestPasswordChange:
         db.add(user)
         db.flush()
 
-        result = await provider.change_password(
-            db, user, "anything", "new_password"
-        )
+        result = await provider.change_password(db, user, "anything", "new_password")
 
         assert result is False
 
@@ -462,7 +447,7 @@ class TestPasswordReset:
 def create_mock_request(
     cookies: dict = None,
     user_agent: str = "pytest-test-client",
-    client_ip: str = "127.0.0.1"
+    client_ip: str = "127.0.0.1",
 ):
     """Create a mock FastAPI request for testing."""
     request = MagicMock()
@@ -475,7 +460,9 @@ def create_mock_request(
 
     # Use MagicMock for headers
     mock_headers = MagicMock()
-    mock_headers.get = lambda key, default="": user_agent if key.lower() == "user-agent" else default
+    mock_headers.get = lambda key, default="": (
+        user_agent if key.lower() == "user-agent" else default
+    )
     request.headers = mock_headers
 
     request.client = MagicMock()

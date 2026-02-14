@@ -4,12 +4,11 @@ Integration tests for the Feedback API endpoints.
 Tests submission and retrieval of user feedback for various features
 (meal analysis, diagnosis results, etc.).
 """
-import pytest
-from datetime import datetime, timezone, timedelta
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import Meal, DiagnosisRun, DiagnosisResult, UserFeedback, Ingredient
+from app.models import UserFeedback
 from tests.factories import (
     create_meal,
     create_diagnosis_run,
@@ -22,6 +21,7 @@ from tests.factories import (
 # =============================================================================
 # Feedback Submission Tests
 # =============================================================================
+
 
 class TestSubmitFeedback:
     """Tests for POST /feedback endpoint."""
@@ -38,8 +38,8 @@ class TestSubmitFeedback:
                 "feature_type": "meal_analysis",
                 "feature_id": meal.id,
                 "rating": 4,
-                "feedback_text": "Good analysis"
-            }
+                "feedback_text": "Good analysis",
+            },
         )
 
         assert response.status_code == 200
@@ -47,11 +47,15 @@ class TestSubmitFeedback:
         assert data["message"] == "Feedback submitted successfully"
 
         # Verify feedback was saved
-        feedback = db.query(UserFeedback).filter(
-            UserFeedback.user_id == test_user.id,
-            UserFeedback.feature_type == "meal_analysis",
-            UserFeedback.feature_id == meal.id
-        ).first()
+        feedback = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.user_id == test_user.id,
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal.id,
+            )
+            .first()
+        )
         assert feedback is not None
         assert feedback.rating == 4
         assert feedback.feedback_text == "Good analysis"
@@ -70,8 +74,8 @@ class TestSubmitFeedback:
                 "feature_type": "diagnosis_result",
                 "feature_id": result.id,
                 "rating": 5,
-                "feedback_text": "Very helpful"
-            }
+                "feedback_text": "Very helpful",
+            },
         )
 
         assert response.status_code == 200
@@ -84,19 +88,19 @@ class TestSubmitFeedback:
 
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 3
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 3},
         )
 
         assert response.status_code == 200
 
-        feedback = db.query(UserFeedback).filter(
-            UserFeedback.feature_type == "meal_analysis",
-            UserFeedback.feature_id == meal.id
-        ).first()
+        feedback = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal.id,
+            )
+            .first()
+        )
         assert feedback.feedback_text is None
 
     def test_submit_feedback_updates_existing(
@@ -112,8 +116,8 @@ class TestSubmitFeedback:
                 "feature_type": "meal_analysis",
                 "feature_id": meal.id,
                 "rating": 2,
-                "feedback_text": "Initial feedback"
-            }
+                "feedback_text": "Initial feedback",
+            },
         )
         assert response1.status_code == 200
 
@@ -124,16 +128,20 @@ class TestSubmitFeedback:
                 "feature_type": "meal_analysis",
                 "feature_id": meal.id,
                 "rating": 5,
-                "feedback_text": "Updated feedback"
-            }
+                "feedback_text": "Updated feedback",
+            },
         )
         assert response2.status_code == 200
 
         # Should only have one record
-        feedbacks = db.query(UserFeedback).filter(
-            UserFeedback.feature_type == "meal_analysis",
-            UserFeedback.feature_id == meal.id
-        ).all()
+        feedbacks = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal.id,
+            )
+            .all()
+        )
         assert len(feedbacks) == 1
         assert feedbacks[0].rating == 5
         assert feedbacks[0].feedback_text == "Updated feedback"
@@ -146,11 +154,7 @@ class TestSubmitFeedback:
 
         response = client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 4
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 4},
         )
 
         assert response.status_code in [401, 403, 307]
@@ -163,11 +167,7 @@ class TestSubmitFeedback:
 
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 6
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 6},
         )
 
         assert response.status_code == 400
@@ -181,11 +181,7 @@ class TestSubmitFeedback:
 
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": -1
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": -1},
         )
 
         assert response.status_code == 400
@@ -196,11 +192,7 @@ class TestSubmitFeedback:
         """Test that invalid feature type is rejected."""
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "invalid_type",
-                "feature_id": 1,
-                "rating": 4
-            }
+            data={"feature_type": "invalid_type", "feature_id": 1, "rating": 4},
         )
 
         assert response.status_code == 400
@@ -212,11 +204,7 @@ class TestSubmitFeedback:
         """Test that non-existent feature returns 404."""
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": 99999,
-                "rating": 4
-            }
+            data={"feature_type": "meal_analysis", "feature_id": 99999, "rating": 4},
         )
 
         assert response.status_code == 404
@@ -230,11 +218,7 @@ class TestSubmitFeedback:
 
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 4
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 4},
         )
 
         assert response.status_code == 404
@@ -247,25 +231,26 @@ class TestSubmitFeedback:
 
         response = auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 0
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 0},
         )
 
         assert response.status_code == 200
 
-        feedback = db.query(UserFeedback).filter(
-            UserFeedback.feature_type == "meal_analysis",
-            UserFeedback.feature_id == meal.id
-        ).first()
+        feedback = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal.id,
+            )
+            .first()
+        )
         assert feedback.rating == 0
 
 
 # =============================================================================
 # Feedback Retrieval Tests
 # =============================================================================
+
 
 class TestGetFeedback:
     """Tests for GET /feedback/{feature_type}/{feature_id} endpoint."""
@@ -275,12 +260,13 @@ class TestGetFeedback:
     ):
         """Test retrieving existing feedback."""
         meal = create_meal(db, test_user)
-        feedback = create_user_feedback(
-            db, test_user,
+        create_user_feedback(
+            db,
+            test_user,
             feature_type="meal_analysis",
             feature_id=meal.id,
             rating=4,
-            feedback_text="Great analysis!"
+            feedback_text="Great analysis!",
         )
 
         response = auth_client.get(f"/feedback/meal_analysis/{meal.id}")
@@ -321,12 +307,13 @@ class TestGetFeedback:
         run = create_diagnosis_run(db, test_user)
         ingredient = create_ingredient(db, name="Garlic")
         result = create_diagnosis_result(db, run, ingredient)
-        feedback = create_user_feedback(
-            db, test_user,
+        create_user_feedback(
+            db,
+            test_user,
             feature_type="diagnosis_result",
             feature_id=result.id,
             rating=5,
-            feedback_text="Very accurate!"
+            feedback_text="Very accurate!",
         )
 
         response = auth_client.get(f"/feedback/diagnosis_result/{result.id}")
@@ -350,7 +337,7 @@ class TestGetFeedback:
             feature_type="meal_analysis",
             feature_id=meal.id,
             rating=3,
-            feedback_text="Admin feedback"
+            feedback_text="Admin feedback",
         )
         db.add(feedback)
         db.flush()
@@ -367,6 +354,7 @@ class TestGetFeedback:
 # Edge Cases and Error Handling
 # =============================================================================
 
+
 class TestFeedbackEdgeCases:
     """Test edge cases and error handling."""
 
@@ -382,8 +370,8 @@ class TestFeedbackEdgeCases:
                 "feature_type": "meal_analysis",
                 "feature_id": meal.id,
                 "rating": 3,
-                "feedback_text": ""
-            }
+                "feedback_text": "",
+            },
         )
 
         assert response.status_code == 200
@@ -401,8 +389,8 @@ class TestFeedbackEdgeCases:
                 "feature_type": "meal_analysis",
                 "feature_id": meal.id,
                 "rating": 4,
-                "feedback_text": long_text
-            }
+                "feedback_text": long_text,
+            },
         )
 
         # Should succeed (database should handle long text)
@@ -417,27 +405,23 @@ class TestFeedbackEdgeCases:
         # First submission
         auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 2
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 2},
         )
 
-        first_feedback = db.query(UserFeedback).filter(
-            UserFeedback.feature_type == "meal_analysis",
-            UserFeedback.feature_id == meal.id
-        ).first()
+        first_feedback = (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.feature_type == "meal_analysis",
+                UserFeedback.feature_id == meal.id,
+            )
+            .first()
+        )
         first_timestamp = first_feedback.created_at
 
         # Second submission
         auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal.id,
-                "rating": 5
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal.id, "rating": 5},
         )
 
         db.refresh(first_feedback)
@@ -454,19 +438,11 @@ class TestFeedbackEdgeCases:
         # Submit feedback for both meals
         auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal1.id,
-                "rating": 2
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal1.id, "rating": 2},
         )
         auth_client.post(
             "/feedback",
-            data={
-                "feature_type": "meal_analysis",
-                "feature_id": meal2.id,
-                "rating": 5
-            }
+            data={"feature_type": "meal_analysis", "feature_id": meal2.id, "rating": 5},
         )
 
         # Verify both are stored independently

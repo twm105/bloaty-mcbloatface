@@ -1,10 +1,8 @@
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from app.main import app
 from app.models.user import User
 from app.models.user_settings import UserSettings
-from tests.factories import create_user
 
 client = TestClient(app)
 
@@ -40,10 +38,7 @@ class TestMainRoutes:
     ):
         """Test home page with disclaimer already acknowledged."""
         # Create user settings with disclaimer acknowledged
-        settings = UserSettings(
-            user_id=test_user.id,
-            disclaimer_acknowledged=True
-        )
+        settings = UserSettings(user_id=test_user.id, disclaimer_acknowledged=True)
         db.add(settings)
         db.commit()
 
@@ -61,16 +56,12 @@ class TestMainRoutes:
         response = auth_client.get("/")
         assert response.status_code == 200
 
-    def test_analysis_page_renders(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_analysis_page_renders(self, auth_client: TestClient, test_user: User):
         """Test analysis page renders."""
         response = auth_client.get("/analysis")
         assert response.status_code == 200
 
-    def test_settings_page_renders(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_settings_page_renders(self, auth_client: TestClient, test_user: User):
         """Test settings page renders."""
         response = auth_client.get("/settings")
         assert response.status_code == 200

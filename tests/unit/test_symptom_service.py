@@ -7,15 +7,15 @@ Tests the symptom business logic including:
 - Similar symptom detection
 - Tag search and autocomplete
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
-from app.services.symptom_service import SymptomService, symptom_service
+from app.services.symptom_service import SymptomService
 from app.models import Symptom
-from tests.factories import create_user, create_symptom, create_symptom_episode
+from tests.factories import create_user, create_symptom
 
 
 class TestSymptomCreation:
@@ -26,8 +26,7 @@ class TestSymptomCreation:
         user = create_user(db)
 
         symptom = SymptomService.create_symptom(
-            db, user.id,
-            raw_description="I have a stomachache"
+            db, user.id, raw_description="I have a stomachache"
         )
 
         assert symptom.id is not None
@@ -39,11 +38,12 @@ class TestSymptomCreation:
         user = create_user(db)
 
         symptom = SymptomService.create_symptom(
-            db, user.id,
+            db,
+            user.id,
             raw_description="Stomach pain",
             structured_type="bloating",
             severity=7,
-            notes="After eating lunch"
+            notes="After eating lunch",
         )
 
         assert symptom.structured_type == "bloating"
@@ -56,9 +56,7 @@ class TestSymptomCreation:
         custom_time = datetime.now(timezone.utc) - timedelta(hours=2)
 
         symptom = SymptomService.create_symptom(
-            db, user.id,
-            raw_description="Bloating",
-            timestamp=custom_time
+            db, user.id, raw_description="Bloating", timestamp=custom_time
         )
 
         assert symptom.timestamp == custom_time
@@ -70,15 +68,9 @@ class TestSymptomWithTags:
     def test_create_symptom_with_tags(self, db: Session):
         """Test creating a symptom with tags."""
         user = create_user(db)
-        tags = [
-            {"name": "bloating", "severity": 7},
-            {"name": "gas", "severity": 5}
-        ]
+        tags = [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}]
 
-        symptom = SymptomService.create_symptom_with_tags(
-            db, user.id,
-            tags=tags
-        )
+        symptom = SymptomService.create_symptom_with_tags(db, user.id, tags=tags)
 
         assert symptom.id is not None
         assert symptom.tags == tags
@@ -91,10 +83,7 @@ class TestSymptomWithTags:
         user = create_user(db)
         tags = [{"name": "cramping", "severity": 6}]
 
-        symptom = SymptomService.create_symptom_with_tags(
-            db, user.id,
-            tags=tags
-        )
+        symptom = SymptomService.create_symptom_with_tags(db, user.id, tags=tags)
 
         assert "cramping" in symptom.raw_description.lower()
         assert "6/10" in symptom.raw_description
@@ -106,9 +95,7 @@ class TestSymptomWithTags:
         ai_text = "Patient experienced moderate bloating after meals."
 
         symptom = SymptomService.create_symptom_with_tags(
-            db, user.id,
-            tags=tags,
-            ai_generated_text=ai_text
+            db, user.id, tags=tags, ai_generated_text=ai_text
         )
 
         assert symptom.ai_generated_text == ai_text
@@ -122,10 +109,7 @@ class TestSymptomWithTags:
         user_text = "I had gas after eating beans."
 
         symptom = SymptomService.create_symptom_with_tags(
-            db, user.id,
-            tags=tags,
-            ai_generated_text=ai_text,
-            final_notes=user_text
+            db, user.id, tags=tags, ai_generated_text=ai_text, final_notes=user_text
         )
 
         assert symptom.final_notes == user_text
@@ -141,14 +125,11 @@ class TestSymptomWithTags:
                 "name": "bloating",
                 "severity": 6,
                 "start_time": start.isoformat(),
-                "end_time": end.isoformat()
+                "end_time": end.isoformat(),
             }
         ]
 
-        symptom = SymptomService.create_symptom_with_tags(
-            db, user.id,
-            tags=tags
-        )
+        symptom = SymptomService.create_symptom_with_tags(db, user.id, tags=tags)
 
         assert symptom.start_time is not None
         assert symptom.end_time is not None
@@ -163,16 +144,12 @@ class TestSymptomWithTags:
 
         # Missing name should raise error
         with pytest.raises(ValueError, match="must have 'name' and 'severity'"):
-            SymptomService.create_symptom_with_tags(
-                db, user.id,
-                tags=[{"severity": 5}]
-            )
+            SymptomService.create_symptom_with_tags(db, user.id, tags=[{"severity": 5}])
 
         # Invalid severity should raise error
         with pytest.raises(ValueError, match="Severity must be"):
             SymptomService.create_symptom_with_tags(
-                db, user.id,
-                tags=[{"name": "test", "severity": 15}]
+                db, user.id, tags=[{"name": "test", "severity": 15}]
             )
 
 
@@ -202,8 +179,7 @@ class TestSymptomQueries:
         # Create symptoms at different times
         for i in range(3):
             create_symptom(
-                db, user,
-                start_time=datetime.now(timezone.utc) - timedelta(hours=i)
+                db, user, start_time=datetime.now(timezone.utc) - timedelta(hours=i)
             )
 
         symptoms = SymptomService.get_user_symptoms(db, user.id)
@@ -220,8 +196,7 @@ class TestSymptomQueries:
         # Create 10 symptoms
         for i in range(10):
             create_symptom(
-                db, user,
-                start_time=datetime.now(timezone.utc) - timedelta(hours=i)
+                db, user, start_time=datetime.now(timezone.utc) - timedelta(hours=i)
             )
 
         # Get first page
@@ -242,8 +217,7 @@ class TestSymptomUpdates:
         symptom = create_symptom(db, user, raw_description="Original")
 
         result = SymptomService.update_symptom(
-            db, symptom.id,
-            raw_description="Updated"
+            db, symptom.id, raw_description="Updated"
         )
 
         assert result is not None
@@ -252,24 +226,15 @@ class TestSymptomUpdates:
     def test_update_symptom_severity(self, db: Session):
         """Test updating symptom severity."""
         user = create_user(db)
-        symptom = create_symptom(
-            db, user,
-            tags=[{"name": "bloating", "severity": 5}]
-        )
+        symptom = create_symptom(db, user, tags=[{"name": "bloating", "severity": 5}])
 
-        result = SymptomService.update_symptom(
-            db, symptom.id,
-            severity=8
-        )
+        result = SymptomService.update_symptom(db, symptom.id, severity=8)
 
         assert result.severity == 8
 
     def test_update_nonexistent_symptom(self, db: Session):
         """Test that updating a non-existent symptom returns None."""
-        result = SymptomService.update_symptom(
-            db, 99999,
-            raw_description="Test"
-        )
+        result = SymptomService.update_symptom(db, 99999, raw_description="Test")
 
         assert result is None
 
@@ -348,14 +313,9 @@ class TestTagSearch:
 
         # Create many symptoms
         for i in range(15):
-            create_symptom(
-                db, user,
-                tags=[{"name": f"symptom{i}", "severity": 5}]
-            )
+            create_symptom(db, user, tags=[{"name": f"symptom{i}", "severity": 5}])
 
-        results = SymptomService.search_symptom_tags(
-            db, user.id, "symptom", limit=5
-        )
+        results = SymptomService.search_symptom_tags(db, user.id, "symptom", limit=5)
 
         assert len(results) <= 5
 
@@ -406,19 +366,22 @@ class TestMostRecentTags:
 
         # Create symptoms at different times
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 5}],
-            start_time=now - timedelta(hours=1)
+            start_time=now - timedelta(hours=1),
         )
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "gas", "severity": 4}],
-            start_time=now - timedelta(hours=2)
+            start_time=now - timedelta(hours=2),
         )
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "cramping", "severity": 6}],
-            start_time=now - timedelta(hours=3)
+            start_time=now - timedelta(hours=3),
         )
 
         results = SymptomService.get_most_recent_symptom_tags(db, user.id, limit=3)
@@ -436,15 +399,14 @@ class TestEpisodeDetection:
 
         # Create a recent symptom
         recent = create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 6}],
-            start_time=now - timedelta(hours=2)
+            start_time=now - timedelta(hours=2),
         )
 
         result = SymptomService.detect_ongoing_symptom_by_name(
-            db, user.id,
-            symptom_name="bloating",
-            lookback_hours=24
+            db, user.id, symptom_name="bloating", lookback_hours=24
         )
 
         assert result is not None
@@ -457,15 +419,17 @@ class TestEpisodeDetection:
 
         # Create an old symptom
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 6}],
-            start_time=now - timedelta(days=5)
+            start_time=now - timedelta(days=5),
         )
 
         result = SymptomService.detect_ongoing_symptom_by_name(
-            db, user.id,
+            db,
+            user.id,
             symptom_name="bloating",
-            lookback_hours=72  # 3 days
+            lookback_hours=72,  # 3 days
         )
 
         assert result is None
@@ -477,16 +441,18 @@ class TestEpisodeDetection:
 
         # Create a recent symptom with bloating
         recent = create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 6}],
-            start_time=now - timedelta(hours=12)
+            start_time=now - timedelta(hours=12),
         )
 
         # Check if similar symptoms exist
         result = SymptomService.detect_similar_recent_symptoms(
-            db, user.id,
+            db,
+            user.id,
             tags=[{"name": "bloating", "severity": 7}],  # Same name, different severity
-            lookback_hours=48
+            lookback_hours=48,
         )
 
         assert result is not None
@@ -499,16 +465,15 @@ class TestEpisodeDetection:
 
         # Create a recent symptom with bloating
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 6}],
-            start_time=now - timedelta(hours=12)
+            start_time=now - timedelta(hours=12),
         )
 
         # Check for completely different symptom
         result = SymptomService.detect_similar_recent_symptoms(
-            db, user.id,
-            tags=[{"name": "headache", "severity": 5}],
-            lookback_hours=48
+            db, user.id, tags=[{"name": "headache", "severity": 5}], lookback_hours=48
         )
 
         assert result is None

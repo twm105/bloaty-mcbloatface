@@ -3,6 +3,7 @@ SSE Publisher service for real-time diagnosis progress updates.
 
 Uses Redis pub/sub to publish events that are consumed by the SSE endpoint.
 """
+
 import json
 import redis
 from app.config import settings
@@ -28,13 +29,12 @@ class SSEPublisher:
             data: Event data as dict
         """
         channel = self._get_channel(run_id)
-        message = json.dumps({
-            "event": event_type,
-            "data": data
-        })
+        message = json.dumps({"event": event_type, "data": data})
         self.redis.publish(channel, message)
 
-    def publish_progress(self, run_id: int, completed: int, total: int, ingredient: str):
+    def publish_progress(
+        self, run_id: int, completed: int, total: int, ingredient: str
+    ):
         """
         Publish progress update event.
 
@@ -44,11 +44,11 @@ class SSEPublisher:
             total: Total number of ingredients
             ingredient: Name of the ingredient just completed
         """
-        self._publish(run_id, "progress", {
-            "completed": completed,
-            "total": total,
-            "ingredient": ingredient
-        })
+        self._publish(
+            run_id,
+            "progress",
+            {"completed": completed, "total": total, "ingredient": ingredient},
+        )
 
     def publish_result(self, run_id: int, result_dict: dict):
         """
@@ -78,10 +78,9 @@ class SSEPublisher:
             run_id: DiagnosisRun ID
             total_results: Total number of results generated
         """
-        self._publish(run_id, "complete", {
-            "run_id": run_id,
-            "total_results": total_results
-        })
+        self._publish(
+            run_id, "complete", {"run_id": run_id, "total_results": total_results}
+        )
 
     def publish_error(self, run_id: int, message: str):
         """
@@ -91,9 +90,7 @@ class SSEPublisher:
             run_id: DiagnosisRun ID
             message: Error message
         """
-        self._publish(run_id, "error", {
-            "message": message
-        })
+        self._publish(run_id, "error", {"message": message})
 
     def close(self):
         """Close Redis connection."""

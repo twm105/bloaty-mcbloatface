@@ -7,11 +7,16 @@ from app.database import Base
 
 class EvalRun(Base):
     """Evaluation run results for tracking AI model performance over time."""
+
     __tablename__ = "eval_runs"
 
     id = Column(Integer, primary_key=True)
-    model_name = Column(String(100), nullable=False)  # e.g., "claude-3-5-haiku-20241022"
-    eval_type = Column(String(50), nullable=False)  # e.g., "ingredient_detection", "symptom_clarification"
+    model_name = Column(
+        String(100), nullable=False
+    )  # e.g., "claude-3-5-haiku-20241022"
+    eval_type = Column(
+        String(50), nullable=False
+    )  # e.g., "ingredient_detection", "symptom_clarification"
 
     # Metrics
     precision = Column(Numeric(5, 4))
@@ -31,7 +36,7 @@ class EvalRun(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
-        Index('idx_eval_runs_model_name', 'model_name'),
-        Index('idx_eval_runs_eval_type', 'eval_type'),
-        Index('idx_eval_runs_created_at', 'created_at'),
+        Index("idx_eval_runs_model_name", "model_name"),
+        Index("idx_eval_runs_eval_type", "eval_type"),
+        Index("idx_eval_runs_created_at", "created_at"),
     )

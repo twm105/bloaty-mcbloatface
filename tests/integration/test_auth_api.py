@@ -7,13 +7,13 @@ Tests the full auth flow including:
 - Session management
 - Admin endpoints
 """
-import pytest
-from datetime import datetime, timedelta, timezone
+
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models import User, Session as UserSession, Invite
-from tests.factories import create_user, create_session, create_invite
+from tests.factories import create_user, create_invite
 
 
 class TestLoginFlow:
@@ -33,7 +33,7 @@ class TestLoginFlow:
         response = client.post(
             "/auth/login",
             data={"email": "test@example.com", "password": "password123"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -46,7 +46,7 @@ class TestLoginFlow:
         response = client.post(
             "/auth/login",
             data={"email": "test@example.com", "password": "wrongpassword"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -57,7 +57,7 @@ class TestLoginFlow:
         response = client.post(
             "/auth/login",
             data={"email": "nonexistent@example.com", "password": "password"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -72,9 +72,9 @@ class TestLoginFlow:
             data={
                 "email": "test@example.com",
                 "password": "password123",
-                "next": "/meals/history"
+                "next": "/meals/history",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -103,9 +103,11 @@ class TestLogoutFlow:
 
         # Verify session is revoked
         db.expire_all()
-        session = db.query(UserSession).filter(
-            UserSession.token == test_session.token
-        ).first()
+        session = (
+            db.query(UserSession)
+            .filter(UserSession.token == test_session.token)
+            .first()
+        )
         assert session is None
 
     def test_logout_clears_cookie(self, auth_client: TestClient):
@@ -149,9 +151,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -175,9 +177,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "password123",
                 "password_confirm": "differentpassword",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -194,9 +196,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "short",
                 "password_confirm": "short",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -210,9 +212,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": "invalid_token"
+                "invite": "invalid_token",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -229,9 +231,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -249,9 +251,9 @@ class TestRegistration:
                 "email": "newuser@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -269,9 +271,9 @@ class TestRegistration:
                 "email": "existing@example.com",
                 "password": "password123",
                 "password_confirm": "password123",
-                "invite": invite.token
+                "invite": invite.token,
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -303,9 +305,9 @@ class TestAccountManagement:
             data={
                 "current_password": "testpassword123",
                 "new_password": "newpassword456",
-                "new_password_confirm": "newpassword456"
+                "new_password_confirm": "newpassword456",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -320,9 +322,9 @@ class TestAccountManagement:
             data={
                 "current_password": "wrongpassword",
                 "new_password": "newpassword456",
-                "new_password_confirm": "newpassword456"
+                "new_password_confirm": "newpassword456",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -335,9 +337,9 @@ class TestAccountManagement:
             data={
                 "current_password": "testpassword123",
                 "new_password": "newpassword456",
-                "new_password_confirm": "differentpassword"
+                "new_password_confirm": "differentpassword",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -408,9 +410,7 @@ class TestUserManagement:
         assert "temp_password" in data
         assert len(data["temp_password"]) >= 8
 
-    def test_reset_user_password_non_admin(
-        self, auth_client: TestClient, db: Session
-    ):
+    def test_reset_user_password_non_admin(self, auth_client: TestClient, db: Session):
         """Test that non-admin cannot reset passwords."""
         target_user = create_user(db, email="target@example.com")
 
@@ -431,9 +431,7 @@ class TestUserManagement:
         # Verify user is deleted
         assert db.query(User).filter(User.id == target_user.id).first() is None
 
-    def test_admin_cannot_delete_self(
-        self, admin_client: TestClient, admin_user: User
-    ):
+    def test_admin_cannot_delete_self(self, admin_client: TestClient, admin_user: User):
         """Test that admin cannot delete their own account."""
         response = admin_client.delete(f"/auth/users/{admin_user.id}")
 
@@ -480,18 +478,16 @@ class TestAdminAccountPage:
 class TestChangePasswordErrors:
     """Tests for password change error handling."""
 
-    def test_change_password_too_short(
-        self, auth_client: TestClient, test_user: User
-    ):
+    def test_change_password_too_short(self, auth_client: TestClient, test_user: User):
         """Test password change with too short new password."""
         response = auth_client.post(
             "/auth/change-password",
             data={
                 "current_password": "testpassword123",
                 "new_password": "short",
-                "new_password_confirm": "short"
+                "new_password_confirm": "short",
             },
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 303
@@ -526,6 +522,7 @@ class TestResetPasswordErrors:
     ):
         """Test reset password for non-existent user."""
         import uuid
+
         fake_uuid = str(uuid.uuid4())
 
         response = admin_client.post(f"/auth/reset-password/{fake_uuid}")
@@ -536,19 +533,16 @@ class TestResetPasswordErrors:
 class TestDeleteUserErrors:
     """Tests for delete user error handling."""
 
-    def test_delete_user_invalid_uuid(
-        self, admin_client: TestClient, admin_user: User
-    ):
+    def test_delete_user_invalid_uuid(self, admin_client: TestClient, admin_user: User):
         """Test delete user with invalid UUID."""
         response = admin_client.delete("/auth/users/not-a-uuid")
 
         assert response.status_code == 400
 
-    def test_delete_user_not_found(
-        self, admin_client: TestClient, admin_user: User
-    ):
+    def test_delete_user_not_found(self, admin_client: TestClient, admin_user: User):
         """Test delete non-existent user."""
         import uuid
+
         fake_uuid = str(uuid.uuid4())
 
         response = admin_client.delete(f"/auth/users/{fake_uuid}")
@@ -578,9 +572,7 @@ class TestAuthRedirectBehavior:
     def test_html_request_redirects_to_login(self, client: TestClient):
         """Test that HTML requests redirect to login page."""
         response = client.get(
-            "/auth/account",
-            headers={"Accept": "text/html"},
-            follow_redirects=False
+            "/auth/account", headers={"Accept": "text/html"}, follow_redirects=False
         )
 
         assert response.status_code == 303
@@ -589,9 +581,7 @@ class TestAuthRedirectBehavior:
     def test_html_request_includes_return_url(self, client: TestClient):
         """Test that redirect includes return URL for post-login redirect."""
         response = client.get(
-            "/meals/history",
-            headers={"Accept": "text/html"},
-            follow_redirects=False
+            "/meals/history", headers={"Accept": "text/html"}, follow_redirects=False
         )
 
         assert response.status_code == 303
@@ -604,7 +594,7 @@ class TestAuthRedirectBehavior:
         response = client.get(
             "/auth/account",
             headers={"Accept": "application/json"},
-            follow_redirects=False
+            follow_redirects=False,
         )
 
         assert response.status_code == 401
@@ -613,11 +603,8 @@ class TestAuthRedirectBehavior:
         """Test that htmx requests get 401, not redirect."""
         response = client.get(
             "/meals/history",
-            headers={
-                "Accept": "text/html",
-                "HX-Request": "true"
-            },
-            follow_redirects=False
+            headers={"Accept": "text/html", "HX-Request": "true"},
+            follow_redirects=False,
         )
 
         # htmx requests should get 401 so JS can handle it

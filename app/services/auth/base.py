@@ -1,4 +1,5 @@
 """Abstract base class for authentication providers."""
+
 from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
@@ -18,7 +19,9 @@ class AuthProvider(ABC):
     """
 
     @abstractmethod
-    async def authenticate(self, db: DBSession, email: str, password: str) -> Optional[User]:
+    async def authenticate(
+        self, db: DBSession, email: str, password: str
+    ) -> Optional[User]:
         """
         Authenticate user with email and password.
 
@@ -28,11 +31,7 @@ class AuthProvider(ABC):
 
     @abstractmethod
     async def create_user(
-        self,
-        db: DBSession,
-        email: str,
-        password: str,
-        is_admin: bool = False
+        self, db: DBSession, email: str, password: str, is_admin: bool = False
     ) -> User:
         """
         Create a new user with the given credentials.
@@ -42,7 +41,9 @@ class AuthProvider(ABC):
         pass
 
     @abstractmethod
-    async def get_user_from_request(self, db: DBSession, request: Request) -> Optional[User]:
+    async def get_user_from_request(
+        self, db: DBSession, request: Request
+    ) -> Optional[User]:
         """
         Extract and validate user from request (session cookie, OAuth token, etc).
 
@@ -69,7 +70,9 @@ class AuthProvider(ABC):
         pass
 
     @abstractmethod
-    async def revoke_all_sessions(self, db: DBSession, user_id: UUID, except_token: Optional[str] = None) -> int:
+    async def revoke_all_sessions(
+        self, db: DBSession, user_id: UUID, except_token: Optional[str] = None
+    ) -> int:
         """
         Revoke all sessions for a user, optionally excluding current session.
 
@@ -79,11 +82,7 @@ class AuthProvider(ABC):
 
     @abstractmethod
     async def change_password(
-        self,
-        db: DBSession,
-        user: User,
-        current_password: str,
-        new_password: str
+        self, db: DBSession, user: User, current_password: str, new_password: str
     ) -> bool:
         """
         Change user's password.

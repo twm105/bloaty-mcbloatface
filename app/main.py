@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.exceptions import HTTPException
 
 from app.api import routes, meals, symptoms, diagnosis, diagnosis_sse, auth, feedback
@@ -35,15 +35,13 @@ async def auth_exception_handler(request: Request, exc: HTTPException):
                 return_url += f"?{request.url.query}"
             return RedirectResponse(
                 url=f"/auth/login?next={return_url}",
-                status_code=status.HTTP_303_SEE_OTHER
+                status_code=status.HTTP_303_SEE_OTHER,
             )
 
     # For all other cases, return the original error
     from fastapi.responses import JSONResponse
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail}
-    )
+
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
 # Include routers

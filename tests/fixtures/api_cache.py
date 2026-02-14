@@ -12,12 +12,13 @@ Usage:
         # Make actual API call
         return result
 """
+
 import hashlib
 import json
 from pathlib import Path
 from functools import wraps
 from datetime import datetime
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, Callable, Optional
 import asyncio
 
 # Cache directory
@@ -100,6 +101,7 @@ def cached_api_response(func: Callable) -> Callable:
             # Make actual API call
             return {"ingredients": [...]}
     """
+
     @wraps(func)
     async def async_wrapper(*args, use_cache: Optional[bool] = None, **kwargs):
         # Determine whether to use cache
@@ -123,9 +125,9 @@ def cached_api_response(func: Callable) -> Callable:
             "request": {
                 "function": func.__name__,
                 "args_hash": cache_key,
-                "timestamp": datetime.utcnow().isoformat() + "Z"
+                "timestamp": datetime.utcnow().isoformat() + "Z",
             },
-            "response": result
+            "response": result,
         }
 
         try:
@@ -159,9 +161,9 @@ def cached_api_response(func: Callable) -> Callable:
             "request": {
                 "function": func.__name__,
                 "args_hash": cache_key,
-                "timestamp": datetime.utcnow().isoformat() + "Z"
+                "timestamp": datetime.utcnow().isoformat() + "Z",
             },
-            "response": result
+            "response": result,
         }
 
         try:

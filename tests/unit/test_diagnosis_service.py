@@ -8,21 +8,22 @@ Tests the diagnosis business logic including:
 - Confidence scoring
 - Ingredient co-occurrence detection
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from sqlalchemy.orm import Session
 
 from app.services.diagnosis_service import DiagnosisService
-from app.models import (
-    User, Meal, Ingredient, MealIngredient, Symptom,
-    DiagnosisRun, DiagnosisResult, IngredientState
-)
+from app.models import Symptom, IngredientState
 from tests.factories import (
-    create_user, create_meal, create_ingredient, create_meal_ingredient,
-    create_symptom, create_meal_with_ingredients, create_test_scenario_onion_intolerance
+    create_user,
+    create_meal,
+    create_ingredient,
+    create_meal_ingredient,
+    create_symptom,
+    create_test_scenario_onion_intolerance,
 )
 
 
@@ -35,14 +36,17 @@ class TestDataSufficiency:
 
         # Create enough meals
         for i in range(5):
-            create_meal(db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i))
+            create_meal(
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+            )
 
         # Create enough symptoms
         for i in range(3):
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 5}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i)
+                start_time=datetime.now(timezone.utc) - timedelta(days=i),
             )
 
         service = DiagnosisService(db)
@@ -155,7 +159,7 @@ class TestDataSufficiency:
                 user_id=user.id,
                 raw_description="No tags",
                 tags=None,
-                start_time=datetime.now(timezone.utc)
+                start_time=datetime.now(timezone.utc),
             )
             db.add(symptom)
         db.flush()
@@ -182,15 +186,16 @@ class TestTemporalCorrelations:
         # Create 2 meals followed by symptoms within 1 hour each
         # (service requires min_symptom_occurrences >= 2)
         for i in range(2):
-            meal_time = datetime.now(timezone.utc) - timedelta(hours=5 + i*24)
+            meal_time = datetime.now(timezone.utc) - timedelta(hours=5 + i * 24)
             meal = create_meal(db, user, timestamp=meal_time)
             create_meal_ingredient(db, meal, onion, state=IngredientState.RAW)
 
             symptom_time = meal_time + timedelta(hours=1)  # 1hr lag (immediate)
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 7}],
-                start_time=symptom_time
+                start_time=symptom_time,
             )
 
         service = DiagnosisService(db)
@@ -202,7 +207,9 @@ class TestTemporalCorrelations:
         )
 
         assert len(correlations) >= 1
-        onion_corr = next((c for c in correlations if c["ingredient_name"] == "onion"), None)
+        onion_corr = next(
+            (c for c in correlations if c["ingredient_name"] == "onion"), None
+        )
         assert onion_corr is not None
         assert onion_corr["immediate_count"] >= 1
 
@@ -214,15 +221,13 @@ class TestTemporalCorrelations:
         # Create 2 meals followed by symptoms 12 hours later each
         # (service requires min_symptom_occurrences >= 2)
         for i in range(2):
-            meal_time = datetime.now(timezone.utc) - timedelta(hours=48 + i*24)
+            meal_time = datetime.now(timezone.utc) - timedelta(hours=48 + i * 24)
             meal = create_meal(db, user, timestamp=meal_time)
             create_meal_ingredient(db, meal, milk, state=IngredientState.PROCESSED)
 
             symptom_time = meal_time + timedelta(hours=12)  # 12hr lag (delayed)
             create_symptom(
-                db, user,
-                tags=[{"name": "gas", "severity": 6}],
-                start_time=symptom_time
+                db, user, tags=[{"name": "gas", "severity": 6}], start_time=symptom_time
             )
 
         service = DiagnosisService(db)
@@ -234,7 +239,9 @@ class TestTemporalCorrelations:
         )
 
         assert len(correlations) >= 1
-        milk_corr = next((c for c in correlations if c["ingredient_name"] == "milk"), None)
+        milk_corr = next(
+            (c for c in correlations if c["ingredient_name"] == "milk"), None
+        )
         assert milk_corr is not None
         assert milk_corr["delayed_count"] >= 1
 
@@ -254,9 +261,10 @@ class TestTemporalCorrelations:
             # Create symptoms at different lags
             lags = [1, 8, 48]  # immediate, delayed, cumulative
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 5}],
-                start_time=meal_time + timedelta(hours=lags[i])
+                start_time=meal_time + timedelta(hours=lags[i]),
             )
 
         service = DiagnosisService(db)
@@ -287,7 +295,7 @@ class TestConfidenceScoring:
             associated_symptoms=associated_symptoms,
             immediate_count=4,
             delayed_count=1,
-            cumulative_count=0
+            cumulative_count=0,
         )
 
         assert confidence_level == "high"
@@ -306,7 +314,7 @@ class TestConfidenceScoring:
             associated_symptoms=associated_symptoms,
             immediate_count=1,
             delayed_count=1,
-            cumulative_count=1
+            cumulative_count=1,
         )
 
         assert confidence_level in ["medium", "high"]
@@ -325,7 +333,7 @@ class TestConfidenceScoring:
             associated_symptoms=associated_symptoms,
             immediate_count=0,
             delayed_count=1,
-            cumulative_count=1
+            cumulative_count=1,
         )
 
         assert confidence_level == "low"
@@ -338,10 +346,12 @@ class TestConfidenceScoring:
         # Below MIN_MEALS threshold
         confidence_score, confidence_level = service.calculate_confidence(
             times_eaten=1,  # Below threshold
-            associated_symptoms=[{"name": "bloating", "frequency": 1, "severity_avg": 5.0}],
+            associated_symptoms=[
+                {"name": "bloating", "frequency": 1, "severity_avg": 5.0}
+            ],
             immediate_count=1,
             delayed_count=0,
-            cumulative_count=0
+            cumulative_count=0,
         )
 
         assert confidence_level == "insufficient_data"
@@ -353,8 +363,18 @@ class TestConfidenceScoring:
 
         # Extreme correlation data
         associated_symptoms = [
-            {"name": "bloating", "frequency": 20, "severity_avg": 10.0, "lag_hours": 1.0},
-            {"name": "cramping", "frequency": 20, "severity_avg": 10.0, "lag_hours": 1.0}
+            {
+                "name": "bloating",
+                "frequency": 20,
+                "severity_avg": 10.0,
+                "lag_hours": 1.0,
+            },
+            {
+                "name": "cramping",
+                "frequency": 20,
+                "severity_avg": 10.0,
+                "lag_hours": 1.0,
+            },
         ]
 
         confidence_score, confidence_level = service.calculate_confidence(
@@ -362,7 +382,7 @@ class TestConfidenceScoring:
             associated_symptoms=associated_symptoms,
             immediate_count=20,
             delayed_count=10,
-            cumulative_count=5
+            cumulative_count=5,
         )
 
         assert confidence_score <= 1.0
@@ -380,7 +400,7 @@ class TestConfidenceScoring:
             associated_symptoms=low_severity_symptoms,
             immediate_count=3,
             delayed_count=1,
-            cumulative_count=0
+            cumulative_count=0,
         )
 
         # High severity
@@ -392,7 +412,7 @@ class TestConfidenceScoring:
             associated_symptoms=high_severity_symptoms,
             immediate_count=3,
             delayed_count=1,
-            cumulative_count=0
+            cumulative_count=0,
         )
 
         assert high_score > low_score
@@ -408,23 +428,20 @@ class TestSymptomClustering:
 
         # Create symptoms close together (within 4hr window)
         create_symptom(
-            db, user,
-            tags=[{"name": "bloating", "severity": 7}],
-            start_time=base_time
+            db, user, tags=[{"name": "bloating", "severity": 7}], start_time=base_time
         )
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "gas", "severity": 6}],
-            start_time=base_time + timedelta(hours=2)  # 2hr later
+            start_time=base_time + timedelta(hours=2),  # 2hr later
         )
 
         service = DiagnosisService(db)
         date_start = base_time - timedelta(hours=1)
         date_end = datetime.now(timezone.utc)
 
-        clusters = service.get_symptom_clusters(
-            str(user.id), date_start, date_end
-        )
+        clusters = service.get_symptom_clusters(str(user.id), date_start, date_end)
 
         # Should detect co-occurrence
         # Note: clustering requires at least 2 co-occurrences, so this test
@@ -439,23 +456,20 @@ class TestSymptomClustering:
 
         # Create symptoms far apart
         create_symptom(
-            db, user,
-            tags=[{"name": "bloating", "severity": 7}],
-            start_time=base_time
+            db, user, tags=[{"name": "bloating", "severity": 7}], start_time=base_time
         )
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "gas", "severity": 6}],
-            start_time=base_time + timedelta(hours=10)  # 10hr later
+            start_time=base_time + timedelta(hours=10),  # 10hr later
         )
 
         service = DiagnosisService(db)
         date_start = base_time - timedelta(hours=1)
         date_end = datetime.now(timezone.utc)
 
-        clusters = service.get_symptom_clusters(
-            str(user.id), date_start, date_end
-        )
+        clusters = service.get_symptom_clusters(str(user.id), date_start, date_end)
 
         # Should not find co-occurrence of these distant symptoms
         assert isinstance(clusters, list)
@@ -473,8 +487,7 @@ class TestIngredientCooccurrence:
         # Create meals with both ingredients
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, onion)
             create_meal_ingredient(db, meal, garlic)
@@ -490,10 +503,19 @@ class TestIngredientCooccurrence:
         # Should detect high co-occurrence
         assert len(cooccurrence) >= 1
         onion_garlic = next(
-            (c for c in cooccurrence
-             if ("onion" in c["ingredient_a_name"].lower() and "garlic" in c["ingredient_b_name"].lower())
-             or ("garlic" in c["ingredient_a_name"].lower() and "onion" in c["ingredient_b_name"].lower())),
-            None
+            (
+                c
+                for c in cooccurrence
+                if (
+                    "onion" in c["ingredient_a_name"].lower()
+                    and "garlic" in c["ingredient_b_name"].lower()
+                )
+                or (
+                    "garlic" in c["ingredient_a_name"].lower()
+                    and "onion" in c["ingredient_b_name"].lower()
+                )
+            ),
+            None,
         )
         assert onion_garlic is not None
         assert onion_garlic["is_high_cooccurrence"] is True
@@ -507,8 +529,7 @@ class TestIngredientCooccurrence:
         # Create 4 meals with onion
         for i in range(4):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i + 1)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i + 1)
             )
             create_meal_ingredient(db, meal, onion)
             # Add tomato to only 2 of them
@@ -525,15 +546,26 @@ class TestIngredientCooccurrence:
 
         # Find the onion-tomato pair
         pair = next(
-            (c for c in cooccurrence
-             if ("onion" in c["ingredient_a_name"].lower() and "tomato" in c["ingredient_b_name"].lower())
-             or ("tomato" in c["ingredient_a_name"].lower() and "onion" in c["ingredient_b_name"].lower())),
-            None
+            (
+                c
+                for c in cooccurrence
+                if (
+                    "onion" in c["ingredient_a_name"].lower()
+                    and "tomato" in c["ingredient_b_name"].lower()
+                )
+                or (
+                    "tomato" in c["ingredient_a_name"].lower()
+                    and "onion" in c["ingredient_b_name"].lower()
+                )
+            ),
+            None,
         )
 
         # P(tomato|onion) = 2/4 = 0.5
         if pair:
-            assert 0.4 <= pair["p_b_given_a"] <= 0.6 or 0.4 <= pair["p_a_given_b"] <= 0.6
+            assert (
+                0.4 <= pair["p_b_given_a"] <= 0.6 or 0.4 <= pair["p_a_given_b"] <= 0.6
+            )
 
 
 class TestAggregateCorrelations:
@@ -651,8 +683,7 @@ class TestCorrelatedIngredientIds:
         # Create meals with chicken but no symptoms
         for i in range(3):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, chicken)
 
@@ -672,10 +703,7 @@ class TestHolisticIngredientData:
         scenario = create_test_scenario_onion_intolerance(db, user, num_meals=5)
 
         service = DiagnosisService(db)
-        data = service.get_holistic_ingredient_data(
-            str(user.id),
-            scenario["onion"].id
-        )
+        data = service.get_holistic_ingredient_data(str(user.id), scenario["onion"].id)
 
         assert data is not None
         assert data["ingredient_name"] == "onion"
@@ -692,7 +720,7 @@ class TestHolisticIngredientData:
         service = DiagnosisService(db)
         data = service.get_holistic_ingredient_data(
             str(user.id),
-            99999  # Non-existent ID
+            99999,  # Non-existent ID
         )
 
         assert data is None
@@ -863,10 +891,7 @@ class TestRunDiagnosisEdgeCases:
         now = datetime.now(timezone.utc)
 
         result = await service.run_diagnosis(
-            str(user.id),
-            now - timedelta(days=30),
-            now,
-            web_search_enabled=False
+            str(user.id), now - timedelta(days=30), now, web_search_enabled=False
         )
 
         assert result.sufficient_data is False
@@ -881,10 +906,7 @@ class TestRunDiagnosisEdgeCases:
 
         # Create meals that don't have symptoms FOLLOWING them (within 7 days)
         for i in range(5):
-            meal = create_meal(
-                db, user,
-                timestamp=now - timedelta(days=i + 1)
-            )
+            meal = create_meal(db, user, timestamp=now - timedelta(days=i + 1))
             ingredient = create_ingredient(db, name=f"Ingredient{i}")
             create_meal_ingredient(db, meal, ingredient)
 
@@ -892,18 +914,16 @@ class TestRunDiagnosisEdgeCases:
         # Symptoms happened before meals, not after
         for i in range(3):
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "headache", "severity": 5}],
-                start_time=now - timedelta(days=20 + i)
+                start_time=now - timedelta(days=20 + i),
             )
 
         service = DiagnosisService(db)
 
         result = await service.run_diagnosis(
-            str(user.id),
-            now - timedelta(days=30),
-            now,
-            web_search_enabled=False
+            str(user.id), now - timedelta(days=30), now, web_search_enabled=False
         )
 
         # Should complete successfully but with no results
@@ -919,42 +939,39 @@ class TestRunDiagnosisEdgeCases:
         # (eaten only once, which is below MIN_MEALS)
         ingredient = create_ingredient(db, name="RareIngredient")
         meal = create_meal(
-            db, user,
-            timestamp=datetime.now(timezone.utc) - timedelta(hours=5)
+            db, user, timestamp=datetime.now(timezone.utc) - timedelta(hours=5)
         )
         create_meal_ingredient(db, meal, ingredient)
 
         # Add symptom but only one occurrence
         create_symptom(
-            db, user,
+            db,
+            user,
             tags=[{"name": "bloating", "severity": 5}],
-            start_time=datetime.now(timezone.utc) - timedelta(hours=3)
+            start_time=datetime.now(timezone.utc) - timedelta(hours=3),
         )
 
         # Need more meals and symptoms to pass data sufficiency but not correlation threshold
         for i in range(5):
             other_meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i + 1)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i + 1)
             )
             other_ingredient = create_ingredient(db, name=f"Other{i}")
             create_meal_ingredient(db, other_meal, other_ingredient)
 
         for i in range(3):
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "nausea", "severity": 3}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=20 + i)
+                start_time=datetime.now(timezone.utc) - timedelta(days=20 + i),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
         result = await service.run_diagnosis(
-            str(user.id),
-            now - timedelta(days=30),
-            now,
-            web_search_enabled=False
+            str(user.id), now - timedelta(days=30), now, web_search_enabled=False
         )
 
         # Should complete with no results meeting threshold
@@ -972,55 +989,64 @@ class TestRunDiagnosisEdgeCases:
         # Always eat garlic and onion together
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, garlic)
             create_meal_ingredient(db, meal, onion)
 
             # Symptom follows
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 6}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
         # Mock the Claude classify_root_cause to return one as confounder
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
             # First ingredient is root cause, second is confounded
-            mock_claude.classify_root_cause = AsyncMock(side_effect=[
-                {"root_cause": True},
-                {
-                    "root_cause": False,
-                    "confounded_by": "garlic",
-                    "discard_justification": "Always appears with garlic",
-                    "medical_reasoning": "FODMAP overlap"
-                }
-            ])
+            mock_claude.classify_root_cause = AsyncMock(
+                side_effect=[
+                    {"root_cause": True},
+                    {
+                        "root_cause": False,
+                        "confounded_by": "garlic",
+                        "discard_justification": "Always appears with garlic",
+                        "medical_reasoning": "FODMAP overlap",
+                    },
+                ]
+            )
 
-            mock_claude.diagnose_correlations = AsyncMock(return_value={
-                "ingredient_analyses": [{
-                    "ingredient_name": "garlic",
-                    "medical_context": "Fructans in garlic...",
-                    "interpretation": "Likely FODMAP intolerance",
-                    "recommendations": "Try low-FODMAP",
-                    "citations": []
-                }],
-                "usage_stats": {"input_tokens": 100, "cached_tokens": 0, "cache_hit": False}
-            })
+            mock_claude.diagnose_correlations = AsyncMock(
+                return_value={
+                    "ingredient_analyses": [
+                        {
+                            "ingredient_name": "garlic",
+                            "medical_context": "Fructans in garlic...",
+                            "interpretation": "Likely FODMAP intolerance",
+                            "recommendations": "Try low-FODMAP",
+                            "citations": [],
+                        }
+                    ],
+                    "usage_stats": {
+                        "input_tokens": 100,
+                        "cached_tokens": 0,
+                        "cache_hit": False,
+                    },
+                }
+            )
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=False
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=False
             )
 
         assert result.sufficient_data is True
@@ -1038,42 +1064,46 @@ class TestRunDiagnosisEdgeCases:
 
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, onion)
             create_meal_ingredient(db, meal, garlic)
 
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 6}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
             # First call succeeds, second throws exception
-            mock_claude.classify_root_cause = AsyncMock(side_effect=[
-                {"root_cause": True},
-                Exception("API Error")
-            ])
+            mock_claude.classify_root_cause = AsyncMock(
+                side_effect=[{"root_cause": True}, Exception("API Error")]
+            )
 
-            mock_claude.diagnose_correlations = AsyncMock(return_value={
-                "ingredient_analyses": [],
-                "usage_stats": {"input_tokens": 100, "cached_tokens": 0, "cache_hit": False}
-            })
+            mock_claude.diagnose_correlations = AsyncMock(
+                return_value={
+                    "ingredient_analyses": [],
+                    "usage_stats": {
+                        "input_tokens": 100,
+                        "cached_tokens": 0,
+                        "cache_hit": False,
+                    },
+                }
+            )
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=False
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=False
             )
 
         # Should complete without error
@@ -1088,58 +1118,67 @@ class TestRunDiagnosisEdgeCases:
 
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, onion)
 
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 7}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
-            mock_claude.classify_root_cause = AsyncMock(return_value={"root_cause": True})
+            mock_claude.classify_root_cause = AsyncMock(
+                return_value={"root_cause": True}
+            )
 
-            mock_claude.diagnose_correlations = AsyncMock(return_value={
-                "ingredient_analyses": [{
-                    "ingredient_name": "onion",
-                    "medical_context": "Fructans in onion...",
-                    "interpretation": "FODMAP intolerance",
-                    "recommendations": "Reduce onion intake",
-                    "citations": [
+            mock_claude.diagnose_correlations = AsyncMock(
+                return_value={
+                    "ingredient_analyses": [
                         {
-                            "url": "https://example.com/fodmap",
-                            "title": "FODMAP Guide",
-                            "source_type": "medical_journal",
-                            "snippet": "Onions contain high fructans...",
-                            "relevance": 0.95
-                        },
-                        {
-                            "url": "https://example.com/ibs",
-                            "title": "IBS Diet",
-                            "source_type": "health_site",
-                            "snippet": "Reducing onion can help...",
-                            "relevance": 0.8
+                            "ingredient_name": "onion",
+                            "medical_context": "Fructans in onion...",
+                            "interpretation": "FODMAP intolerance",
+                            "recommendations": "Reduce onion intake",
+                            "citations": [
+                                {
+                                    "url": "https://example.com/fodmap",
+                                    "title": "FODMAP Guide",
+                                    "source_type": "medical_journal",
+                                    "snippet": "Onions contain high fructans...",
+                                    "relevance": 0.95,
+                                },
+                                {
+                                    "url": "https://example.com/ibs",
+                                    "title": "IBS Diet",
+                                    "source_type": "health_site",
+                                    "snippet": "Reducing onion can help...",
+                                    "relevance": 0.8,
+                                },
+                            ],
                         }
-                    ]
-                }],
-                "usage_stats": {"input_tokens": 200, "cached_tokens": 50, "cache_hit": True}
-            })
+                    ],
+                    "usage_stats": {
+                        "input_tokens": 200,
+                        "cached_tokens": 50,
+                        "cache_hit": True,
+                    },
+                }
+            )
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=True
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=True
             )
 
         # Verify citations were created
@@ -1162,37 +1201,42 @@ class TestRunDiagnosisEdgeCases:
 
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, garlic)
 
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 6}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
             # No co-occurrence, so classify_root_cause won't be called
             # This tests the path where scored_ingredients is empty after confidence check
-            mock_claude.diagnose_correlations = AsyncMock(return_value={
-                "ingredient_analyses": [],
-                "usage_stats": {"input_tokens": 0, "cached_tokens": 0, "cache_hit": False}
-            })
+            mock_claude.diagnose_correlations = AsyncMock(
+                return_value={
+                    "ingredient_analyses": [],
+                    "usage_stats": {
+                        "input_tokens": 0,
+                        "cached_tokens": 0,
+                        "cache_hit": False,
+                    },
+                }
+            )
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=False
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=False
             )
 
         assert result.sufficient_data is True
@@ -1206,44 +1250,53 @@ class TestRunDiagnosisEdgeCases:
 
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, onion)
 
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 7}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
-            mock_claude.classify_root_cause = AsyncMock(return_value={"root_cause": True})
+            mock_claude.classify_root_cause = AsyncMock(
+                return_value={"root_cause": True}
+            )
 
             # Claude returns analysis for "garlic" which we don't have - should be skipped
-            mock_claude.diagnose_correlations = AsyncMock(return_value={
-                "ingredient_analyses": [{
-                    "ingredient_name": "garlic",  # Not in our data!
-                    "medical_context": "Fructans in garlic...",
-                    "interpretation": "FODMAP intolerance",
-                    "recommendations": "Reduce garlic",
-                    "citations": []
-                }],
-                "usage_stats": {"input_tokens": 100, "cached_tokens": 0, "cache_hit": False}
-            })
+            mock_claude.diagnose_correlations = AsyncMock(
+                return_value={
+                    "ingredient_analyses": [
+                        {
+                            "ingredient_name": "garlic",  # Not in our data!
+                            "medical_context": "Fructans in garlic...",
+                            "interpretation": "FODMAP intolerance",
+                            "recommendations": "Reduce garlic",
+                            "citations": [],
+                        }
+                    ],
+                    "usage_stats": {
+                        "input_tokens": 100,
+                        "cached_tokens": 0,
+                        "cache_hit": False,
+                    },
+                }
+            )
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=False
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=False
             )
 
         # Should complete without error, but no results stored
@@ -1251,7 +1304,9 @@ class TestRunDiagnosisEdgeCases:
         assert len(result.results) == 0
 
     @pytest.mark.asyncio
-    async def test_scored_ingredients_empty_after_discounting_uses_fallback(self, db: Session):
+    async def test_scored_ingredients_empty_after_discounting_uses_fallback(
+        self, db: Session
+    ):
         """Test that when all ingredients are discounted, we use the fallback AI response."""
         user = create_user(db)
 
@@ -1261,40 +1316,41 @@ class TestRunDiagnosisEdgeCases:
 
         for i in range(5):
             meal = create_meal(
-                db, user,
-                timestamp=datetime.now(timezone.utc) - timedelta(days=i)
+                db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=i)
             )
             create_meal_ingredient(db, meal, garlic)
             create_meal_ingredient(db, meal, onion)
 
             create_symptom(
-                db, user,
+                db,
+                user,
                 tags=[{"name": "bloating", "severity": 6}],
-                start_time=datetime.now(timezone.utc) - timedelta(days=i) + timedelta(hours=1)
+                start_time=datetime.now(timezone.utc)
+                - timedelta(days=i)
+                + timedelta(hours=1),
             )
 
         service = DiagnosisService(db)
         now = datetime.now(timezone.utc)
 
-        with patch('app.services.ai_service.ClaudeService') as MockClaudeService:
+        with patch("app.services.ai_service.ClaudeService") as MockClaudeService:
             mock_claude = MagicMock()
             MockClaudeService.return_value = mock_claude
 
             # All ingredients marked as confounders
-            mock_claude.classify_root_cause = AsyncMock(return_value={
-                "root_cause": False,
-                "confounded_by": "unknown",
-                "discard_justification": "Confounded",
-                "medical_reasoning": "Test"
-            })
+            mock_claude.classify_root_cause = AsyncMock(
+                return_value={
+                    "root_cause": False,
+                    "confounded_by": "unknown",
+                    "discard_justification": "Confounded",
+                    "medical_reasoning": "Test",
+                }
+            )
 
             mock_claude.sonnet_model = "claude-sonnet-test"
 
             result = await service.run_diagnosis(
-                str(user.id),
-                now - timedelta(days=30),
-                now,
-                web_search_enabled=False
+                str(user.id), now - timedelta(days=30), now, web_search_enabled=False
             )
 
         # Should complete - all ingredients were discounted
@@ -1314,8 +1370,7 @@ class TestHolisticCooccurrenceEdgeCases:
 
         # Create one meal with ingredient but no co-occurring ingredients
         meal = create_meal(
-            db, user,
-            timestamp=datetime.now(timezone.utc) - timedelta(days=1)
+            db, user, timestamp=datetime.now(timezone.utc) - timedelta(days=1)
         )
         create_meal_ingredient(db, meal, ingredient)
 
@@ -1323,12 +1378,8 @@ class TestHolisticCooccurrenceEdgeCases:
 
         # Call _get_holistic_cooccurrence directly
         result = service._get_holistic_cooccurrence(
-            str(user.id),
-            ingredient.id,
-            max_occurrences=50
+            str(user.id), ingredient.id, max_occurrences=50
         )
 
         # Should return empty list (no co-occurring ingredients)
         assert result == []
-
-

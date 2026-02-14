@@ -1,4 +1,5 @@
 """Diagnosis API endpoints for ingredient-symptom correlation analysis."""
+
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Body
@@ -27,7 +28,9 @@ class DiagnosisRequest(BaseModel):
     date_range_start: datetime | None = None
     date_range_end: datetime | None = None
     min_meals: int | None = None  # Defaults to settings.diagnosis_min_meals
-    min_symptom_occurrences: int | None = None  # Defaults to settings.diagnosis_min_symptom_occurrences
+    min_symptom_occurrences: int | None = (
+        None  # Defaults to settings.diagnosis_min_symptom_occurrences
+    )
     web_search_enabled: bool = True
     async_mode: bool = True  # Enable async processing by default
 
@@ -66,12 +69,20 @@ async def analyze_correlations(
     diagnosis_service = DiagnosisService(db)
 
     # Override minimum thresholds (resolve None to settings defaults)
-    diagnosis_service.MIN_MEALS = request.min_meals if request.min_meals is not None else settings.diagnosis_min_meals
-    diagnosis_service.MIN_SYMPTOM_OCCURRENCES = request.min_symptom_occurrences if request.min_symptom_occurrences is not None else settings.diagnosis_min_symptom_occurrences
+    diagnosis_service.MIN_MEALS = (
+        request.min_meals
+        if request.min_meals is not None
+        else settings.diagnosis_min_meals
+    )
+    diagnosis_service.MIN_SYMPTOM_OCCURRENCES = (
+        request.min_symptom_occurrences
+        if request.min_symptom_occurrences is not None
+        else settings.diagnosis_min_symptom_occurrences
+    )
 
     # Step 1: Check data sufficiency (fast)
-    sufficient_data, meals_count, symptoms_count = diagnosis_service.check_data_sufficiency(
-        user.id, start_date, end_date
+    sufficient_data, meals_count, symptoms_count = (
+        diagnosis_service.check_data_sufficiency(user.id, start_date, end_date)
     )
 
     if not sufficient_data:
@@ -141,8 +152,13 @@ async def analyze_correlations(
     # Step 4: Gather holistic data for each correlated ingredient
     holistic_ingredients = []
     for ingredient_id in correlated_ingredient_ids:
-        ingredient_data = diagnosis_service.get_holistic_ingredient_data(user.id, ingredient_id)
-        if ingredient_data and ingredient_data.get("confidence_level") != "insufficient_data":
+        ingredient_data = diagnosis_service.get_holistic_ingredient_data(
+            user.id, ingredient_id
+        )
+        if (
+            ingredient_data
+            and ingredient_data.get("confidence_level") != "insufficient_data"
+        ):
             holistic_ingredients.append(ingredient_data)
 
     # Sort by confidence score
@@ -194,7 +210,7 @@ async def analyze_correlations(
     if request.async_mode:
         # Step 6: Enqueue async tasks with holistic data (returns immediately)
         queue_service = DiagnosisQueueService(db)
-        tasks_enqueued = queue_service.enqueue_diagnosis(
+        queue_service.enqueue_diagnosis(
             diagnosis_run=diagnosis_run,
             scored_ingredients=holistic_ingredients,
             web_search_enabled=request.web_search_enabled,
@@ -218,7 +234,7 @@ async def analyze_correlations(
                 date_range_end=end_date,
                 web_search_enabled=request.web_search_enabled,
             )
-        except ServiceUnavailableError as e:
+        except ServiceUnavailableError:
             raise HTTPException(
                 status_code=503,
                 detail={
@@ -229,17 +245,17 @@ async def analyze_correlations(
                         "If the problem persists, try disabling web search for faster results."
                     ),
                     "can_retry": True,
-                    "disable_web_search_option": True
-                }
+                    "disable_web_search_option": True,
+                },
             )
-        except RateLimitError as e:
+        except RateLimitError:
             raise HTTPException(
                 status_code=429,
                 detail={
                     "error": "rate_limit",
                     "message": "Too many requests. Please wait a minute and try again.",
-                    "can_retry": True
-                }
+                    "can_retry": True,
+                },
             )
         except ValueError as e:
             error_msg = str(e)
@@ -249,8 +265,8 @@ async def analyze_correlations(
                     "error": "validation_error",
                     "message": error_msg,
                     "can_retry": True,
-                    "reduce_date_range_suggestion": "Request too large" in error_msg
-                }
+                    "reduce_date_range_suggestion": "Request too large" in error_msg,
+                },
             )
 
         results_count = len(diagnosis_run.results) if diagnosis_run.results else 0
@@ -284,15 +300,15 @@ async def get_diagnosis(
         .filter(DiagnosisRun.user_id == user.id)
         .order_by(DiagnosisRun.run_timestamp.desc())
         .options(
-            joinedload(DiagnosisRun.results)
-            .joinedload(DiagnosisResult.ingredient),
-            joinedload(DiagnosisRun.results)
-            .joinedload(DiagnosisResult.citations),
+            joinedload(DiagnosisRun.results).joinedload(DiagnosisResult.ingredient),
+            joinedload(DiagnosisRun.results).joinedload(DiagnosisResult.citations),
             # Note: feedback is now in unified user_feedback table
-            joinedload(DiagnosisRun.discounted_ingredients)
-            .joinedload(DiscountedIngredient.ingredient),
-            joinedload(DiagnosisRun.discounted_ingredients)
-            .joinedload(DiscountedIngredient.confounded_by),
+            joinedload(DiagnosisRun.discounted_ingredients).joinedload(
+                DiscountedIngredient.ingredient
+            ),
+            joinedload(DiagnosisRun.discounted_ingredients).joinedload(
+                DiscountedIngredient.confounded_by
+            ),
         )
         .first()
     )
@@ -322,9 +338,7 @@ async def get_diagnosis(
     # Get results and discounted ingredients directly from the run
     # No deduplication needed since each analysis clears previous data
     results = sorted(
-        latest_run.results or [],
-        key=lambda r: r.confidence_score,
-        reverse=True
+        latest_run.results or [], key=lambda r: r.confidence_score, reverse=True
     )
 
     discounted = latest_run.discounted_ingredients or []
@@ -332,14 +346,18 @@ async def get_diagnosis(
     # Load feedback for all results from unified user_feedback table
     result_ids = [r.id for r in results]
     feedback_records = (
-        db.query(UserFeedback)
-        .filter(
-            UserFeedback.user_id == user.id,
-            UserFeedback.feature_type == "diagnosis_result",
-            UserFeedback.feature_id.in_(result_ids),
+        (
+            db.query(UserFeedback)
+            .filter(
+                UserFeedback.user_id == user.id,
+                UserFeedback.feature_type == "diagnosis_result",
+                UserFeedback.feature_id.in_(result_ids),
+            )
+            .all()
         )
-        .all()
-    ) if result_ids else []
+        if result_ids
+        else []
+    )
 
     # Build feedback lookup by result_id
     feedback_by_result = {f.feature_id: f for f in feedback_records}
@@ -452,15 +470,11 @@ async def reset_diagnosis_data(
     try:
         # Count runs before deletion for confirmation message
         runs_count = (
-            db.query(DiagnosisRun)
-            .filter(DiagnosisRun.user_id == user.id)
-            .count()
+            db.query(DiagnosisRun).filter(DiagnosisRun.user_id == user.id).count()
         )
 
         # Delete all diagnosis runs (cascades to results, citations, feedback)
-        db.query(DiagnosisRun).filter(
-            DiagnosisRun.user_id == user.id
-        ).delete()
+        db.query(DiagnosisRun).filter(DiagnosisRun.user_id == user.id).delete()
 
         db.commit()
 
@@ -472,8 +486,7 @@ async def reset_diagnosis_data(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to reset diagnosis data: {str(e)}"
+            status_code=500, detail=f"Failed to reset diagnosis data: {str(e)}"
         )
 
 
@@ -496,10 +509,7 @@ async def delete_diagnosis_result(
     result = (
         db.query(DiagnosisResult)
         .join(DiagnosisRun)
-        .filter(
-            DiagnosisResult.id == result_id,
-            DiagnosisRun.user_id == user.id
-        )
+        .filter(DiagnosisResult.id == result_id, DiagnosisRun.user_id == user.id)
         .first()
     )
 
