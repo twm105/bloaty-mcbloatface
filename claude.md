@@ -153,6 +153,7 @@ Project documentation lives in the `docs/` folder:
 - Reference when writing or organizing tests
 - Consult for database isolation, API caching, and fixture patterns
 - Check for CI/CD and coverage requirements
+- **Before merging to main**: Read merge workflow section for test validation steps
 
 ## Dependencies to Add
 - fastapi[all]

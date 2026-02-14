@@ -372,6 +372,62 @@ Recommended: Accept sharing with `.gitignore` for the cache directory.
 tests/fixtures/api_responses/
 ```
 
+## Merge & Integration Workflow
+
+### Worktrees as Distributed Agents
+
+When using git worktrees with multiple Claude Code agents, each worktree is like an independent developer. Merges to main are equivalent to PRs—the integration point where work comes together.
+
+**Recommended Workflow:**
+1. Agent completes work in feature worktree
+2. Agent switches to main worktree
+3. Agent merges feature → main
+4. **Agent runs tests on merged result** (simulates PR CI check)
+5. If green: push to remote
+6. If red: fix locally before pushing
+
+This is **post-merge, pre-push testing**—it simulates PR CI checks (tests the merged result), keeps main green both locally and remotely, and allows agents to work fast while validating before sharing.
+
+### Test Commands for Merge Validation
+
+```bash
+# After merging, before pushing - run from main worktree:
+
+# Quick regression check (~15s) - catches obvious breaks
+docker compose exec web pytest tests/unit/ -x --tb=short
+
+# Full validation (~75s) - ensures nothing broke
+docker compose exec web pytest tests/ --cov=app --cov-fail-under=80
+
+# Coverage report - check new code is tested
+docker compose exec web pytest tests/ --cov=app --cov-report=term-missing
+```
+
+### What Each Check Validates
+
+| Check | Purpose | When to Use |
+|-------|---------|-------------|
+| **Unit tests only** | Fast regression catch | Every merge |
+| **Full suite** | Complete regression + coverage | Before pushing to remote |
+| **Coverage report** | Ensure new code tested | When adding features |
+
+### Remote CI as Safety Net
+
+Even with local testing, CI runs on push as a safety net:
+- Catches environment-specific issues
+- Aggregates coverage reports
+- Provides audit trail
+
+### Handling Conflicts Between Agents
+
+When multiple agents merge to main:
+1. First agent's merge + push succeeds normally
+2. Second agent's push fails (remote has new commits)
+3. Second agent pulls, re-runs tests on re-merged result
+4. If green: push; if red: fix conflicts
+
+This mirrors the standard PR workflow where base branch updates require re-testing.
+
 ## Security Testing
 
 Security tests live in a separate directory and run independently from the main test suite.
@@ -523,13 +579,15 @@ repos:
 
 ### Coverage Thresholds
 
-| Category | Minimum Coverage |
-|----------|------------------|
-| Overall | 80% |
-| New code in PR | 90% |
-| Models | 95% |
-| Services | 85% |
-| API routes | 75% |
+**Current state:** 95% coverage with 643 tests.
+
+| Category | Minimum Coverage | Current |
+|----------|------------------|---------|
+| Overall | 80% | 95% |
+| New code in PR | 90% | — |
+| Models | 95% | ✓ |
+| Services | 85% | ✓ |
+| API routes | 75% | ✓ |
 
 ## Future: `/test` Skill
 
@@ -559,11 +617,10 @@ If the testing workflow becomes repetitive, consider implementing a `/test` skil
 
 Utilities to implement when building test infrastructure:
 
-- [ ] `conftest.py` with database fixtures (transaction rollback)
-- [ ] `factories.py` for creating test data
-- [ ] `api_cache.py` decorator for caching API responses
-- [ ] pytest plugins for `--use-cached-responses` and `--refresh-api-cache`
+- [x] `conftest.py` with database fixtures (transaction rollback)
+- [x] `factories.py` for creating test data
+- [x] API mocking via `tests/fixtures/mocks.py` (mocks Claude API responses)
+- [x] GitHub Actions workflow for CI/CD (`.github/workflows/test.yml`)
+- [x] Security test directory structure (`tests/security/`)
 - [ ] Curated image fixtures with manifest
 - [ ] Pre-commit hook for coverage enforcement
-- [ ] GitHub Actions workflow for CI/CD
-- [ ] Security test directory structure
