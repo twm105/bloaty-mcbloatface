@@ -33,7 +33,9 @@
             selectedTags: window.symptomInitData.selectedTags,
             currentTag: '',
             autocompleteSuggestions: [],
-            commonTags: [],
+            defaultTags: [],
+            extendedTags: [],
+            showExtended: false,
             aiGeneratedText: null,
             finalNotes: window.symptomInitData.finalNotes,
             isGeneratingAi: false,
@@ -43,10 +45,11 @@
             isSubmitting: false,
 
             async init() {
-                // Fetch common tags
+                // Fetch common tags (now returns default_tags and extended_tags)
                 const response = await fetch('/symptoms/tags/common');
                 const data = await response.json();
-                this.commonTags = data.tags || [];
+                this.defaultTags = data.default_tags || [];
+                this.extendedTags = data.extended_tags || [];
 
                 // If editing, pre-populate times from existing symptom
                 if (this.editing && this.selectedTags.length > 0) {
@@ -337,11 +340,11 @@
             }
         }"
     >
-        <!-- Quick Add Tags -->
-        <div style="margin-bottom: 1.5rem;">
+        <!-- Quick Add Tags (Defaults) -->
+        <div style="margin-bottom: 1rem;">
             <label><strong>Quick Add:</strong></label>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                <template x-for="tag in commonTags" :key="tag.name">
+                <template x-for="tag in defaultTags" :key="tag.name">
                     <button
                         type="button"
                         class="outline"
@@ -353,39 +356,79 @@
             </div>
         </div>
 
-        <!-- Tag Input with Autocomplete -->
+        <!-- Show More Button -->
         <div style="margin-bottom: 1.5rem;">
-            <label for="tag-input">
-                Add Symptoms (Tags) *
-                <small>Type to search or click quick add buttons above</small>
-            </label>
-            <div style="position: relative; margin-bottom: 1rem;">
-                <input
-                    type="text"
-                    id="tag-input"
-                    x-model="currentTag"
-                    @input="searchTags()"
-                    @keydown.enter.prevent="autocompleteSuggestions.length > 0 ? addTag(autocompleteSuggestions[0]) : addTag(currentTag)"
-                    placeholder="Type symptom name (e.g., bloating, gas, nausea)..."
-                    style="margin-bottom: 0;"
-                >
+            <button
+                type="button"
+                class="outline secondary"
+                style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
+                @click="showExtended = !showExtended"
+            >
+                <span x-show="!showExtended">+ Show more</span>
+                <span x-show="showExtended">− Show less</span>
+            </button>
+        </div>
+
+        <!-- Extended Tags + Custom Input (Collapsible) -->
+        <div x-show="showExtended" x-cloak style="margin-bottom: 1.5rem; padding: 1rem; background: var(--card-background-color); border-radius: var(--border-radius);">
+            <!-- Extended Tags -->
+            <div style="margin-bottom: 1rem;">
+                <label style="font-size: 0.9rem;"><strong>More symptoms:</strong></label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <template x-for="tag in extendedTags" :key="tag.name">
+                        <button
+                            type="button"
+                            class="outline"
+                            style="padding: 0.5rem 1rem; font-size: 0.9rem; text-transform: capitalize;"
+                            @click="addTag(tag.name, tag.avg_severity)"
+                            x-text="tag.name"
+                        ></button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Custom Symptom Input -->
+            <div>
+                <label for="custom-tag-input" style="font-size: 0.9rem;">
+                    <strong>Custom symptom:</strong>
+                </label>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input
+                        type="text"
+                        id="custom-tag-input"
+                        x-model="currentTag"
+                        @input="searchTags()"
+                        @keydown.enter.prevent="if (currentTag.trim()) addTag(currentTag.trim())"
+                        placeholder="Type custom symptom..."
+                        style="margin-bottom: 0; flex: 1;"
+                    >
+                    <button
+                        type="button"
+                        class="outline"
+                        style="padding: 0.5rem 1rem; white-space: nowrap;"
+                        @click="if (currentTag.trim()) addTag(currentTag.trim())"
+                        :disabled="!currentTag.trim()"
+                    >Add</button>
+                </div>
 
                 <!-- Autocomplete Dropdown -->
-                <div
-                    x-show="autocompleteSuggestions.length > 0"
-                    style="position: absolute; top: calc(100% + 0.5rem); left: 0; right: 0; z-index: 9999; background: white; border: 2px solid var(--primary); border-radius: var(--border-radius); max-height: 200px; overflow-y: auto; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);"
-                    @click.away="autocompleteSuggestions = []"
-                    x-cloak
-                >
-                    <template x-for="suggestion in autocompleteSuggestions" :key="suggestion">
-                        <div
-                            @click="addTag(suggestion)"
-                            @mouseenter="$el.style.backgroundColor = 'var(--primary-focus)'"
-                            @mouseleave="$el.style.backgroundColor = ''"
-                            style="padding: 0.75rem; cursor: pointer; border-bottom: 1px solid var(--muted-border-color); text-transform: capitalize;"
-                            x-text="suggestion"
-                        ></div>
-                    </template>
+                <div style="position: relative;">
+                    <div
+                        x-show="autocompleteSuggestions.length > 0"
+                        style="position: absolute; top: 0.5rem; left: 0; right: 0; z-index: 9999; background: white; border: 2px solid var(--primary); border-radius: var(--border-radius); max-height: 200px; overflow-y: auto; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);"
+                        @click.away="autocompleteSuggestions = []"
+                        x-cloak
+                    >
+                        <template x-for="suggestion in autocompleteSuggestions" :key="suggestion">
+                            <div
+                                @click="addTag(suggestion); currentTag = ''"
+                                @mouseenter="$el.style.backgroundColor = 'var(--primary-focus)'"
+                                @mouseleave="$el.style.backgroundColor = ''"
+                                style="padding: 0.75rem; cursor: pointer; border-bottom: 1px solid var(--muted-border-color); text-transform: capitalize;"
+                                x-text="suggestion"
+                            ></div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
