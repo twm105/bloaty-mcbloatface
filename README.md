@@ -45,7 +45,7 @@ A meal tracking and gastro issue diagnosis application. Upload meal images, AI a
 - ❌ **Date Range Filtering**: History pages lack date filtering controls
 - ❌ **Test Coverage**: Unit and integration tests needed
 
-**See `STATUS.md` for detailed progress and next priorities.**
+**See `docs/STATUS.md` for detailed progress and next priorities.**
 
 ## Tech Stack
 
@@ -138,8 +138,9 @@ tests/                   # ❌ Not implemented yet
 ### Key Documentation
 
 - **`CLAUDE.md`** - Project vision, architecture decisions, tech stack rationale
-- **`STATUS.md`** - Detailed progress tracker with phase completion
-- **`DESIGN_PRINCIPLES.md`** - UI/UX design system and guidelines
+- **`docs/STATUS.md`** - Detailed progress tracker with phase completion
+- **`docs/DESIGN_PRINCIPLES.md`** - UI/UX design system and guidelines
+- **`docs/DEVOPS.md`** - AWS deployment and infrastructure guide
 - **`tests/README.md`** - Test organization and coverage roadmap
 
 ### Development Commands
@@ -196,7 +197,7 @@ docker-compose restart web
 3. Test coverage (unit & integration tests)
 4. Evals framework for AI accuracy
 
-**For detailed roadmap, see `STATUS.md`**
+**For detailed roadmap, see `docs/STATUS.md`**
 
 ## Contributing
 

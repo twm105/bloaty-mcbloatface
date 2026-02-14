@@ -170,7 +170,7 @@
 **Goal:** Transform from Pico.css Notion aesthetic to elegant, minimal dark theme
 
 **Completed:**
-- ✅ Comprehensive design system documentation (`/DESIGN_PRINCIPLES.md`)
+- ✅ Comprehensive design system documentation (`DESIGN_PRINCIPLES.md`)
 - ✅ CSS architecture overhaul:
   - Created `/app/static/css/design-tokens.css` - All design variables
   - Created `/app/static/css/base.css` - Replaces Pico.css
@@ -225,7 +225,7 @@
 - Update remaining templates with new design system
 - Test responsive design and accessibility
 
-**Documentation:** See `/REDESIGN_SUMMARY.md` for full implementation details
+**Documentation:** See `DESIGN_PRINCIPLES.md` for the design system reference
 
 ## 🚧 Next Priorities
 
