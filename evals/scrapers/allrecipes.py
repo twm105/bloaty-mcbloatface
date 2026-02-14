@@ -77,9 +77,7 @@ class AllRecipesScraper(BaseScraper):
 
         return None
 
-    def _parse_json_ld(
-        self, data: dict, url: str, raw_html: str
-    ) -> ScrapedRecipe:
+    def _parse_json_ld(self, data: dict, url: str, raw_html: str) -> ScrapedRecipe:
         """Parse recipe from JSON-LD data."""
         # Extract image URL
         image_url = ""
@@ -107,9 +105,29 @@ class AllRecipesScraper(BaseScraper):
 
         for cat in categories:
             cat_lower = cat.lower() if cat else ""
-            if cat_lower in ["indian", "italian", "mexican", "chinese", "thai", "japanese", "french", "greek", "spanish", "american"]:
+            if cat_lower in [
+                "indian",
+                "italian",
+                "mexican",
+                "chinese",
+                "thai",
+                "japanese",
+                "french",
+                "greek",
+                "spanish",
+                "american",
+            ]:
                 cuisine = cat_lower
-            if cat_lower in ["breakfast", "lunch", "dinner", "brunch", "snack", "dessert", "appetizer", "side dish"]:
+            if cat_lower in [
+                "breakfast",
+                "lunch",
+                "dinner",
+                "brunch",
+                "snack",
+                "dessert",
+                "appetizer",
+                "side dish",
+            ]:
                 meal_type = cat_lower
 
         return ScrapedRecipe(
@@ -123,7 +141,9 @@ class AllRecipesScraper(BaseScraper):
             raw_html=raw_html,
         )
 
-    def _parse_html(self, soup: BeautifulSoup, url: str, raw_html: str) -> ScrapedRecipe:
+    def _parse_html(
+        self, soup: BeautifulSoup, url: str, raw_html: str
+    ) -> ScrapedRecipe:
         """Fallback HTML parsing when JSON-LD is not available."""
         # Recipe name
         name_elem = soup.find("h1")
@@ -161,8 +181,23 @@ class AllRecipesScraper(BaseScraper):
             "1 cup diced onion" -> ScrapedIngredient(name="onion", quantity="1", unit="cup")
         """
         # Common cooking state indicators
-        cooked_indicators = ["cooked", "roasted", "grilled", "fried", "baked", "steamed", "sauteed"]
-        processed_indicators = ["canned", "jarred", "frozen", "dried", "pickled", "crushed"]
+        cooked_indicators = [
+            "cooked",
+            "roasted",
+            "grilled",
+            "fried",
+            "baked",
+            "steamed",
+            "sauteed",
+        ]
+        processed_indicators = [
+            "canned",
+            "jarred",
+            "frozen",
+            "dried",
+            "pickled",
+            "crushed",
+        ]
 
         text = text.strip()
         state = None
@@ -192,7 +227,7 @@ class AllRecipesScraper(BaseScraper):
         qty_match = re.match(quantity_pattern, text, re.IGNORECASE)
         if qty_match:
             quantity = qty_match.group(1).strip()
-            name = text[qty_match.end():].strip()
+            name = text[qty_match.end() :].strip()
 
         # Try to extract unit (including parenthetical size like "(8 ounce)")
         unit_match = re.match(unit_pattern, name, re.IGNORECASE)
@@ -201,14 +236,19 @@ class AllRecipesScraper(BaseScraper):
             paren_part = unit_match.group(1) or ""
             unit_part = unit_match.group(2) or ""
             unit = (paren_part + unit_part).strip()
-            name = name[unit_match.end():].strip()
+            name = name[unit_match.end() :].strip()
 
         # Clean up name - remove prep instructions after comma
         if "," in name:
             name = name.split(",")[0].strip()
 
         # Remove size descriptors and prep words
-        name = re.sub(r"^(large|medium|small|diced|chopped|minced|sliced)\s+", "", name, flags=re.IGNORECASE)
+        name = re.sub(
+            r"^(large|medium|small|diced|chopped|minced|sliced)\s+",
+            "",
+            name,
+            flags=re.IGNORECASE,
+        )
 
         return ScrapedIngredient(
             name=name,

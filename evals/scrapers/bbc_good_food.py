@@ -70,7 +70,9 @@ class BBCGoodFoodScraper(BaseScraper):
                     for item in data:
                         if isinstance(item, dict):
                             item_type = item.get("@type")
-                            if item_type == "Recipe" or (isinstance(item_type, list) and "Recipe" in item_type):
+                            if item_type == "Recipe" or (
+                                isinstance(item_type, list) and "Recipe" in item_type
+                            ):
                                 return item
 
             except json.JSONDecodeError:
@@ -94,7 +96,9 @@ class BBCGoodFoodScraper(BaseScraper):
         minutes = int(match.group(2) or 0)
         return hours * 60 + minutes if (hours or minutes) else None
 
-    def _parse_nutrition(self, nutrition_data: Optional[dict]) -> Optional[NutritionInfo]:
+    def _parse_nutrition(
+        self, nutrition_data: Optional[dict]
+    ) -> Optional[NutritionInfo]:
         """Extract nutrition info from JSON-LD nutrition object."""
         if not nutrition_data:
             return None
@@ -118,9 +122,7 @@ class BBCGoodFoodScraper(BaseScraper):
             raw_data=nutrition_data,
         )
 
-    def _parse_json_ld(
-        self, data: dict, url: str, raw_html: str
-    ) -> ScrapedRecipe:
+    def _parse_json_ld(self, data: dict, url: str, raw_html: str) -> ScrapedRecipe:
         """Parse recipe from JSON-LD data."""
         # Extract image URL
         image_url = ""
@@ -179,12 +181,36 @@ class BBCGoodFoodScraper(BaseScraper):
             keyword_list = [k.strip().lower() for k in keywords.split(",")]
             # Common cuisines
             for kw in keyword_list:
-                if kw in ["indian", "italian", "mexican", "chinese", "thai", "japanese", "french", "greek", "spanish", "american", "british", "korean", "vietnamese"]:
+                if kw in [
+                    "indian",
+                    "italian",
+                    "mexican",
+                    "chinese",
+                    "thai",
+                    "japanese",
+                    "french",
+                    "greek",
+                    "spanish",
+                    "american",
+                    "british",
+                    "korean",
+                    "vietnamese",
+                ]:
                     cuisine = kw
                     break
             # Meal types
             for kw in keyword_list:
-                if kw in ["breakfast", "lunch", "dinner", "brunch", "snack", "dessert", "starter", "main", "side"]:
+                if kw in [
+                    "breakfast",
+                    "lunch",
+                    "dinner",
+                    "brunch",
+                    "snack",
+                    "dessert",
+                    "starter",
+                    "main",
+                    "side",
+                ]:
                     meal_type = kw
                     break
 
@@ -204,7 +230,9 @@ class BBCGoodFoodScraper(BaseScraper):
             raw_html=raw_html,
         )
 
-    def _parse_html(self, soup: BeautifulSoup, url: str, raw_html: str) -> ScrapedRecipe:
+    def _parse_html(
+        self, soup: BeautifulSoup, url: str, raw_html: str
+    ) -> ScrapedRecipe:
         """Fallback HTML parsing when JSON-LD is not available."""
         # Recipe name
         name_elem = soup.find("h1")
@@ -218,7 +246,9 @@ class BBCGoodFoodScraper(BaseScraper):
 
         # Description
         description = ""
-        desc_elem = soup.find("div", class_=re.compile(r"description|summary|intro", re.I))
+        desc_elem = soup.find(
+            "div", class_=re.compile(r"description|summary|intro", re.I)
+        )
         if desc_elem:
             description = desc_elem.get_text(strip=True)
 
@@ -250,8 +280,24 @@ class BBCGoodFoodScraper(BaseScraper):
         """
         # Common cooking state indicators
         raw_indicators = ["raw", "fresh", "uncooked"]
-        cooked_indicators = ["cooked", "roasted", "grilled", "fried", "baked", "steamed", "sautéed", "sauteed"]
-        processed_indicators = ["canned", "tinned", "jarred", "frozen", "dried", "pickled"]
+        cooked_indicators = [
+            "cooked",
+            "roasted",
+            "grilled",
+            "fried",
+            "baked",
+            "steamed",
+            "sautéed",
+            "sauteed",
+        ]
+        processed_indicators = [
+            "canned",
+            "tinned",
+            "jarred",
+            "frozen",
+            "dried",
+            "pickled",
+        ]
 
         text = text.strip()
         state = None
@@ -286,13 +332,13 @@ class BBCGoodFoodScraper(BaseScraper):
         qty_match = re.match(quantity_pattern, text, re.IGNORECASE)
         if qty_match:
             quantity = qty_match.group(1).strip()
-            name = text[qty_match.end():].strip()
+            name = text[qty_match.end() :].strip()
 
         # Try to extract unit
         unit_match = re.match(unit_pattern, name, re.IGNORECASE)
         if unit_match:
             unit = unit_match.group(1).lower()
-            name = name[unit_match.end():].strip()
+            name = name[unit_match.end() :].strip()
 
         # Clean up name - remove prep instructions after comma
         if "," in name:
@@ -347,10 +393,19 @@ class BBCGoodFoodScraper(BaseScraper):
             recipe_links = []
 
             # Pattern 1: /recipes/name (collection pages)
-            recipe_links.extend(soup.find_all("a", href=re.compile(r"^/recipes/[a-z0-9-]+$")))
+            recipe_links.extend(
+                soup.find_all("a", href=re.compile(r"^/recipes/[a-z0-9-]+$"))
+            )
 
             # Pattern 2: Full URLs
-            recipe_links.extend(soup.find_all("a", href=re.compile(rf"^{re.escape(self.BASE_URL)}/recipes/[a-z0-9-]+$")))
+            recipe_links.extend(
+                soup.find_all(
+                    "a",
+                    href=re.compile(
+                        rf"^{re.escape(self.BASE_URL)}/recipes/[a-z0-9-]+$"
+                    ),
+                )
+            )
 
             if not recipe_links:
                 # Try broader pattern
@@ -394,7 +449,9 @@ class BBCGoodFoodScraper(BaseScraper):
 
         return urls[:limit]
 
-    def scrape_urls(self, urls: list[str], download_images: bool = True) -> list[ScrapedRecipe]:
+    def scrape_urls(
+        self, urls: list[str], download_images: bool = True
+    ) -> list[ScrapedRecipe]:
         """Scrape a list of explicit recipe URLs.
 
         Useful for ad-hoc scraping from curated lists.
@@ -413,10 +470,12 @@ class BBCGoodFoodScraper(BaseScraper):
             try:
                 recipe = self.scrape_recipe(url)
                 if download_images and recipe.image_url:
-                    print(f"    Downloading image...")
+                    print("    Downloading image...")
                     self.download_image(recipe)
                 recipes.append(recipe)
-                print(f"    OK: {recipe.recipe_name} ({len(recipe.ingredients)} ingredients)")
+                print(
+                    f"    OK: {recipe.recipe_name} ({len(recipe.ingredients)} ingredients)"
+                )
                 if recipe.nutrition and recipe.nutrition.calories:
                     print(f"    Nutrition: {recipe.nutrition.calories:.0f} kcal")
             except Exception as e:

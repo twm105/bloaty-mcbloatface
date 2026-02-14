@@ -250,18 +250,22 @@ def run_scrape(args):
             # Convert ingredients to ground truth format
             ingredients = []
             for ing in recipe.ingredients:
-                ingredients.append({
-                    "name": ing.name,
-                    "name_variants": [],
-                    "state": ing.state or "raw",
-                    "required": True,
-                })
+                ingredients.append(
+                    {
+                        "name": ing.name,
+                        "name_variants": [],
+                        "state": ing.state or "raw",
+                        "required": True,
+                    }
+                )
 
             test_case = {
                 "id": f"{args.source}_{recipe.slug}",
                 "source": args.source,
                 "source_url": recipe.source_url,
-                "image_path": str(recipe.local_image_path.relative_to(Path("evals/datasets")))
+                "image_path": str(
+                    recipe.local_image_path.relative_to(Path("evals/datasets"))
+                )
                 if recipe.local_image_path
                 else None,
                 "expected": {
@@ -301,7 +305,9 @@ def run_history(args):
 
     print(f"\nRecent {args.eval_type} eval runs:")
     print("-" * 80)
-    print(f"{'ID':<6} {'Model':<30} {'F1':<8} {'P':<8} {'R':<8} {'Cases':<6} {'Time':<8}")
+    print(
+        f"{'ID':<6} {'Model':<30} {'F1':<8} {'P':<8} {'R':<8} {'Cases':<6} {'Time':<8}"
+    )
     print("-" * 80)
 
     for run in runs:
@@ -362,7 +368,7 @@ def run_cache(args):
         print("\nCache Statistics:")
         print(f"  Files: {stats['file_count']}")
         print(f"  Size: {stats['total_size_bytes'] / 1024:.1f} KB")
-        print(f"  Methods:")
+        print("  Methods:")
         for method, count in stats.get("methods", {}).items():
             print(f"    {method}: {count}")
 
@@ -374,7 +380,9 @@ def run_cache(args):
     else:
         # Default to stats
         stats = cache.stats()
-        print(f"Cache: {stats['file_count']} files, {stats['total_size_bytes'] / 1024:.1f} KB")
+        print(
+            f"Cache: {stats['file_count']} files, {stats['total_size_bytes'] / 1024:.1f} KB"
+        )
 
 
 def print_table(result):

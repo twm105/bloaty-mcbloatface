@@ -2,7 +2,6 @@
 
 import time
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 from evals.config import EvalConfig
 from evals.results import EvalResult

@@ -1,7 +1,6 @@
 """Database storage and retrieval for eval results."""
 
 from dataclasses import dataclass
-from datetime import datetime
 
 
 @dataclass

@@ -1,7 +1,6 @@
 """Meal analysis evaluation runner."""
 
 import json
-from pathlib import Path
 
 from .base import BaseEvalRunner
 from evals.metrics import score_meal_analysis, aggregate_meal_analysis_scores
@@ -49,7 +48,7 @@ class MealAnalysisRunner(BaseEvalRunner):
             raise FileNotFoundError(f"Image not found: {image_path}")
 
         # Check cache first
-        cache_key = f"meal_analysis_{test_case['id']}_{self.config.model}"
+        f"meal_analysis_{test_case['id']}_{self.config.model}"
         cached_result = None
 
         if self.cache_manager:

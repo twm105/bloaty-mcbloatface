@@ -164,14 +164,18 @@ class BaseScraper(ABC):
                     raise
 
                 # Exponential backoff
-                backoff = self.BACKOFF_FACTOR ** attempt + random.uniform(0, 1)
-                print(f"  Retry {attempt + 1}/{self.MAX_RETRIES} after {backoff:.1f}s (status {status})")
+                backoff = self.BACKOFF_FACTOR**attempt + random.uniform(0, 1)
+                print(
+                    f"  Retry {attempt + 1}/{self.MAX_RETRIES} after {backoff:.1f}s (status {status})"
+                )
                 time.sleep(backoff)
 
             except requests.exceptions.RequestException as e:
                 last_error = e
-                backoff = self.BACKOFF_FACTOR ** attempt + random.uniform(0, 1)
-                print(f"  Retry {attempt + 1}/{self.MAX_RETRIES} after {backoff:.1f}s ({type(e).__name__})")
+                backoff = self.BACKOFF_FACTOR**attempt + random.uniform(0, 1)
+                print(
+                    f"  Retry {attempt + 1}/{self.MAX_RETRIES} after {backoff:.1f}s ({type(e).__name__})"
+                )
                 time.sleep(backoff)
 
         raise last_error or requests.exceptions.RequestException("Max retries exceeded")
@@ -269,10 +273,12 @@ class BaseScraper(ABC):
             try:
                 recipe = self.scrape_recipe(url)
                 if download_images and recipe.image_url:
-                    print(f"    Downloading image...")
+                    print("    Downloading image...")
                     self.download_image(recipe)
                 recipes.append(recipe)
-                print(f"    OK: {recipe.recipe_name} ({len(recipe.ingredients)} ingredients)")
+                print(
+                    f"    OK: {recipe.recipe_name} ({len(recipe.ingredients)} ingredients)"
+                )
             except Exception as e:
                 print(f"    ERROR: {e}")
                 continue
