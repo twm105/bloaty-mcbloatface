@@ -100,8 +100,12 @@ async def llm_judge_ingredient_match(
     """
     # Format expected ingredients for the prompt
     expected_formatted = "\n".join(
-        f"- {exp['name']}" + (f" (variants: {', '.join(exp.get('name_variants', []))})"
-                              if exp.get('name_variants') else "")
+        f"- {exp['name']}"
+        + (
+            f" (variants: {', '.join(exp.get('name_variants', []))})"
+            if exp.get("name_variants")
+            else ""
+        )
         for exp in expected_list
     )
 
@@ -137,7 +141,9 @@ async def llm_judge_ingredient_match(
         except json.JSONDecodeError:
             # Try to extract JSON from response
             if "{" in raw_response and "}" in raw_response:
-                json_str = raw_response[raw_response.index("{"):raw_response.rindex("}") + 1]
+                json_str = raw_response[
+                    raw_response.index("{") : raw_response.rindex("}") + 1
+                ]
                 result = json.loads(json_str)
             else:
                 # Fallback to string matching
@@ -196,6 +202,7 @@ async def llm_judge_ingredient_match(
 @dataclass
 class SoftMatchResult:
     """Result of soft matching for a single predicted ingredient."""
+
     predicted: str
     score: float
     matched_to: Optional[str]
@@ -335,7 +342,9 @@ async def score_meal_analysis_soft(
 
     # Score each predicted ingredient
     prediction_scores: list[SoftMatchResult] = []
-    matched_expected_scores: dict[int, float] = {}  # Track best score per expected ingredient
+    matched_expected_scores: dict[
+        int, float
+    ] = {}  # Track best score per expected ingredient
 
     for pred in pred_ingredients:
         pred_name = pred.get("name", "") if isinstance(pred, dict) else pred
@@ -357,7 +366,9 @@ async def score_meal_analysis_soft(
         prediction_scores.append(soft_result)
 
         if verbose:
-            print(f"      {pred_name} -> {result['matched_to'] or 'NO MATCH'} ({result['score']})")
+            print(
+                f"      {pred_name} -> {result['matched_to'] or 'NO MATCH'} ({result['score']})"
+            )
 
         # Track best score for each expected ingredient (for recall)
         if result["matched_to"] and result["score"] > 0:
@@ -416,15 +427,23 @@ async def score_meal_analysis_soft(
 
     # Build detailed results for analysis
     true_positives = [
-        {"predicted": r.predicted, "score": r.score, "matched_to": r.matched_to, "reasoning": r.reasoning}
-        for r in prediction_scores if r.score >= 0.5
+        {
+            "predicted": r.predicted,
+            "score": r.score,
+            "matched_to": r.matched_to,
+            "reasoning": r.reasoning,
+        }
+        for r in prediction_scores
+        if r.score >= 0.5
     ]
     false_positives = [
         {"predicted": r.predicted, "score": r.score, "reasoning": r.reasoning}
-        for r in prediction_scores if r.score == 0.0
+        for r in prediction_scores
+        if r.score == 0.0
     ]
     false_negatives = [
-        exp for i, exp in enumerate(exp_ingredients)
+        exp
+        for i, exp in enumerate(exp_ingredients)
         if exp.get("required", True) and matched_expected_scores.get(i, 0) == 0
     ]
 

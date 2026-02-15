@@ -5,7 +5,11 @@ import json
 from pathlib import Path
 
 from .base import BaseEvalRunner
-from evals.metrics import score_meal_analysis, score_meal_analysis_soft, aggregate_meal_analysis_scores
+from evals.metrics import (
+    score_meal_analysis,
+    score_meal_analysis_soft,
+    aggregate_meal_analysis_scores,
+)
 
 
 class MealAnalysisRunner(BaseEvalRunner):

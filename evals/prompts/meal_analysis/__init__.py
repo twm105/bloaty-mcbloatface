@@ -42,8 +42,7 @@ def get_prompt(version: Optional[str] = None) -> str:
 
     if version not in VERSIONS:
         raise ValueError(
-            f"Unknown prompt version: {version}. "
-            f"Available: {', '.join(VERSIONS)}"
+            f"Unknown prompt version: {version}. Available: {', '.join(VERSIONS)}"
         )
 
     module = importlib.import_module(f".{version}", package=__name__)

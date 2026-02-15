@@ -42,7 +42,9 @@ def load_image_base64(image_path: str) -> str:
     return f"data:{mime_type};base64,{data}"
 
 
-def get_match_status(ingredient_name: str, ingredient_details: dict) -> tuple[str, float, str]:
+def get_match_status(
+    ingredient_name: str, ingredient_details: dict
+) -> tuple[str, float, str]:
     """
     Determine if an expected ingredient was matched by any prediction.
 
@@ -70,7 +72,9 @@ def get_match_status(ingredient_name: str, ingredient_details: dict) -> tuple[st
         return "missed", 0.0, None
 
 
-def get_prediction_status(predicted: str, ingredient_details: dict) -> tuple[str, float, str]:
+def get_prediction_status(
+    predicted: str, ingredient_details: dict
+) -> tuple[str, float, str]:
     """
     Determine if a predicted ingredient matched any expected ingredient.
 
@@ -116,18 +120,22 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
     for run in runs_data:
         version_label = get_version_label(run)
         aggregate = run.get("detailed_results", {}).get("aggregate", {})
-        versions.append({
-            "id": run.get("id"),
-            "label": version_label,
-            "model": run.get("model", "Unknown"),
-            "created_at": run.get("created_at", "")[:10] if run.get("created_at") else "N/A",
-            "notes": run.get("detailed_results", {}).get("notes", ""),
-            "f1": aggregate.get("mean_f1", 0),
-            "precision": aggregate.get("mean_precision", 0),
-            "recall": aggregate.get("mean_recall", 0),
-            "state_accuracy": aggregate.get("mean_state_accuracy", 0),
-            "num_cases": run.get("num_cases", 0),
-        })
+        versions.append(
+            {
+                "id": run.get("id"),
+                "label": version_label,
+                "model": run.get("model", "Unknown"),
+                "created_at": run.get("created_at", "")[:10]
+                if run.get("created_at")
+                else "N/A",
+                "notes": run.get("detailed_results", {}).get("notes", ""),
+                "f1": aggregate.get("mean_f1", 0),
+                "precision": aggregate.get("mean_precision", 0),
+                "recall": aggregate.get("mean_recall", 0),
+                "state_accuracy": aggregate.get("mean_state_accuracy", 0),
+                "num_cases": run.get("num_cases", 0),
+            }
+        )
 
     # Collect all test cases indexed by ID
     test_cases_by_id = {}
@@ -525,11 +533,19 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
         delta_f1 = v["f1"] - baseline_f1 if i > 0 else 0
         delta_html = ""
         if i > 0:
-            delta_class = "positive" if delta_f1 > 0 else "negative" if delta_f1 < 0 else ""
+            delta_class = (
+                "positive" if delta_f1 > 0 else "negative" if delta_f1 < 0 else ""
+            )
             delta_sign = "+" if delta_f1 > 0 else ""
-            delta_html = f'<span class="delta {delta_class}">{delta_sign}{delta_f1:.1%}</span>'
+            delta_html = (
+                f'<span class="delta {delta_class}">{delta_sign}{delta_f1:.1%}</span>'
+            )
 
-        notes_html = f'<div class="version-notes">{html.escape(v["notes"][:60])}...</div>' if v["notes"] else ""
+        notes_html = (
+            f'<div class="version-notes">{html.escape(v["notes"][:60])}...</div>'
+            if v["notes"]
+            else ""
+        )
 
         html_parts.append(f"""
                     <tr class="{row_class}">
@@ -537,12 +553,12 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
                             <div class="version-label">{html.escape(v["label"])}</div>
                             {notes_html}
                         </td>
-                        <td class="metric-cell {get_score_class(v['f1'])}">{v['f1']:.1%}{delta_html}</td>
-                        <td class="metric-cell {get_score_class(v['precision'])}">{v['precision']:.1%}</td>
-                        <td class="metric-cell {get_score_class(v['recall'])}">{v['recall']:.1%}</td>
-                        <td class="metric-cell {get_score_class(v['state_accuracy'])}">{v['state_accuracy']:.1%}</td>
-                        <td>{v['num_cases']}</td>
-                        <td>{v['created_at']}</td>
+                        <td class="metric-cell {get_score_class(v["f1"])}">{v["f1"]:.1%}{delta_html}</td>
+                        <td class="metric-cell {get_score_class(v["precision"])}">{v["precision"]:.1%}</td>
+                        <td class="metric-cell {get_score_class(v["recall"])}">{v["recall"]:.1%}</td>
+                        <td class="metric-cell {get_score_class(v["state_accuracy"])}">{v["state_accuracy"]:.1%}</td>
+                        <td>{v["num_cases"]}</td>
+                        <td>{v["created_at"]}</td>
                     </tr>
 """)
 
@@ -578,7 +594,7 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
         html_parts.append(f"""
             <button class="version-tab {active_class}" data-version="{i}">
                 {html.escape(v["label"])}
-                <span class="tab-score">F1: {v['f1']:.0%}</span>
+                <span class="tab-score">F1: {v["f1"]:.0%}</span>
             </button>
 """)
 
@@ -602,7 +618,7 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
             score_badges_html.append(
                 f'<span class="score-badge {get_score_class(f1)}" data-version="{i}">'
                 f'<span class="version-name">{html.escape(v["label"][:10])}:</span> {f1:.0%}'
-                f'</span>'
+                f"</span>"
             )
 
         html_parts.append(f"""
@@ -610,7 +626,7 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
             <div class="test-case-header">
                 <span class="test-case-id">{html.escape(case_id)}</span>
                 <div class="score-badges">
-                    {''.join(score_badges_html)}
+                    {"".join(score_badges_html)}
                 </div>
             </div>
             <div class="test-case-body">
@@ -619,8 +635,8 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
                     {"<img class='meal-image' src='" + image_data + "' alt='Meal image'>" if image_data else "<div class='meal-image' style='display:flex;align-items:center;justify-content:center;color:#999;'>No image</div>"}
                 </div>
                 <div>
-                    <div class="column-header">Ground Truth ({len(expected.get('ingredients', []))} ingredients)</div>
-                    <div class="meal-title">{html.escape(expected.get('meal_name', 'Unknown'))}</div>
+                    <div class="column-header">Ground Truth ({len(expected.get("ingredients", []))} ingredients)</div>
+                    <div class="meal-title">{html.escape(expected.get("meal_name", "Unknown"))}</div>
 """)
 
         # Build ground truth ingredients per version (colors change based on selected version)
@@ -636,7 +652,9 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
                 raw_text = ing.get("raw_text", ing_name)
                 required = ing.get("required", True)
 
-                status, match_score, matched_by = get_match_status(ing_name, ingredient_details)
+                status, match_score, matched_by = get_match_status(
+                    ing_name, ingredient_details
+                )
 
                 status_class = status
                 match_info = ""
@@ -653,7 +671,7 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
 
             html_parts.append(f"""
                     <ul class="ingredients-list prediction-version {active_class}" data-version="{i}">
-                        {''.join(expected_ingredients_html)}
+                        {"".join(expected_ingredients_html)}
                     </ul>
 """)
 
@@ -679,7 +697,9 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
                     ing_name = str(ing)
                     ing_state = ""
 
-                status, match_score, matched_to = get_prediction_status(ing_name, ingredient_details)
+                status, match_score, matched_to = get_prediction_status(
+                    ing_name, ingredient_details
+                )
 
                 match_info = ""
                 if matched_to:
@@ -696,10 +716,10 @@ def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
 
             html_parts.append(f"""
                     <div class="prediction-version {active_class}" data-version="{i}">
-                        <div class="column-header">Predicted - {html.escape(v['label'])} ({len(predicted.get('ingredients', []))} ingredients)</div>
-                        <div class="meal-title">{html.escape(predicted.get('meal_name', 'Unknown'))}</div>
+                        <div class="column-header">Predicted - {html.escape(v["label"])} ({len(predicted.get("ingredients", []))} ingredients)</div>
+                        <div class="meal-title">{html.escape(predicted.get("meal_name", "Unknown"))}</div>
                         <ul class="ingredients-list">
-                            {''.join(predicted_ingredients_html)}
+                            {"".join(predicted_ingredients_html)}
                         </ul>
                     </div>
 """)

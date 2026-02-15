@@ -194,7 +194,9 @@ async def run_eval(args):
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    scoring_mode = "LLM-judge soft scoring" if config.use_llm_judge else "hard string matching"
+    scoring_mode = (
+        "LLM-judge soft scoring" if config.use_llm_judge else "hard string matching"
+    )
     print(f"Running {config.eval_type} eval with {config.model}...")
     print(f"Scoring mode: {scoring_mode}")
     if config.prompt_version != "current":
