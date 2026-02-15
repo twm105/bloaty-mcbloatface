@@ -7,7 +7,7 @@ Run with: docker compose exec web python scripts/populate_dev_data.py
 
 import asyncio
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
@@ -269,9 +269,9 @@ async def main():
 
         print("\n=== Done! ===")
         print(f"Created {len(meals)} meals and 6 symptoms")
-        print(f"Login at http://localhost:8000 with:")
-        print(f"  Email: tmaisey@gmail.com")
-        print(f"  Password: bloaty-admin")
+        print("Login at http://localhost:8000 with:")
+        print("  Email: tmaisey@gmail.com")
+        print("  Password: bloaty-admin")
 
     finally:
         db.close()
