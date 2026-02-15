@@ -204,61 +204,16 @@ async def analyze_meal_image(
         # Refresh meal to get all ingredients
         db.refresh(meal)
 
-        # Return HTML to replace the entire AI container
-        from fastapi.responses import HTMLResponse
-
-        # Build complete status bar + content section wrapped in #ai-container
-        response_html = f"""
-        <div id="ai-container">
-            <!-- Complete status bar (replaces analyzing bar) -->
-            <div style="
-                background: #d4edda;
-                border-left: 4px solid #28a745;
-                color: #155724;
-                padding: 0.75rem 1rem;
-                border-radius: 8px;
-                margin-bottom: 1.5rem;
-                font-size: 14px;
-            ">
-                ✓ AI Analysis Complete - Ready for review
-            </div>
-
-            <!-- Content section -->
-            <div id="analysis-and-ingredients">
-            <header style="margin-bottom: 1.5rem;">
-                <h1
-                    id="meal-name-header"
-                    onclick="makeEditable(this, {meal.id}, null, 'meal_name')"
-                    style="cursor: text; padding: 0.25rem; border-radius: 8px; margin-bottom: 0.5rem;"
-                    title="Click to edit meal name"
-                >
-                    {meal.name or "Untitled Meal"}
-                </h1>
-                <p style="font-size: 14px; color: #666; margin: 0;">Click any field to edit</p>
-            </header>
-
-            <section style="margin-bottom: 1.5rem;">
-                <h3>Ingredients</h3>
-                <div id="ingredients-list">
-        """
-
-        # Build all ingredient items
-        ingredients_parts = [response_html]
-        for mi in meal.meal_ingredients:
-            ingredient_partial = templates.TemplateResponse(
-                "meals/partials/ingredient_item.html",
-                {"request": {}, "meal_ingredient": mi},
-            )
-            ingredients_parts.append(ingredient_partial.body.decode())
-
-        ingredients_parts.append("""
-                </div>
-            </section>
-            </div>
-        </div>
-        """)
-
-        return HTMLResponse(content="".join(ingredients_parts))
+        # Return HTML partial via template (includes feedback component)
+        return templates.TemplateResponse(
+            "meals/partials/analysis_complete.html",
+            {
+                "request": request,
+                "meal": meal,
+                "existing_rating": 0,
+                "existing_feedback": "",
+            },
+        )
 
     except ServiceUnavailableError:
         return templates.TemplateResponse(

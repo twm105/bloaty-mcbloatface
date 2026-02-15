@@ -1,0 +1,45 @@
+<div id="ai-container">
+    <!-- Complete status bar (replaces analyzing bar) -->
+    <div style="
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        color: #155724;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 14px;
+    ">
+        ✓ AI Analysis Complete - Ready for review
+    </div>
+
+    <!-- Content section -->
+    <div id="analysis-and-ingredients">
+        <header style="margin-bottom: 1.5rem;">
+            <h1
+                id="meal-name-header"
+                onclick="makeEditable(this, {{ meal.id }}, null, 'meal_name')"
+                style="cursor: text; padding: 0.25rem; border-radius: 8px; margin-bottom: 0.5rem;"
+                title="Click to edit meal name"
+            >
+                {{ meal.name or 'Untitled Meal' }}
+            </h1>
+            <p style="font-size: 14px; color: #666; margin: 0;">Click any field to edit</p>
+        </header>
+
+        <section style="margin-bottom: 1.5rem;">
+            <h3>Ingredients</h3>
+            <div id="ingredients-list">
+                {% for meal_ingredient in meal.meal_ingredients %}
+                    {% include 'meals/partials/ingredient_item.html' %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Meal Analysis Feedback -->
+        <section style="margin-top: var(--space-6);">
+            {% set entity_type = 'meal_analysis' %}
+            {% set entity_id = meal.id %}
+            {% include 'components/_feedback_rating.html' %}
+        </section>
+    </div>
+</div>
