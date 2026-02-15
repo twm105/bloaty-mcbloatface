@@ -135,8 +135,10 @@ def test_engine():
 
     yield engine
 
-    # Cleanup: drop all tables after test session
-    Base.metadata.drop_all(engine)
+    # Cleanup: only drop tables in CI (ephemeral database)
+    # In local dev, we share the database and use transaction rollback for isolation
+    if os.environ.get("CI"):
+        Base.metadata.drop_all(engine)
     engine.dispose()
 
 
