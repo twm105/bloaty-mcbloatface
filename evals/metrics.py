@@ -111,7 +111,6 @@ async def llm_judge_ingredient_match(
     )
 
     # Check cache first
-    cache_key = None
     if cache_manager:
         cached = cache_manager.get(
             "llm_judge_ingredient",
