@@ -6,7 +6,7 @@ from difflib import SequenceMatcher
 from typing import Optional
 
 from .config import INGREDIENT_MATCH_THRESHOLD, INGREDIENT_QUALIFIERS
-from .prompts import INGREDIENT_MATCH_JUDGE_PROMPT, INGREDIENT_MATCH_USER_TEMPLATE
+from .judge_prompts import INGREDIENT_MATCH_JUDGE_PROMPT, INGREDIENT_MATCH_USER_TEMPLATE
 
 
 def normalize_ingredient(name: str) -> str:

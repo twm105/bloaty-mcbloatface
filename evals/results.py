@@ -14,6 +14,8 @@ class EvalResult:
     detailed_results: list[dict]
     execution_time_seconds: float
     errors: list[dict]
+    prompt_version: str = "current"
+    notes: str = ""
 
 
 def store_eval_result(result: EvalResult) -> int:
@@ -43,8 +45,10 @@ def store_eval_result(result: EvalResult) -> int:
                 "test_cases": result.detailed_results,
                 "aggregate": result.metrics,
                 "errors": result.errors,
+                "prompt_version": result.prompt_version,
             },
             execution_time_seconds=result.execution_time_seconds,
+            notes=result.notes if result.notes else None,
         )
         db.add(run)
         db.commit()

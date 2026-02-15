@@ -71,6 +71,18 @@ def main():
         action="store_true",
         help="Disable LLM-as-judge soft scoring (use hard string matching)",
     )
+    eval_parser.add_argument(
+        "--prompt-version",
+        type=str,
+        default="current",
+        help="Prompt version for meal_analysis (e.g., v2_recall_focus)",
+    )
+    eval_parser.add_argument(
+        "--notes",
+        type=str,
+        default="",
+        help="Experiment hypothesis/notes to store with results",
+    )
 
     # Scrape command
     scrape_parser = subparsers.add_parser("scrape", help="Scrape recipe data")
@@ -172,6 +184,8 @@ async def run_eval(args):
         sample_size=args.sample,
         verbose=args.verbose,
         use_llm_judge=not args.no_llm_judge,
+        prompt_version=args.prompt_version,
+        notes=args.notes,
     )
 
     try:
@@ -183,6 +197,10 @@ async def run_eval(args):
     scoring_mode = "LLM-judge soft scoring" if config.use_llm_judge else "hard string matching"
     print(f"Running {config.eval_type} eval with {config.model}...")
     print(f"Scoring mode: {scoring_mode}")
+    if config.prompt_version != "current":
+        print(f"Prompt version: {config.prompt_version}")
+    if config.notes:
+        print(f"Notes: {config.notes}")
 
     result = await runner.run()
 

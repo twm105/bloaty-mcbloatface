@@ -102,7 +102,109 @@ python -m evals.run history --eval-type meal_analysis --limit 10
 
 # Compare runs
 python -m evals.run compare --runs 1,2,3
+
+# Run with specific prompt version (for experiments)
+python -m evals.run eval --eval-type meal_analysis --prompt-version v2_recall_focus \
+  --notes "HYPOTHESIS: Explicit 'list ALL' instruction improves recall"
+
+# Disable LLM judge (use string matching only)
+python -m evals.run eval --eval-type meal_analysis --no-llm-judge
+
+# Generate HTML report
+python -m scripts.generate_eval_report --run-id 3
 ```
+
+## LLM-as-Judge Scoring
+
+For ingredient matching, the evals use Haiku as an LLM judge to provide **soft scores** (0, 0.5, or 1.0) rather than binary matching. This handles semantic equivalence that string matching misses.
+
+### Score Levels
+| Score | Meaning | Example |
+|-------|---------|---------|
+| 1.0 | Exact or semantic match | "ground beef" ↔ "minced beef" |
+| 0.5 | Partial match (subset/superset) | "cheddar cheese" ↔ "cheese" |
+| 0.0 | No match | "tomato" ↔ "onion" |
+
+### Soft Metrics
+- **Soft Precision** = sum(match_scores) / num_predicted
+- **Soft Recall** = sum(best_match_scores_for_required) / num_required
+- **Soft F1** = harmonic mean of soft precision and recall
+
+### Cache
+LLM judge responses are cached to avoid repeated API costs. Cache key includes:
+- Predicted ingredient name
+- Expected ingredient list hash
+- Prompt version (for experiments)
+
+## Prompt Iteration Workflow
+
+Iterative prompt engineering to improve AI feature accuracy.
+
+### Structure
+
+```
+evals/prompts/
+├── meal_analysis/
+│   ├── __init__.py           # get_prompt(version), CURRENT_VERSION
+│   ├── v1_baseline.py        # Original production prompt
+│   ├── v2_recall_focus.py    # Experiment: emphasize inclusion
+│   ├── v3_recipe_inference.py # Experiment: infer recipe ingredients
+│   └── history.md            # Experiment log with results
+```
+
+### Version File Format
+
+Each version documents its hypothesis:
+
+```python
+"""
+Version: v2_recall_focus
+Hypothesis: Explicit "list ALL visible ingredients" instruction improves recall
+Expected: Recall +0.15, Precision -0.05 (acceptable trade-off)
+Changes:
+  - Added "ERR ON THE SIDE OF INCLUSION" instruction
+  - Added commonly missed ingredients list
+Created: 2026-02-15
+Result: F1 +12.6%, Recall +31.7% ✓
+"""
+MEAL_ANALYSIS_SYSTEM_PROMPT = """..."""
+```
+
+### Workflow
+
+1. **Hypothesize**: Identify weakness in current scores, form hypothesis
+2. **Build**: Create new version file `vN_descriptive_name.py`
+3. **Eval**: Run with `--prompt-version vN_name --notes "..."`
+4. **Record**: Update `history.md` with results and analysis
+5. **Repeat**: If target not met, form new hypothesis
+
+### CLI Examples
+
+```bash
+# Run baseline (or any version)
+docker compose exec web python -m evals.run eval \
+  --eval-type meal_analysis --sample 20 \
+  --prompt-version v1_baseline \
+  --notes "BASELINE: Initial measurement"
+
+# Run experiment
+docker compose exec web python -m evals.run eval \
+  --eval-type meal_analysis --sample 20 \
+  --prompt-version v3_recipe_inference \
+  --notes "HYPOTHESIS: Recipe inference matches ground truth better"
+
+# Compare all runs
+docker compose exec web python -m evals.run compare --runs 1,2,3
+```
+
+### Experiment History
+
+See `evals/prompts/meal_analysis/history.md` for full experiment log with:
+- Summary table of all runs
+- Per-version hypothesis, changes, and results
+- Key learnings and next experiments
+
+**Current best (v3_recipe_inference)**: F1=0.522, Recall=0.514 (+45.7% from baseline)
 
 ## Metrics
 
@@ -167,19 +269,21 @@ To avoid repeated API costs during development:
 
 ## Implementation Phases
 
-### Phase 1: Infrastructure
+### Phase 1: Infrastructure ✅
 - [x] EvalRun model exists
-- [ ] Directory structure
-- [ ] Base scraper and runner classes
-- [ ] Metrics implementation
-- [ ] CLI skeleton
+- [x] Directory structure
+- [x] Base scraper and runner classes
+- [x] Metrics implementation (hard + soft/LLM-judge)
+- [x] CLI skeleton with all commands
 
-### Phase 2: Meal Analysis (Priority)
-- [ ] BBC Good Food scraper
-- [ ] Download 50 recipe images
-- [ ] Curate ground truth (manual review)
-- [ ] MealAnalysisRunner implementation
-- [ ] Run first eval
+### Phase 2: Meal Analysis ✅
+- [x] BBC Good Food scraper
+- [x] Download 53 recipe images
+- [x] Ground truth JSON format
+- [x] MealAnalysisRunner implementation
+- [x] Run baseline eval (F1=0.43)
+- [x] Prompt versioning infrastructure
+- [x] First iteration experiments (F1=0.52)
 
 ### Phase 3: Secondary Evals
 - [ ] AllRecipes scraper
@@ -187,7 +291,12 @@ To avoid repeated API costs during development:
 - [ ] Symptom elaboration eval
 - [ ] Edge case images
 
-### Phase 4: Polish
-- [ ] HTML report generation
-- [ ] History and comparison commands
-- [ ] Documentation updates
+### Phase 4: Polish ✅
+- [x] HTML report generation (`scripts/generate_eval_report.py`)
+- [x] History and comparison commands
+- [x] Documentation updates
+
+### Phase 5: Iterate to Target
+- [ ] Continue prompt experiments to F1 ≥0.77
+- [ ] State accuracy improvements (currently ~16%)
+- [ ] Expand dataset to 100 images

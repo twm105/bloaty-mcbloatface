@@ -128,4 +128,6 @@ class BaseEvalRunner(ABC):
             detailed_results=results,
             execution_time_seconds=execution_time,
             errors=errors,
+            prompt_version=self.config.prompt_version,
+            notes=self.config.notes,
         )

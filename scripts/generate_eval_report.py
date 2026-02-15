@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 """
-Generate static HTML visualization of eval results.
+Generate static HTML visualization of eval results with version comparison.
 
 Usage:
+    # Single run
     docker compose exec web python -m scripts.generate_eval_report --run-id 1
-    docker compose exec web python -m scripts.generate_eval_report --run-id 1 --output report.html
+
+    # Compare multiple runs (baseline vs experiments)
+    docker compose exec web python -m scripts.generate_eval_report --run-ids 1,2,3
+
+    # Custom output
+    docker compose exec web python -m scripts.generate_eval_report --run-ids 1,2,3 --output comparison.html
 """
 
 import argparse
@@ -90,11 +96,67 @@ def get_prediction_status(predicted: str, ingredient_details: dict) -> tuple[str
     return "wrong", 0.0, None
 
 
-def generate_html(run_data: dict, output_path: str) -> None:
-    """Generate HTML visualization from eval run data."""
+def get_version_label(run_data: dict) -> str:
+    """Extract a human-readable version label from run data."""
+    detailed = run_data.get("detailed_results", {})
+    prompt_version = detailed.get("prompt_version", "")
 
-    test_cases = run_data.get("detailed_results", {}).get("test_cases", [])
-    aggregate = run_data.get("detailed_results", {}).get("aggregate", {})
+    if prompt_version and prompt_version != "current":
+        return prompt_version
+
+    # Fallback to run ID
+    return f"Run {run_data.get('id', '?')}"
+
+
+def generate_comparison_html(runs_data: list[dict], output_path: str) -> None:
+    """Generate HTML visualization comparing multiple eval runs."""
+
+    # Build version info
+    versions = []
+    for run in runs_data:
+        version_label = get_version_label(run)
+        aggregate = run.get("detailed_results", {}).get("aggregate", {})
+        versions.append({
+            "id": run.get("id"),
+            "label": version_label,
+            "model": run.get("model", "Unknown"),
+            "created_at": run.get("created_at", "")[:10] if run.get("created_at") else "N/A",
+            "notes": run.get("detailed_results", {}).get("notes", ""),
+            "f1": aggregate.get("mean_f1", 0),
+            "precision": aggregate.get("mean_precision", 0),
+            "recall": aggregate.get("mean_recall", 0),
+            "state_accuracy": aggregate.get("mean_state_accuracy", 0),
+            "num_cases": run.get("num_cases", 0),
+        })
+
+    # Collect all test cases indexed by ID
+    test_cases_by_id = {}
+    for run_idx, run in enumerate(runs_data):
+        test_cases = run.get("detailed_results", {}).get("test_cases", [])
+        for case in test_cases:
+            case_id = case.get("id", "unknown")
+            if case_id not in test_cases_by_id:
+                test_cases_by_id[case_id] = {
+                    "id": case_id,
+                    "image_path": case.get("image_path", ""),
+                    "expected": case.get("expected", {}),
+                    "versions": {},
+                }
+            test_cases_by_id[case_id]["versions"][run_idx] = {
+                "predicted": case.get("predicted", {}),
+                "score": case.get("score", {}),
+                "ingredient_details": case.get("ingredient_details", {}),
+            }
+
+    # Sort test cases by ID
+    sorted_case_ids = sorted(test_cases_by_id.keys())
+
+    def get_score_class(score):
+        if score >= 0.7:
+            return "good"
+        elif score >= 0.4:
+            return "medium"
+        return "poor"
 
     # Start building HTML
     html_parts = [
@@ -103,7 +165,7 @@ def generate_html(run_data: dict, output_path: str) -> None:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal Analysis Eval Report</title>
+    <title>Meal Analysis Eval Comparison</title>
     <style>
         * {
             box-sizing: border-box;
@@ -126,7 +188,7 @@ def generate_html(run_data: dict, output_path: str) -> None:
 
         h1 {
             font-size: 1.8rem;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #1a1a1a;
         }
 
@@ -145,45 +207,100 @@ def generate_html(run_data: dict, output_path: str) -> None:
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-top: 16px;
+        /* Version Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.95rem;
         }
 
-        .metric-card {
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table th {
             background: #f8f9fa;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2563eb;
+        .comparison-table tr:hover {
+            background: #f8f9fa;
         }
 
-        .metric-value.good { color: #16a34a; }
-        .metric-value.medium { color: #d97706; }
-        .metric-value.poor { color: #dc2626; }
+        .comparison-table .metric-cell {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
 
-        .metric-label {
+        .comparison-table .metric-cell.good { color: #16a34a; }
+        .comparison-table .metric-cell.medium { color: #d97706; }
+        .comparison-table .metric-cell.poor { color: #dc2626; }
+
+        .comparison-table .best {
+            background: #dcfce7;
+        }
+
+        .version-label {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .version-notes {
             font-size: 0.85rem;
             color: #666;
             margin-top: 4px;
         }
 
-        .meta-info {
+        .delta {
+            font-size: 0.8rem;
+            margin-left: 6px;
+        }
+
+        .delta.positive { color: #16a34a; }
+        .delta.negative { color: #dc2626; }
+
+        /* Version Tabs */
+        .version-tabs {
             display: flex;
+            gap: 8px;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .version-tab {
+            padding: 8px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
             font-size: 0.9rem;
-            color: #666;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .version-tab:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .version-tab.active {
+            border-color: #2563eb;
+            background: #2563eb;
+            color: white;
+        }
+
+        .version-tab .tab-score {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-left: 6px;
         }
 
         /* Test Case Cards */
@@ -202,6 +319,8 @@ def generate_html(run_data: dict, output_path: str) -> None:
             padding: 16px 20px;
             background: #f8f9fa;
             border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .test-case-id {
@@ -209,19 +328,30 @@ def generate_html(run_data: dict, output_path: str) -> None:
             color: #333;
         }
 
+        .score-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .score-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             padding: 6px 12px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .score-badge.good { background: #dcfce7; color: #166534; }
         .score-badge.medium { background: #fef3c7; color: #92400e; }
         .score-badge.poor { background: #fee2e2; color: #991b1b; }
+
+        .score-badge .version-name {
+            font-weight: 500;
+            opacity: 0.8;
+        }
 
         .test-case-body {
             display: grid;
@@ -332,6 +462,27 @@ def generate_html(run_data: dict, output_path: str) -> None:
         .legend-swatch.green { background: #dcfce7; border: 1px solid #86efac; }
         .legend-swatch.yellow { background: #fef3c7; border: 1px solid #fcd34d; }
         .legend-swatch.red { background: #fee2e2; border: 1px solid #fca5a5; }
+
+        /* Version content */
+        .version-content {
+            display: none;
+        }
+
+        .version-content.active {
+            display: block;
+        }
+
+        .predictions-wrapper {
+            position: relative;
+        }
+
+        .prediction-version {
+            display: none;
+        }
+
+        .prediction-version.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -339,50 +490,66 @@ def generate_html(run_data: dict, output_path: str) -> None:
 """
     ]
 
-    # Summary section
-    mean_f1 = aggregate.get("mean_f1", 0)
-    mean_precision = aggregate.get("mean_precision", 0)
-    mean_recall = aggregate.get("mean_recall", 0)
-    mean_state_acc = aggregate.get("mean_state_accuracy", 0)
+    # Find best scores for highlighting
+    best_f1 = max(v["f1"] for v in versions) if versions else 0
+    baseline_f1 = versions[0]["f1"] if versions else 0
 
-    def get_score_class(score):
-        if score >= 0.7:
-            return "good"
-        elif score >= 0.4:
-            return "medium"
-        return "poor"
-
+    # Summary section with comparison table
     html_parts.append(f"""
         <div class="summary">
-            <h1>Meal Analysis Eval Report</h1>
-            <div class="summary-grid">
-                <div class="metric-card">
-                    <div class="metric-value {get_score_class(mean_f1)}">{mean_f1:.1%}</div>
-                    <div class="metric-label">Mean Soft F1</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value {get_score_class(mean_precision)}">{mean_precision:.1%}</div>
-                    <div class="metric-label">Mean Precision</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value {get_score_class(mean_recall)}">{mean_recall:.1%}</div>
-                    <div class="metric-label">Mean Recall</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value {get_score_class(mean_state_acc)}">{mean_state_acc:.1%}</div>
-                    <div class="metric-label">State Accuracy</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">{run_data.get('num_cases', 0)}</div>
-                    <div class="metric-label">Test Cases</div>
-                </div>
-            </div>
-            <div class="meta-info">
-                <span><strong>Model:</strong> {html.escape(run_data.get('model', 'Unknown'))}</span>
-                <span><strong>Run ID:</strong> {run_data.get('id', 'N/A')}</span>
-                <span><strong>Date:</strong> {run_data.get('created_at', 'N/A')[:10] if run_data.get('created_at') else 'N/A'}</span>
-                <span><strong>Execution Time:</strong> {run_data.get('execution_time', 0):.1f}s</span>
-            </div>
+            <h1>Meal Analysis Eval Comparison</h1>
+            <p style="color: #666; margin-bottom: 16px;">
+                Comparing {len(versions)} prompt versions. Select a version below to view per-case predictions.
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>F1 Score</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>State Acc</th>
+                        <th>Cases</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+""")
+
+    for i, v in enumerate(versions):
+        is_best = v["f1"] == best_f1 and len(versions) > 1
+        row_class = "best" if is_best else ""
+
+        # Calculate delta from baseline
+        delta_f1 = v["f1"] - baseline_f1 if i > 0 else 0
+        delta_html = ""
+        if i > 0:
+            delta_class = "positive" if delta_f1 > 0 else "negative" if delta_f1 < 0 else ""
+            delta_sign = "+" if delta_f1 > 0 else ""
+            delta_html = f'<span class="delta {delta_class}">{delta_sign}{delta_f1:.1%}</span>'
+
+        notes_html = f'<div class="version-notes">{html.escape(v["notes"][:60])}...</div>' if v["notes"] else ""
+
+        html_parts.append(f"""
+                    <tr class="{row_class}">
+                        <td>
+                            <div class="version-label">{html.escape(v["label"])}</div>
+                            {notes_html}
+                        </td>
+                        <td class="metric-cell {get_score_class(v['f1'])}">{v['f1']:.1%}{delta_html}</td>
+                        <td class="metric-cell {get_score_class(v['precision'])}">{v['precision']:.1%}</td>
+                        <td class="metric-cell {get_score_class(v['recall'])}">{v['recall']:.1%}</td>
+                        <td class="metric-cell {get_score_class(v['state_accuracy'])}">{v['state_accuracy']:.1%}</td>
+                        <td>{v['num_cases']}</td>
+                        <td>{v['created_at']}</td>
+                    </tr>
+""")
+
+    html_parts.append("""
+                </tbody>
+            </table>
+
             <div class="legend">
                 <div class="legend-item">
                     <div class="legend-swatch green"></div>
@@ -398,83 +565,53 @@ def generate_html(run_data: dict, output_path: str) -> None:
                 </div>
             </div>
         </div>
-
-        <h2>Test Cases</h2>
 """)
 
-    # Test case cards
-    for case in test_cases:
-        case_id = case.get("id", "unknown")
-        image_path = case.get("image_path", "")
-        expected = case.get("expected", {})
-        predicted = case.get("predicted", {})
-        score = case.get("score", {})
-        ingredient_details = case.get("ingredient_details", {})
+    # Version selector tabs
+    html_parts.append("""
+        <h2>Test Cases</h2>
+        <div class="version-tabs">
+""")
 
-        f1 = score.get("f1", 0)
-        precision = score.get("precision", 0)
-        recall = score.get("recall", 0)
+    for i, v in enumerate(versions):
+        active_class = "active" if i == 0 else ""
+        html_parts.append(f"""
+            <button class="version-tab {active_class}" data-version="{i}">
+                {html.escape(v["label"])}
+                <span class="tab-score">F1: {v['f1']:.0%}</span>
+            </button>
+""")
+
+    html_parts.append("</div>")
+
+    # Test case cards
+    for case_id in sorted_case_ids:
+        case_data = test_cases_by_id[case_id]
+        image_path = case_data["image_path"]
+        expected = case_data["expected"]
 
         # Load image
         image_data = load_image_base64(image_path)
 
-        # Build expected ingredients HTML
-        expected_ingredients_html = []
-        for ing in expected.get("ingredients", []):
-            ing_name = ing.get("name", "Unknown")
-            raw_text = ing.get("raw_text", ing_name)
-            required = ing.get("required", True)
-
-            status, match_score, matched_by = get_match_status(ing_name, ingredient_details)
-
-            status_class = status  # matched, partial, or missed
-            match_info = ""
-            if matched_by and status != "missed":
-                match_info = f' <span class="match-info">(matched by: {html.escape(matched_by)})</span>'
-
-            # Show with strikethrough if not required
-            display_text = html.escape(raw_text)
-            if not required:
-                display_text = f"<em>{display_text}</em> (optional)"
-
-            expected_ingredients_html.append(
-                f'<li class="ingredient {status_class}">{display_text}{match_info}</li>'
+        # Score badges for all versions
+        score_badges_html = []
+        for i, v in enumerate(versions):
+            version_data = case_data["versions"].get(i, {})
+            score = version_data.get("score", {})
+            f1 = score.get("f1", 0)
+            score_badges_html.append(
+                f'<span class="score-badge {get_score_class(f1)}" data-version="{i}">'
+                f'<span class="version-name">{html.escape(v["label"][:10])}:</span> {f1:.0%}'
+                f'</span>'
             )
-
-        # Build predicted ingredients HTML
-        predicted_ingredients_html = []
-        for ing in predicted.get("ingredients", []):
-            if isinstance(ing, dict):
-                ing_name = ing.get("name", "Unknown")
-                ing_state = ing.get("state", "")
-            else:
-                ing_name = str(ing)
-                ing_state = ""
-
-            status, match_score, matched_to = get_prediction_status(ing_name, ingredient_details)
-
-            match_info = ""
-            if matched_to:
-                score_str = "full" if match_score >= 1.0 else "partial"
-                match_info = f' <span class="match-info">({score_str}: {html.escape(matched_to)})</span>'
-
-            display_text = html.escape(ing_name)
-            if ing_state:
-                display_text += f" <em>({ing_state})</em>"
-
-            predicted_ingredients_html.append(
-                f'<li class="ingredient {status}">{display_text}{match_info}</li>'
-            )
-
-        score_class = get_score_class(f1)
 
         html_parts.append(f"""
         <div class="test-case">
             <div class="test-case-header">
                 <span class="test-case-id">{html.escape(case_id)}</span>
-                <span class="score-badge {score_class}">
-                    F1: {f1:.1%} | P: {precision:.1%} | R: {recall:.1%}
-                </span>
+                <div class="score-badges">
+                    {''.join(score_badges_html)}
+                </div>
             </div>
             <div class="test-case-body">
                 <div class="image-col">
@@ -484,24 +621,122 @@ def generate_html(run_data: dict, output_path: str) -> None:
                 <div>
                     <div class="column-header">Ground Truth ({len(expected.get('ingredients', []))} ingredients)</div>
                     <div class="meal-title">{html.escape(expected.get('meal_name', 'Unknown'))}</div>
-                    <ul class="ingredients-list">
+""")
+
+        # Build ground truth ingredients per version (colors change based on selected version)
+        for i, v in enumerate(versions):
+            version_data = case_data["versions"].get(i, {})
+            ingredient_details = version_data.get("ingredient_details", {})
+
+            active_class = "active" if i == 0 else ""
+
+            expected_ingredients_html = []
+            for ing in expected.get("ingredients", []):
+                ing_name = ing.get("name", "Unknown")
+                raw_text = ing.get("raw_text", ing_name)
+                required = ing.get("required", True)
+
+                status, match_score, matched_by = get_match_status(ing_name, ingredient_details)
+
+                status_class = status
+                match_info = ""
+                if matched_by and status != "missed":
+                    match_info = f' <span class="match-info">(matched by: {html.escape(matched_by)})</span>'
+
+                display_text = html.escape(raw_text)
+                if not required:
+                    display_text = f"<em>{display_text}</em> (optional)"
+
+                expected_ingredients_html.append(
+                    f'<li class="ingredient {status_class}">{display_text}{match_info}</li>'
+                )
+
+            html_parts.append(f"""
+                    <ul class="ingredients-list prediction-version {active_class}" data-version="{i}">
                         {''.join(expected_ingredients_html)}
                     </ul>
+""")
+
+        html_parts.append("""
                 </div>
-                <div>
-                    <div class="column-header">Predicted ({len(predicted.get('ingredients', []))} ingredients)</div>
-                    <div class="meal-title">{html.escape(predicted.get('meal_name', 'Unknown'))}</div>
-                    <ul class="ingredients-list">
-                        {''.join(predicted_ingredients_html)}
-                    </ul>
+                <div class="predictions-wrapper">
+""")
+
+        # Predictions for each version
+        for i, v in enumerate(versions):
+            version_data = case_data["versions"].get(i, {})
+            predicted = version_data.get("predicted", {})
+            ingredient_details = version_data.get("ingredient_details", {})
+
+            active_class = "active" if i == 0 else ""
+
+            predicted_ingredients_html = []
+            for ing in predicted.get("ingredients", []):
+                if isinstance(ing, dict):
+                    ing_name = ing.get("name", "Unknown")
+                    ing_state = ing.get("state", "")
+                else:
+                    ing_name = str(ing)
+                    ing_state = ""
+
+                status, match_score, matched_to = get_prediction_status(ing_name, ingredient_details)
+
+                match_info = ""
+                if matched_to:
+                    score_str = "full" if match_score >= 1.0 else "partial"
+                    match_info = f' <span class="match-info">({score_str}: {html.escape(matched_to)})</span>'
+
+                display_text = html.escape(ing_name)
+                if ing_state:
+                    display_text += f" <em>({ing_state})</em>"
+
+                predicted_ingredients_html.append(
+                    f'<li class="ingredient {status}">{display_text}{match_info}</li>'
+                )
+
+            html_parts.append(f"""
+                    <div class="prediction-version {active_class}" data-version="{i}">
+                        <div class="column-header">Predicted - {html.escape(v['label'])} ({len(predicted.get('ingredients', []))} ingredients)</div>
+                        <div class="meal-title">{html.escape(predicted.get('meal_name', 'Unknown'))}</div>
+                        <ul class="ingredients-list">
+                            {''.join(predicted_ingredients_html)}
+                        </ul>
+                    </div>
+""")
+
+        html_parts.append("""
                 </div>
             </div>
         </div>
 """)
 
-    # Close HTML
+    # JavaScript for version switching
     html_parts.append("""
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.version-tab');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const version = this.dataset.version;
+
+                    // Update tab active state
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Update all version-specific content
+                    document.querySelectorAll('.prediction-version').forEach(el => {
+                        el.classList.remove('active');
+                        if (el.dataset.version === version) {
+                            el.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
 """)
@@ -509,7 +744,12 @@ def generate_html(run_data: dict, output_path: str) -> None:
     # Write to file
     output = Path(output_path)
     output.write_text("".join(html_parts))
-    print(f"Generated report: {output.absolute()}")
+    print(f"Generated comparison report: {output.absolute()}")
+
+
+def generate_single_html(run_data: dict, output_path: str) -> None:
+    """Generate HTML visualization for a single eval run (backward compatible)."""
+    generate_comparison_html([run_data], output_path)
 
 
 def main():
@@ -517,8 +757,12 @@ def main():
     parser.add_argument(
         "--run-id",
         type=int,
-        required=True,
-        help="Eval run ID to visualize",
+        help="Single eval run ID to visualize",
+    )
+    parser.add_argument(
+        "--run-ids",
+        type=str,
+        help="Comma-separated list of run IDs to compare (e.g., 1,2,3)",
     )
     parser.add_argument(
         "--output",
@@ -529,18 +773,30 @@ def main():
 
     args = parser.parse_args()
 
-    # Get run data
-    run_data = get_run_details(args.run_id)
-    if not run_data:
-        print(f"Error: Run ID {args.run_id} not found")
+    # Determine run IDs
+    if args.run_ids:
+        run_ids = [int(x.strip()) for x in args.run_ids.split(",")]
+    elif args.run_id:
+        run_ids = [args.run_id]
+    else:
+        print("Error: Must specify --run-id or --run-ids")
         return 1
+
+    # Load all run data
+    runs_data = []
+    for run_id in run_ids:
+        run_data = get_run_details(run_id)
+        if not run_data:
+            print(f"Error: Run ID {run_id} not found")
+            return 1
+        runs_data.append(run_data)
 
     # Ensure output directory exists
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Generate HTML
-    generate_html(run_data, args.output)
+    generate_comparison_html(runs_data, args.output)
     return 0
 
 

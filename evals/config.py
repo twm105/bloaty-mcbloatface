@@ -18,6 +18,8 @@ class EvalConfig:
     verbose: bool = False
     temperature: float = 0.0
     use_llm_judge: bool = True  # Use LLM-as-judge for soft scoring (meal_analysis)
+    prompt_version: str = "current"  # Prompt version for meal_analysis experiments
+    notes: str = ""  # Experiment hypothesis/notes
 
 
 # Default models
