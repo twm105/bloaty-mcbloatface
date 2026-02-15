@@ -17,6 +17,7 @@ class EvalConfig:
     parallel: int = 1
     verbose: bool = False
     temperature: float = 0.0
+    use_llm_judge: bool = True  # Use LLM-as-judge for soft scoring (meal_analysis)
 
 
 # Default models

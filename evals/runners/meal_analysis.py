@@ -3,7 +3,7 @@
 import json
 
 from .base import BaseEvalRunner
-from evals.metrics import score_meal_analysis, aggregate_meal_analysis_scores
+from evals.metrics import score_meal_analysis, score_meal_analysis_soft, aggregate_meal_analysis_scores
 
 
 class MealAnalysisRunner(BaseEvalRunner):
@@ -78,7 +78,18 @@ class MealAnalysisRunner(BaseEvalRunner):
 
         # Score the result
         expected = test_case["expected"]
-        score = score_meal_analysis(predicted, expected)
+
+        # Use LLM judge for soft scoring if enabled
+        if self.config.use_llm_judge:
+            score = await score_meal_analysis_soft(
+                predicted,
+                expected,
+                claude_service=self.ai_service,
+                cache_manager=self.cache_manager,
+                verbose=self.config.verbose,
+            )
+        else:
+            score = score_meal_analysis(predicted, expected)
 
         return {
             "id": test_case["id"],

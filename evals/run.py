@@ -66,6 +66,11 @@ def main():
         action="store_true",
         help="Don't store results in database",
     )
+    eval_parser.add_argument(
+        "--no-llm-judge",
+        action="store_true",
+        help="Disable LLM-as-judge soft scoring (use hard string matching)",
+    )
 
     # Scrape command
     scrape_parser = subparsers.add_parser("scrape", help="Scrape recipe data")
@@ -166,6 +171,7 @@ async def run_eval(args):
         use_cache=not args.no_cache,
         sample_size=args.sample,
         verbose=args.verbose,
+        use_llm_judge=not args.no_llm_judge,
     )
 
     try:
@@ -174,7 +180,9 @@ async def run_eval(args):
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
+    scoring_mode = "LLM-judge soft scoring" if config.use_llm_judge else "hard string matching"
     print(f"Running {config.eval_type} eval with {config.model}...")
+    print(f"Scoring mode: {scoring_mode}")
 
     result = await runner.run()
 
