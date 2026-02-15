@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 12, 2026
-**Overall Progress:** ~85% MVP Complete
-**Recent:** Reduced diagnosis thresholds from 3 to 2 meals/symptoms for faster onboarding
+**Last Updated:** February 15, 2026
+**Overall Progress:** ~90% MVP Complete
+**Recent:** Evals framework with LLM-as-judge scoring, prompt iteration workflow (F1: 0.43 → 0.52, +21.7%)
 
 ## 🚀 Production Deployment - COMPLETE (Feb 9, 2026)
 
@@ -247,14 +247,47 @@
 
 **Cost:** First analysis ~$0.0508, cached ~$0.0053 (90% savings with prompt caching)
 
-### Phase 9: Evals Framework (MEDIUM) - NOT STARTED
-**Goal:** Quantify AI accuracy
+### Phase 9: Evals Framework - COMPLETE (Feb 15, 2026)
+**Goal:** Quantify AI accuracy and iterate on prompts
 
-**Implementation needed:**
-1. BBC Good Food scraper (`evals/scrapers/bbc_good_food.py`)
-2. Eval runner (`evals/run.py`)
-3. Metrics calculator (`evals/metrics.py`) - precision, recall, F1
-4. Store results in eval_runs table
+**Implementation:**
+- ✅ BBC Good Food scraper (`evals/scrapers/bbc_good_food.py`) - 53 recipes with images
+- ✅ Eval runner (`evals/run.py`) with CLI flags (`--prompt-version`, `--notes`, `--no-llm-judge`)
+- ✅ Metrics calculator (`evals/metrics.py`) - precision, recall, F1 with LLM-as-judge soft scoring
+- ✅ Results stored in eval_runs table with detailed JSONB
+- ✅ Prompt versioning infrastructure (`evals/prompts/meal_analysis/`)
+- ✅ HTML comparison dashboard (`scripts/generate_eval_report.py`)
+
+**Prompt Iteration Results:**
+| Version | F1 | Precision | Recall | Change |
+|---------|-----|-----------|--------|--------|
+| v1_baseline | 0.429 | 0.616 | 0.353 | — |
+| v2_recall_focus | 0.483 | 0.541 | 0.465 | +12.6% F1 |
+| v3_recipe_inference | **0.522** | 0.582 | **0.514** | **+21.7% F1** |
+
+**Key Insight:** Ground truth includes recipe ingredients (onion, garlic, stock) not visible in photos. v3 prompts the model to infer typical recipe ingredients based on dish type.
+
+**LLM-as-Judge Scoring:**
+- Uses Haiku to score ingredient matches (0, 0.5, 1.0)
+- Soft F1 = harmonic mean of soft precision/recall
+- Handles semantic equivalence ("ground beef" ↔ "minced beef")
+
+**CLI Usage:**
+```bash
+# Run eval with specific prompt version
+docker compose exec web python -m evals.run eval \
+  --eval-type meal_analysis --sample 20 \
+  --prompt-version v3_recipe_inference \
+  --notes "Recipe inference approach"
+
+# Compare runs
+docker compose exec web python -m evals.run compare --runs 1,2,3
+
+# Generate HTML comparison
+docker compose exec web python -m scripts.generate_eval_report --run-ids 1,2,3
+```
+
+**Documentation:** See `docs/EVALS_STRATEGY.md` for full workflow
 
 ### Phase 10: Polish (MEDIUM) - NOT STARTED
 - Error handling improvements
@@ -271,7 +304,7 @@
 
 ### Services
 - ✅ `ai_service.py` - Claude integration (meal analysis, symptom elaboration, episode detection)
-- ✅ `prompts.py` - All prompt templates
+- ✅ `prompts.py` - All prompt templates (meal analysis upgraded to v3_recipe_inference)
 - ✅ `meal_service.py` - Meal CRUD + inline editing
 - ✅ `symptom_service.py` - Symptom CRUD + episode detection + tag management
 - ✅ `file_service.py` - Image handling
@@ -283,7 +316,7 @@
 - ❌ `/analysis` - NOT CREATED
 - ❌ `/settings/*` - NOT CREATED (GDPR exports, disclaimers)
 
-## 📊 Current Status: ~65% MVP Complete
+## 📊 Current Status: ~90% MVP Complete
 
 **Working End-to-End:**
 
@@ -401,14 +434,16 @@
 ## 📝 Next Session TODO
 
 **Immediate priorities:**
-1. **Pattern Analysis Dashboard (Phase 8)** - The core value proposition
-   - Implement `analyze_patterns()` in ClaudeService with prompt caching
-   - Create `analysis_service.py` for SQL correlation queries
+1. **Continue Evals Iteration** - Target F1 ≥ 0.77
+   - v4_state_focused: Improve state accuracy (currently ~16%)
+   - v5_combined: Combine recipe inference with state guidance
+   - Expand dataset to 100 images (add AllRecipes scraper)
+
+2. **Analytics & Visualizations**
    - Build timeline view showing meals + symptoms chronologically
    - Add Chart.js visualizations (correlation graphs, heatmaps)
-   - Medical disclaimer modal before showing results
 
-2. **GDPR Compliance**
+3. **GDPR Compliance**
    - Data export endpoint (`/settings/export`)
    - Privacy policy page
    - User settings page (disclaimer acknowledgment)
@@ -417,7 +452,6 @@
 - Add date range filtering to meal/symptom history
 - Add meal editing UI (currently only inline editing)
 - Create settings page for user preferences
-- Add "Delete All Data" functionality for testing
 
 ---
 
