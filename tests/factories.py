@@ -679,7 +679,8 @@ def create_test_scenario_onion_intolerance(
     Returns:
         Dict with created entities: {"meals": [...], "symptoms": [...], "onion": Ingredient}
     """
-    onion = create_ingredient(db, name="Onion")
+    # Use unique name to avoid collisions with other tests
+    onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
     meals = []
     symptoms = []
 

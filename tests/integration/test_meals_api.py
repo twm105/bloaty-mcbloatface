@@ -8,6 +8,7 @@ Tests the full meal management flow including:
 - Authorization checks
 """
 
+import secrets
 from unittest.mock import patch, AsyncMock
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -306,8 +307,8 @@ class TestMealWithIngredients:
     ):
         """Test that meal edit page shows ingredients."""
         meal = create_meal(db, test_user, name="Chicken Salad")
-        chicken = create_ingredient(db, name="Chicken")
-        lettuce = create_ingredient(db, name="Lettuce")
+        chicken = create_ingredient(db, name=f"Chicken_{secrets.token_hex(4)}")
+        lettuce = create_ingredient(db, name=f"Lettuce_{secrets.token_hex(4)}")
 
         create_meal_ingredient(db, meal, chicken, state=IngredientState.COOKED)
         create_meal_ingredient(db, meal, lettuce, state=IngredientState.RAW)
@@ -740,7 +741,7 @@ class TestUpdateIngredient:
     ):
         """Test updating ingredient name and quantity."""
         meal = create_meal(db, test_user)
-        ingredient = create_ingredient(db, name="Chicken")
+        ingredient = create_ingredient(db, name=f"Chicken_{secrets.token_hex(4)}")
         mi = create_meal_ingredient(db, meal, ingredient)
 
         response = auth_client.put(

@@ -8,6 +8,7 @@ Tests the full diagnosis flow including:
 - Result management
 """
 
+import secrets
 from datetime import timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -70,7 +71,7 @@ class TestDiagnosisPage:
         run = create_diagnosis_run(
             db, test_user, status="completed", sufficient_data=True
         )
-        ingredient = create_ingredient(db, name="Onion")
+        ingredient = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
         create_diagnosis_result(db, run, ingredient, confidence_score=0.85)
 
         response = auth_client.get("/diagnosis")

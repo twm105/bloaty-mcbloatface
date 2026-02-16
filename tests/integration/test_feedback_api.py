@@ -5,6 +5,8 @@ Tests submission and retrieval of user feedback for various features
 (meal analysis, diagnosis results, etc.).
 """
 
+import secrets
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -65,7 +67,7 @@ class TestSubmitFeedback:
     ):
         """Test feedback submission for a diagnosis result."""
         run = create_diagnosis_run(db, test_user)
-        ingredient = create_ingredient(db, name="Onion")
+        ingredient = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
         result = create_diagnosis_result(db, run, ingredient)
 
         response = auth_client.post(
@@ -305,7 +307,7 @@ class TestGetFeedback:
     ):
         """Test retrieving feedback for diagnosis result."""
         run = create_diagnosis_run(db, test_user)
-        ingredient = create_ingredient(db, name="Garlic")
+        ingredient = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
         result = create_diagnosis_result(db, run, ingredient)
         create_user_feedback(
             db,

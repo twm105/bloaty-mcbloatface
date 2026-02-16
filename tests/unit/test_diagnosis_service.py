@@ -10,6 +10,7 @@ Tests the diagnosis business logic including:
 """
 
 import pytest
+import secrets
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock, AsyncMock
 
@@ -181,7 +182,8 @@ class TestTemporalCorrelations:
     def test_immediate_correlation_detection(self, db: Session):
         """Test detection of immediate (0-2hr) correlations."""
         user = create_user(db)
-        onion = create_ingredient(db, name="Onion")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
+        onion_normalized = onion.normalized_name  # Store for assertion
 
         # Create 2 meals followed by symptoms within 1 hour each
         # (service requires min_symptom_occurrences >= 2)
@@ -208,7 +210,7 @@ class TestTemporalCorrelations:
 
         assert len(correlations) >= 1
         onion_corr = next(
-            (c for c in correlations if c["ingredient_name"] == "onion"), None
+            (c for c in correlations if c["ingredient_name"] == onion_normalized), None
         )
         assert onion_corr is not None
         assert onion_corr["immediate_count"] >= 1
@@ -216,7 +218,8 @@ class TestTemporalCorrelations:
     def test_delayed_correlation_detection(self, db: Session):
         """Test detection of delayed (4-24hr) correlations."""
         user = create_user(db)
-        milk = create_ingredient(db, name="Milk")
+        milk = create_ingredient(db, name=f"Milk_{secrets.token_hex(4)}")
+        milk_normalized = milk.normalized_name  # Store for assertion
 
         # Create 2 meals followed by symptoms 12 hours later each
         # (service requires min_symptom_occurrences >= 2)
@@ -240,7 +243,7 @@ class TestTemporalCorrelations:
 
         assert len(correlations) >= 1
         milk_corr = next(
-            (c for c in correlations if c["ingredient_name"] == "milk"), None
+            (c for c in correlations if c["ingredient_name"] == milk_normalized), None
         )
         assert milk_corr is not None
         assert milk_corr["delayed_count"] >= 1
@@ -481,8 +484,8 @@ class TestIngredientCooccurrence:
     def test_detects_high_cooccurrence(self, db: Session):
         """Test detection of ingredients that frequently appear together."""
         user = create_user(db)
-        onion = create_ingredient(db, name="Onion")
-        garlic = create_ingredient(db, name="Garlic")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
+        garlic = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
 
         # Create meals with both ingredients
         for i in range(5):
@@ -523,8 +526,8 @@ class TestIngredientCooccurrence:
     def test_calculates_conditional_probability(self, db: Session):
         """Test calculation of P(B|A) conditional probability."""
         user = create_user(db)
-        onion = create_ingredient(db, name="Onion")
-        tomato = create_ingredient(db, name="Tomato")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
+        tomato = create_ingredient(db, name=f"Tomato_{secrets.token_hex(4)}")
 
         # Create 4 meals with onion
         for i in range(4):
@@ -678,7 +681,7 @@ class TestCorrelatedIngredientIds:
     def test_excludes_ingredients_without_correlations(self, db: Session):
         """Test that ingredients without symptom correlations are excluded."""
         user = create_user(db)
-        chicken = create_ingredient(db, name="Chicken")
+        chicken = create_ingredient(db, name=f"Chicken_{secrets.token_hex(4)}")
 
         # Create meals with chicken but no symptoms
         for i in range(3):
@@ -701,12 +704,13 @@ class TestHolisticIngredientData:
         """Test that complete analysis data is returned for an ingredient."""
         user = create_user(db)
         scenario = create_test_scenario_onion_intolerance(db, user, num_meals=5)
+        expected_name = scenario["onion"].normalized_name  # Get actual name
 
         service = DiagnosisService(db)
         data = service.get_holistic_ingredient_data(str(user.id), scenario["onion"].id)
 
         assert data is not None
-        assert data["ingredient_name"] == "onion"
+        assert data["ingredient_name"] == expected_name
         assert data["times_eaten"] >= 5
         assert len(data["associated_symptoms"]) >= 1
         assert "confidence_score" in data
@@ -983,8 +987,9 @@ class TestRunDiagnosisEdgeCases:
         user = create_user(db)
 
         # Create scenario with two highly co-occurring ingredients
-        garlic = create_ingredient(db, name="Garlic")
-        onion = create_ingredient(db, name="Onion")
+        # Use unique names to avoid collisions with other tests
+        garlic = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
 
         # Always eat garlic and onion together
         for i in range(5):
@@ -1058,9 +1063,9 @@ class TestRunDiagnosisEdgeCases:
         """Test that classification errors result in keeping the ingredient."""
         user = create_user(db)
 
-        # Create basic scenario
-        onion = create_ingredient(db, name="Onion")
-        garlic = create_ingredient(db, name="Garlic")
+        # Create basic scenario with unique names
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
+        garlic = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
 
         for i in range(5):
             meal = create_meal(
@@ -1114,7 +1119,7 @@ class TestRunDiagnosisEdgeCases:
         """Test that citations from Claude are stored correctly."""
         user = create_user(db)
 
-        onion = create_ingredient(db, name="Onion")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
 
         for i in range(5):
             meal = create_meal(
@@ -1197,7 +1202,7 @@ class TestRunDiagnosisEdgeCases:
         user = create_user(db)
 
         # Create scenario where only one ingredient exists but gets discounted
-        garlic = create_ingredient(db, name="Garlic")
+        garlic = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
 
         for i in range(5):
             meal = create_meal(
@@ -1246,7 +1251,7 @@ class TestRunDiagnosisEdgeCases:
         """Test handling when Claude returns analysis for an ingredient we don't have."""
         user = create_user(db)
 
-        onion = create_ingredient(db, name="Onion")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
 
         for i in range(5):
             meal = create_meal(
@@ -1310,9 +1315,9 @@ class TestRunDiagnosisEdgeCases:
         """Test that when all ingredients are discounted, we use the fallback AI response."""
         user = create_user(db)
 
-        # Create scenario with co-occurring ingredients
-        garlic = create_ingredient(db, name="Garlic")
-        onion = create_ingredient(db, name="Onion")
+        # Create scenario with co-occurring ingredients (use unique names)
+        garlic = create_ingredient(db, name=f"Garlic_{secrets.token_hex(4)}")
+        onion = create_ingredient(db, name=f"Onion_{secrets.token_hex(4)}")
 
         for i in range(5):
             meal = create_meal(

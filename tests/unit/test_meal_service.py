@@ -9,6 +9,7 @@ Tests the meal business logic including:
 """
 
 import pytest
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
@@ -86,12 +87,13 @@ class TestMealIngredients:
         user = create_user(db)
         meal = create_meal(db, user)
 
-        # Create ingredient first
-        existing = create_ingredient(db, name="Chicken")
+        # Create ingredient first with unique name
+        unique_name = f"Chicken_{secrets.token_hex(4)}"
+        existing = create_ingredient(db, name=unique_name)
 
-        # Add to meal
+        # Add to meal with same name (case-insensitive)
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id, ingredient_name="chicken", state=IngredientState.COOKED
+            db, meal.id, ingredient_name=unique_name.lower(), state=IngredientState.COOKED
         )
 
         assert meal_ingredient.ingredient_id == existing.id
@@ -390,11 +392,14 @@ class TestIngredientUpdates:
         """Test that editing AI ingredient changes source to user-edit."""
         user = create_user(db)
         meal = create_meal(db, user)
-        ingredient = create_ingredient(db, name="Broccoli")
+        # Use unique names to avoid collisions with other tests
+        original_name = f"Broccoli_{secrets.token_hex(4)}"
+        new_name = f"Cauliflower_{secrets.token_hex(4)}"
+        ingredient = create_ingredient(db, name=original_name)
         meal_ing = create_meal_ingredient(db, meal, ingredient, source="ai")
 
         result = MealService.update_ingredient_in_meal(
-            db, meal_ing.id, ingredient_name="Cauliflower"
+            db, meal_ing.id, ingredient_name=new_name
         )
 
         assert result.source == "user-edit"
