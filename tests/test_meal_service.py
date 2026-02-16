@@ -116,12 +116,12 @@ class TestDuplicateMeal:
         # Duplicate timestamp should be close to now, not the original time
         assert duplicate.timestamp != original.timestamp
         # Allow some tolerance for test execution time
-        assert duplicate.timestamp.replace(tzinfo=timezone.utc) >= before_duplicate.replace(
-            microsecond=0
-        ) - timedelta(seconds=1)
-        assert duplicate.timestamp.replace(tzinfo=timezone.utc) <= after_duplicate + timedelta(
-            seconds=1
-        )
+        assert duplicate.timestamp.replace(
+            tzinfo=timezone.utc
+        ) >= before_duplicate.replace(microsecond=0) - timedelta(seconds=1)
+        assert duplicate.timestamp.replace(
+            tzinfo=timezone.utc
+        ) <= after_duplicate + timedelta(seconds=1)
 
     def test_duplicate_meal_sets_published_status(self, db: Session):
         """Verify immediately published (not draft)."""

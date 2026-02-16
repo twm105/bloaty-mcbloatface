@@ -52,7 +52,9 @@ class TestDuplicateMealEndpoint:
         # Should redirect to login or return 401/403
         assert response.status_code in [401, 302, 303]
 
-    def test_duplicate_meal_forbidden(self, db: Session, auth_client: TestClient, test_user):
+    def test_duplicate_meal_forbidden(
+        self, db: Session, auth_client: TestClient, test_user
+    ):
         """Verify 403 for another user's meal."""
         other_user = create_user(db, email="other@example.com")
         other_meal = create_meal(db, other_user, name="Other User's Meal")

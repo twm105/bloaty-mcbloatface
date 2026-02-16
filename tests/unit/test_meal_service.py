@@ -93,7 +93,10 @@ class TestMealIngredients:
 
         # Add to meal with same name (case-insensitive)
         meal_ingredient = MealService.add_ingredient_to_meal(
-            db, meal.id, ingredient_name=unique_name.lower(), state=IngredientState.COOKED
+            db,
+            meal.id,
+            ingredient_name=unique_name.lower(),
+            state=IngredientState.COOKED,
         )
 
         assert meal_ingredient.ingredient_id == existing.id

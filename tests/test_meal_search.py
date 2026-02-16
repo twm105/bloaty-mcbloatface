@@ -115,9 +115,7 @@ class TestSearchUserMeals:
         middle = create_meal(
             db, user, name=f"Middle Burger {suffix}", timestamp=now - timedelta(days=3)
         )
-        newest = create_meal(
-            db, user, name=f"New Burger {suffix}", timestamp=now
-        )
+        newest = create_meal(db, user, name=f"New Burger {suffix}", timestamp=now)
 
         results = meal_service.search_user_meals(db, user.id, "Burger")
 
@@ -180,9 +178,13 @@ class TestSearchEndpoint:
 
         assert response.status_code == 200
         # Should contain both meals
-        assert f"Meal A {suffix}" in response.text or f"Meal B {suffix}" in response.text
+        assert (
+            f"Meal A {suffix}" in response.text or f"Meal B {suffix}" in response.text
+        )
 
-    def test_search_endpoint_no_results_message(self, auth_client, db: Session, test_user):
+    def test_search_endpoint_no_results_message(
+        self, auth_client, db: Session, test_user
+    ):
         """No results should show appropriate message."""
         response = auth_client.get("/meals/history/results?q=NonexistentFood12345")
 
@@ -212,7 +214,9 @@ class TestSearchEndpoint:
         assert response.status_code == 200
         assert "search-clear-btn" in response.text
 
-    def test_empty_query_returns_day_grouped_view(self, auth_client, db: Session, test_user):
+    def test_empty_query_returns_day_grouped_view(
+        self, auth_client, db: Session, test_user
+    ):
         """Empty query should return day-grouped HTML template."""
         suffix = secrets.token_hex(4)
         create_meal(db, test_user, name=f"Test Meal {suffix}")
@@ -223,7 +227,9 @@ class TestSearchEndpoint:
         # Day-grouped view uses the grouped template with recent-meals-grid element
         assert 'id="recent-meals-grid"' in response.text
 
-    def test_whitespace_query_returns_day_grouped_view(self, auth_client, db: Session, test_user):
+    def test_whitespace_query_returns_day_grouped_view(
+        self, auth_client, db: Session, test_user
+    ):
         """Whitespace-only query should return day-grouped HTML."""
         suffix = secrets.token_hex(4)
         create_meal(db, test_user, name=f"Test Meal {suffix}")
@@ -234,7 +240,9 @@ class TestSearchEndpoint:
         # Should use day-grouped template (contains recent-meals-grid)
         assert "recent-meals-grid" in response.text
 
-    def test_search_query_returns_flat_results(self, auth_client, db: Session, test_user):
+    def test_search_query_returns_flat_results(
+        self, auth_client, db: Session, test_user
+    ):
         """Non-empty search query should return flat results without day grouping."""
         from datetime import datetime, timedelta, timezone
 
@@ -243,7 +251,10 @@ class TestSearchEndpoint:
         # Create meals on different days
         create_meal(db, test_user, name=f"SearchTest {suffix} Today", timestamp=now)
         create_meal(
-            db, test_user, name=f"SearchTest {suffix} Yesterday", timestamp=now - timedelta(days=1)
+            db,
+            test_user,
+            name=f"SearchTest {suffix} Yesterday",
+            timestamp=now - timedelta(days=1),
         )
 
         response = auth_client.get(f"/meals/history/results?q={suffix}")
@@ -256,7 +267,9 @@ class TestSearchEndpoint:
         assert f"SearchTest {suffix} Today" in response.text
         assert f"SearchTest {suffix} Yesterday" in response.text
 
-    def test_search_results_have_card_grid_id(self, auth_client, db: Session, test_user):
+    def test_search_results_have_card_grid_id(
+        self, auth_client, db: Session, test_user
+    ):
         """Search results should have a card-grid with ID for duplicate button targeting."""
         suffix = secrets.token_hex(4)
         create_meal(db, test_user, name=f"DuplicateTest {suffix}")
@@ -269,7 +282,9 @@ class TestSearchEndpoint:
         # Verify the card-grid class is present (used by hx-target="closest .card-grid")
         assert 'class="card-grid"' in response.text
 
-    def test_duplicate_button_uses_closest_card_grid(self, auth_client, db: Session, test_user):
+    def test_duplicate_button_uses_closest_card_grid(
+        self, auth_client, db: Session, test_user
+    ):
         """Duplicate button should target closest .card-grid, not a specific ID."""
         suffix = secrets.token_hex(4)
         create_meal(db, test_user, name=f"DuplicateBtnTest {suffix}")
@@ -298,7 +313,7 @@ class TestSearchEndpoint:
         # Should contain the matching meal
         assert f"FullPageSearch {suffix}" in response.text
         # Search input should be pre-filled
-        assert 'x-data="{ searchQuery: \'FullPageSearch\' }"' in response.text
+        assert "x-data=\"{ searchQuery: 'FullPageSearch' }\"" in response.text
 
     def test_history_page_with_q_shows_flat_results(
         self, auth_client, db: Session, test_user
