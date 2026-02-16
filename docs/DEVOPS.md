@@ -224,6 +224,7 @@ Outbound:
    - `ANTHROPIC_API_KEY`: your Anthropic API key
    - `SESSION_SECRET_KEY`: (generate with `openssl rand -hex 32`)
    - `POSTGRES_PASSWORD`: (generate with `openssl rand -base64 24`)
+   - `BACKUP_S3_BUCKET`: your bucket name from step 7 (e.g., `bloaty-backups-XXXXX`)
 4. Secret name: `bloaty/production`
 5. No rotation
 6. Store secret
@@ -260,17 +261,23 @@ docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
 
 ### Phase 3: Automation
 
-#### Daily Backups (cron)
+Both daily backups and SSL certificate renewal are configured automatically by `setup-ec2.sh`:
 
-Add to root's crontab (`sudo crontab -e`):
+- **Daily backups**: 3 AM via `/etc/cron.d/bloaty-backup` → logs to `/var/log/bloaty-backup.log`
+- **SSL renewal**: Twice daily via `/etc/cron.d/certbot-renew`
+
+Verify cron jobs:
+```bash
+cat /etc/cron.d/bloaty-backup
+cat /etc/cron.d/certbot-renew
 ```
-# Daily backup at 3 AM
-0 3 * * * /opt/bloaty/deploy/backup.sh >> /var/log/bloaty-backup.log 2>&1
+
+Test backup manually:
+```bash
+/opt/bloaty/deploy/backup.sh
 ```
 
-#### SSL Certificate Renewal
-
-Certbot auto-renewal is installed by setup script. Test with:
+Test SSL renewal:
 ```bash
 sudo certbot renew --dry-run
 ```
@@ -296,7 +303,8 @@ Secret name: `bloaty/production`
 {
   "ANTHROPIC_API_KEY": "sk-ant-...",
   "SESSION_SECRET_KEY": "64-char-hex-string",
-  "POSTGRES_PASSWORD": "strong-random-password"
+  "POSTGRES_PASSWORD": "strong-random-password",
+  "BACKUP_S3_BUCKET": "bloaty-backups-XXXXX"
 }
 ```
 

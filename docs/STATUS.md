@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 15, 2026
+**Last Updated:** February 16, 2026
 **Overall Progress:** ~90% MVP Complete
-**Recent:** Evals framework with LLM-as-judge scoring, prompt iteration workflow (F1: 0.43 → 0.52, +21.7%)
+**Recent:** Fixed shared image deletion bug, automated S3 backups, bind mount for uploads
 
 ## 🚀 Production Deployment - COMPLETE (Feb 9, 2026)
 
@@ -13,17 +13,13 @@
 - Route 53 DNS
 - Let's Encrypt SSL via Certbot
 - Secrets Manager for credentials
-- S3 bucket for backups (not yet automated)
+- S3 bucket for backups (automated daily at 3am)
 
-**Known Issue - Images Not Rendering:**
-- Meal photos upload and AI analysis works correctly
-- Images fail to render in the UI (broken image icon)
-- Root cause: Volume mount conflict between base and prod docker-compose files
-  - Base uses `./uploads:/app/uploads:ro` (local path)
-  - Prod uses `uploads:/app/uploads:ro` (named volume)
-  - Both get merged, web container writes to named volume, nginx reads from local path
-- Attempted fix with `!reset` on nginx volumes broke nginx entirely (no volumes mounted)
-- **TODO:** Fix volume mount so nginx can read from the same named volume as web
+**Recent Fixes (Feb 16, 2026):**
+- ✅ **Shared image deletion bug** - Duplicated meals share `image_path`; deleting one no longer deletes the shared image file (checks reference count first)
+- ✅ **Uploads bind mount** - Changed from named Docker volume to `/opt/bloaty/uploads` bind mount for easier backups and EBS snapshots
+- ✅ **Automated backups** - `backup.sh` now sources `.env` for S3 bucket config; daily cron job configured
+- ✅ **Setup script** - Added cronie install and backup cron job to `setup-ec2.sh`
 
 **Files:**
 - `DEVOPS.md` - Full deployment guide
@@ -379,6 +375,7 @@ docker compose exec web python -m scripts.generate_eval_report --run-ids 1,2,3
 - ✅ Symptom edit page template rendering (Jinja2/Alpine.js escaping issue - fixed with script tag pattern)
 - ✅ Icon sizing (SVG elements rendering at intrinsic 300x150px - fixed with explicit width/height/viewBox attributes)
 - ✅ Incremental diagnosis analysis (skip already-analyzed ingredients on re-runs)
+- ✅ Shared image deletion (duplicated meals share image_path; now checks ref count before deleting file)
 
 ## 💾 Database State
 
