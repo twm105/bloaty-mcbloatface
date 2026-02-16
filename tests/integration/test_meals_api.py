@@ -829,6 +829,64 @@ class TestDeleteMealWithImage:
 
         assert response.status_code == 404
 
+    def test_delete_duplicate_preserves_shared_image(
+        self, auth_client: TestClient, test_user: User, db: Session
+    ):
+        """Test that deleting a duplicate meal does NOT delete the shared image file.
+
+        Reproduction scenario:
+        1. Create meal A with image
+        2. Duplicate meal A → copy B (shares same image_path)
+        3. Delete copy B → image file should NOT be deleted
+        4. Original A should still have its image
+        """
+        from app.services.meal_service import meal_service
+
+        # Create original meal with image
+        original = create_meal(db, test_user, image_path="/uploads/shared_image.jpg")
+
+        # Duplicate the meal (shares same image_path)
+        duplicate = meal_service.duplicate_meal(db, original.id, test_user.id)
+        assert duplicate is not None
+        assert duplicate.image_path == original.image_path
+
+        # Delete the duplicate - should NOT delete the image
+        with patch("app.api.meals.file_service.delete_file") as mock_delete:
+            response = auth_client.delete(f"/meals/{duplicate.id}")
+
+        assert response.status_code in [200, 204]
+        # Image should NOT be deleted because original still uses it
+        mock_delete.assert_not_called()
+
+        # Verify original still exists with its image
+        db.refresh(original)
+        assert original.image_path == "/uploads/shared_image.jpg"
+
+    def test_delete_last_meal_using_image_deletes_file(
+        self, auth_client: TestClient, test_user: User, db: Session
+    ):
+        """Test that deleting the last meal referencing an image DOES delete the file."""
+        from app.services.meal_service import meal_service
+
+        # Create original meal with image
+        original = create_meal(db, test_user, image_path="/uploads/unique_image.jpg")
+
+        # Duplicate the meal
+        duplicate = meal_service.duplicate_meal(db, original.id, test_user.id)
+        assert duplicate is not None
+
+        # Delete the duplicate first (should not delete image)
+        with patch("app.api.meals.file_service.delete_file") as mock_delete:
+            auth_client.delete(f"/meals/{duplicate.id}")
+        mock_delete.assert_not_called()
+
+        # Now delete the original (should delete image - it's the last reference)
+        with patch("app.api.meals.file_service.delete_file") as mock_delete:
+            response = auth_client.delete(f"/meals/{original.id}")
+
+        assert response.status_code in [200, 204]
+        mock_delete.assert_called_once_with("/uploads/unique_image.jpg")
+
 
 class TestEditIngredientsWithFeedback:
     """Tests for edit ingredients page with existing feedback."""

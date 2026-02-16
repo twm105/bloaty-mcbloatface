@@ -8,8 +8,22 @@ set -e
 # Configuration
 APP_DIR="/opt/bloaty"
 BACKUP_DIR="/opt/bloaty/backups"
+
+# Load env vars from .env (created by fetch-secrets.sh)
+if [ -f "$APP_DIR/.env" ]; then
+    set -a
+    source "$APP_DIR/.env"
+    set +a
+fi
+
 S3_BUCKET="${BACKUP_S3_BUCKET:-bloaty-backups-XXXXX}"
 REGION="${AWS_REGION:-eu-north-1}"
+
+# Validate S3 bucket is configured (not placeholder)
+if [[ "$S3_BUCKET" == *"XXXXX"* ]]; then
+    echo "ERROR: BACKUP_S3_BUCKET not configured. Run fetch-secrets.sh first."
+    exit 1
+fi
 DATE=$(date +%Y-%m-%d)
 RETENTION_DAYS=7
 

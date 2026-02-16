@@ -489,6 +489,20 @@ class MealService:
         return False
 
     @staticmethod
+    def count_meals_with_image(db: Session, image_path: str) -> int:
+        """
+        Count how many meals reference the given image path.
+
+        Args:
+            db: Database session
+            image_path: Path to the image file
+
+        Returns:
+            Number of meals referencing this image
+        """
+        return db.query(Meal).filter(Meal.image_path == image_path).count()
+
+    @staticmethod
     def search_user_meals(
         db: Session, user_id: UUID, query: str, limit: int = 50
     ) -> List[Meal]:

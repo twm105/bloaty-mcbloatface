@@ -535,8 +535,12 @@ async def delete_meal(
     if meal and meal.user_id != user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
+    # Only delete image file if no other meals reference it
     if meal and meal.image_path:
-        file_service.delete_file(meal.image_path)
+        # Check how many meals use this image (including this one)
+        ref_count = meal_service.count_meals_with_image(db, meal.image_path)
+        if ref_count <= 1:  # Only this meal uses it
+            file_service.delete_file(meal.image_path)
 
     success = meal_service.delete_meal(db, meal_id)
     if not success:

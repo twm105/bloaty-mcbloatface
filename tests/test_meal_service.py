@@ -194,3 +194,51 @@ class TestDuplicateMeal:
         assert duplicate is not None
         assert len(duplicate.meal_ingredients) == 1
         assert float(duplicate.meal_ingredients[0].confidence) == 0.95
+
+
+class TestCountMealsWithImage:
+    """Tests for MealService.count_meals_with_image()."""
+
+    def test_count_meals_with_image_single_meal(self, db: Session):
+        """Verify count is 1 for a single meal with image."""
+        user = create_user(db)
+        create_meal(db, user, name="Meal with image", image_path="/uploads/test.jpg")
+
+        count = meal_service.count_meals_with_image(db, "/uploads/test.jpg")
+
+        assert count == 1
+
+    def test_count_meals_with_image_shared_image(self, db: Session):
+        """Verify count reflects all meals sharing an image (e.g., duplicates)."""
+        user = create_user(db)
+        original = create_meal(
+            db, user, name="Original", image_path="/uploads/shared.jpg"
+        )
+
+        # Create duplicate that shares the image
+        duplicate = meal_service.duplicate_meal(db, original.id, user.id)
+        assert duplicate is not None
+        assert duplicate.image_path == original.image_path
+
+        count = meal_service.count_meals_with_image(db, "/uploads/shared.jpg")
+
+        assert count == 2
+
+    def test_count_meals_with_image_no_matches(self, db: Session):
+        """Verify count is 0 for image path with no meals."""
+        count = meal_service.count_meals_with_image(db, "/uploads/nonexistent.jpg")
+
+        assert count == 0
+
+    def test_count_meals_with_image_different_images(self, db: Session):
+        """Verify count only includes meals with the specific image path."""
+        user = create_user(db)
+        create_meal(db, user, name="Meal A", image_path="/uploads/image_a.jpg")
+        create_meal(db, user, name="Meal B", image_path="/uploads/image_b.jpg")
+        create_meal(db, user, name="Meal C", image_path="/uploads/image_a.jpg")
+
+        count_a = meal_service.count_meals_with_image(db, "/uploads/image_a.jpg")
+        count_b = meal_service.count_meals_with_image(db, "/uploads/image_b.jpg")
+
+        assert count_a == 2
+        assert count_b == 1
