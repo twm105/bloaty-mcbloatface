@@ -30,9 +30,11 @@ usermod -aG docker ec2-user
 echo "Installing Certbot..."
 dnf install -y certbot
 
-# Install jq (AWS CLI is pre-installed on Amazon Linux)
-echo "Installing jq..."
-dnf install -y jq git
+# Install jq, git, and cronie (AWS CLI is pre-installed on Amazon Linux)
+echo "Installing jq, git, cronie..."
+dnf install -y jq git cronie
+systemctl enable crond
+systemctl start crond
 
 # Create app directory structure
 echo "Setting up app directory..."
@@ -69,6 +71,12 @@ cat > /etc/cron.d/certbot-renew << 'EOF'
 0 0,12 * * * root certbot renew --quiet --deploy-hook "/usr/local/lib/docker/cli-plugins/docker-compose -f /opt/bloaty/docker-compose.yml -f /opt/bloaty/deploy/docker-compose.prod.yml exec nginx nginx -s reload"
 EOF
 
+# Set up daily backup cron job
+echo "Configuring daily backups..."
+cat > /etc/cron.d/bloaty-backup << 'EOF'
+0 3 * * * ec2-user /opt/bloaty/deploy/backup.sh >> /var/log/bloaty-backup.log 2>&1
+EOF
+
 echo ""
 echo "=== Setup Complete ==="
 echo ""
@@ -79,4 +87,8 @@ echo "1. Clone your repo to /opt/bloaty (or copy files)"
 echo "2. Run: cd /opt/bloaty && ./deploy/fetch-secrets.sh"
 echo "3. Run: sudo certbot certonly --standalone -d YOUR_DOMAIN"
 echo "4. Run: docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d"
+echo ""
+echo "Automated tasks configured:"
+echo "- SSL renewal: twice daily (certbot)"
+echo "- Backups to S3: daily at 3am (check /var/log/bloaty-backup.log)"
 echo ""
