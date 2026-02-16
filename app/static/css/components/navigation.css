@@ -56,6 +56,8 @@
   transition: color var(--transition-fast);
   position: relative;
   padding-bottom: 4px;
+  display: flex;
+  align-items: center;
 }
 
 .nav-link:hover {
@@ -69,7 +71,47 @@
 }
 
 /* ============================================
-   MOBILE NAV (Responsive)
+   NAV SEARCH LINK (Desktop)
+   ============================================ */
+
+.nav-search-link {
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  border-bottom: none !important;
+}
+
+.nav-search-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-accent-green);
+}
+
+.nav-search-link.active {
+  border-bottom: none;
+}
+
+/* ============================================
+   HAMBURGER MENU TOGGLE
+   ============================================ */
+
+.nav-menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: var(--space-2);
+}
+
+/* ============================================
+   MOBILE DROPDOWN
+   ============================================ */
+
+.nav-mobile-dropdown {
+  display: none;
+}
+
+/* ============================================
+   DESKTOP/MOBILE RESPONSIVE
    ============================================ */
 
 @media (max-width: 768px) {
@@ -77,7 +119,7 @@
     padding: var(--space-3) var(--space-4);
   }
 
-  .nav-links {
+  .nav-links-desktop {
     gap: var(--space-4);
   }
 
@@ -86,19 +128,20 @@
   }
 }
 
-/* Hamburger menu for very small screens */
+/* Mobile breakpoint: hamburger menu */
 @media (max-width: 480px) {
+  /* Show hamburger button */
   .nav-menu-toggle {
     display: block;
-    background: transparent;
-    border: none;
-    color: var(--color-text-primary);
-    cursor: pointer;
-    padding: var(--space-2);
   }
 
-  .nav-links {
+  /* Hide desktop nav links */
+  .nav-links-desktop {
     display: none;
+  }
+
+  /* Mobile dropdown menu */
+  .nav-mobile-dropdown {
     position: absolute;
     top: 64px;
     left: 0;
@@ -108,18 +151,25 @@
     flex-direction: column;
     padding: var(--space-4);
     gap: var(--space-3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   }
 
-  .nav-links.open {
+  .nav-mobile-dropdown[style*="display: none"] {
+    display: none !important;
+  }
+
+  /* Alpine.js will toggle display via x-show */
+  .nav-mobile-dropdown:not([style*="display: none"]) {
     display: flex;
   }
 
-  .nav-link {
-    padding: var(--space-2) 0;
+  .nav-mobile-dropdown .nav-link {
+    padding: var(--space-3) var(--space-2);
     border-bottom: none;
+    font-size: var(--text-sm);
   }
 
-  .nav-link.active {
+  .nav-mobile-dropdown .nav-link.active {
     color: var(--color-accent-green);
     border-bottom: none;
     border-left: 2px solid var(--color-accent-green);
@@ -127,11 +177,75 @@
   }
 }
 
-/* Hide hamburger on larger screens */
-@media (min-width: 481px) {
-  .nav-menu-toggle {
-    display: none;
+/* ============================================
+   SEARCH BAR (History page - responsive)
+   ============================================ */
+
+.search-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 400px;
+  position: relative;
+}
+
+/* Clear button inside search bar */
+.search-clear-btn {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.search-clear-btn:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Add padding to search input to prevent text overlapping with clear button */
+.search-bar-inner .search-input {
+  padding-right: var(--space-8);
+}
+
+@media (max-width: 480px) {
+  /* When search input is focused on mobile, transform the UI */
+  .history-page:has(.search-input:focus) .history-header {
+    display: none !important;
   }
+
+  .history-page:has(.search-input:focus) .search-bar-inner {
+    max-width: none;
+  }
+
+  .history-page:has(.search-input:focus) .search-input {
+    flex-grow: 1;
+  }
+}
+
+/* ============================================
+   SEARCH BAR (Desktop)
+   ============================================ */
+
+.search-input {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-accent-green);
 }
 
 /* ============================================

@@ -489,6 +489,32 @@ class MealService:
         return False
 
     @staticmethod
+    def search_user_meals(
+        db: Session, user_id: UUID, query: str, limit: int = 50
+    ) -> List[Meal]:
+        """
+        Search published meals by name for a user.
+
+        Args:
+            db: Database session
+            user_id: User ID
+            query: Search query (case-insensitive partial match on meal name)
+            limit: Maximum number of meals to return
+
+        Returns:
+            List of matching Meal objects, ordered by timestamp descending
+        """
+        base_query = db.query(Meal).filter(
+            Meal.user_id == user_id,
+            Meal.status == "published",
+        )
+
+        if query and query.strip():
+            base_query = base_query.filter(Meal.name.ilike(f"%{query.strip()}%"))
+
+        return base_query.order_by(Meal.timestamp.desc()).limit(limit).all()
+
+    @staticmethod
     def duplicate_meal(db: Session, meal_id: int, user_id: UUID) -> Optional[Meal]:
         """
         Create a copy of an existing meal with all its ingredients.

@@ -41,18 +41,57 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="main-nav">
+    <nav class="main-nav" x-data="{ mobileMenuOpen: false }">
         <a href="/" class="nav-logo">Bloaty McBloatface</a>
-        <ul class="nav-links">
+
+        <!-- Desktop Nav Links -->
+        <ul class="nav-links nav-links-desktop">
             {% if user %}
+            <li>
+                <a href="/meals/history?search=1" class="nav-link nav-search-link" title="Search meals">
+                    <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="overflow: visible;">
+                        <use href="/static/icons/lucide-sprite.svg#search"></use>
+                    </svg>
+                </a>
+            </li>
             <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
             <li><a href="/meals/history" class="nav-link {% if request.path.startswith('/meals') %}active{% endif %}">Meal History</a></li>
             <li><a href="/symptoms/history" class="nav-link {% if request.path.startswith('/symptoms') %}active{% endif %}">Symptom History</a></li>
             <li><a href="/diagnosis" class="nav-link {% if request.path.startswith('/diagnosis') %}active{% endif %}">Diagnosis</a></li>
-            {# <li><a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">Settings</a></li> #}
             <li><a href="/auth/account" class="nav-link {% if request.path.startswith('/auth/account') %}active{% endif %}">Account</a></li>
             {% else %}
             <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">Login</a></li>
+            {% endif %}
+        </ul>
+
+        <!-- Mobile Hamburger Button -->
+        <button type="button" class="nav-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="overflow: visible;" x-show="!mobileMenuOpen">
+                <use href="/static/icons/lucide-sprite.svg#menu"></use>
+            </svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="overflow: visible;" x-show="mobileMenuOpen" x-cloak>
+                <use href="/static/icons/lucide-sprite.svg#x"></use>
+            </svg>
+        </button>
+
+        <!-- Mobile Dropdown Menu -->
+        <ul class="nav-links nav-mobile-dropdown" x-show="mobileMenuOpen" x-cloak @click.away="mobileMenuOpen = false">
+            {% if user %}
+            <li>
+                <a href="/meals/history?search=1" class="nav-link" @click="mobileMenuOpen = false">
+                    <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="overflow: visible; margin-right: var(--space-2);">
+                        <use href="/static/icons/lucide-sprite.svg#search"></use>
+                    </svg>
+                    Search Meals
+                </a>
+            </li>
+            <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}" @click="mobileMenuOpen = false">Home</a></li>
+            <li><a href="/meals/history" class="nav-link {% if request.path.startswith('/meals') %}active{% endif %}" @click="mobileMenuOpen = false">Meal History</a></li>
+            <li><a href="/symptoms/history" class="nav-link {% if request.path.startswith('/symptoms') %}active{% endif %}" @click="mobileMenuOpen = false">Symptom History</a></li>
+            <li><a href="/diagnosis" class="nav-link {% if request.path.startswith('/diagnosis') %}active{% endif %}" @click="mobileMenuOpen = false">Diagnosis</a></li>
+            <li><a href="/auth/account" class="nav-link {% if request.path.startswith('/auth/account') %}active{% endif %}" @click="mobileMenuOpen = false">Account</a></li>
+            {% else %}
+            <li><a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}" @click="mobileMenuOpen = false">Login</a></li>
             {% endif %}
         </ul>
     </nav>

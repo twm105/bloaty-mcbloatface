@@ -329,10 +329,29 @@ async def complete_meal(
 @router.get("/history", response_class=HTMLResponse)
 async def meal_history_page(
     request: Request,
+    q: str = "",
+    search: str = "",
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Meal history page with day-based grouping."""
+    # If search query provided, render with filtered results
+    if q and q.strip():
+        meals = meal_service.search_user_meals(db, user.id, q)
+        return templates.TemplateResponse(
+            "meals/history.html",
+            {
+                "request": request,
+                "user": user,
+                "recent_meals": None,
+                "collapsed_days": [],
+                "search_query": q,
+                "search_results": meals,
+                "search_active": True,
+            },
+        )
+
+    # Default: day-grouped view
     recent_meals, collapsed_days = meal_service.get_meals_grouped_by_date(
         db, user.id, limit=50
     )
@@ -344,8 +363,49 @@ async def meal_history_page(
             "user": user,
             "recent_meals": recent_meals,
             "collapsed_days": collapsed_days,
+            "search_active": search == "1",
+            "search_query": "",
+            "search_results": None,
         },
     )
+
+
+@router.get("/history/results", response_class=HTMLResponse)
+async def search_meal_history(
+    request: Request,
+    q: str = "",
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Search meals or return day-grouped view when query is empty."""
+    from urllib.parse import urlencode
+
+    if not q or not q.strip():
+        # Empty query: return day-grouped default view
+        recent_meals, collapsed_days = meal_service.get_meals_grouped_by_date(
+            db, user.id, limit=50
+        )
+        response = templates.TemplateResponse(
+            "meals/partials/meal_results_grouped.html",
+            {
+                "request": request,
+                "recent_meals": recent_meals,
+                "collapsed_days": collapsed_days,
+            },
+        )
+        # Push full page URL so browser back works correctly
+        response.headers["HX-Push-Url"] = "/meals/history"
+        return response
+
+    # Non-empty query: return flat search results
+    meals = meal_service.search_user_meals(db, user.id, q)
+    response = templates.TemplateResponse(
+        "meals/partials/meal_cards.html",
+        {"request": request, "meals": meals, "query": q},
+    )
+    # Push full page URL with query param so browser back works correctly
+    response.headers["HX-Push-Url"] = f"/meals/history?{urlencode({'q': q})}"
+    return response
 
 
 @router.put("/{meal_id}/name")

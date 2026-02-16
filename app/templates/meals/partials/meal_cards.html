@@ -1,0 +1,25 @@
+{# Reusable meal cards grid for search results #}
+{# Required context: meals, query (optional) #}
+{% if meals %}
+<div id="search-results-grid" class="card-grid" x-data="{ expandedMeal: null }">
+    {% for meal in meals %}
+    {% include "meals/_meal_card.html" %}
+    {% endfor %}
+</div>
+{% elif query %}
+<div class="card" style="text-align: center; padding: var(--space-8);">
+    <svg width="48" height="48" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary); overflow: visible;">
+        <use href="/static/icons/lucide-sprite.svg#search-x"></use>
+    </svg>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-2);">No meals found</p>
+    <p class="text-muted">No meals matching "{{ query }}"</p>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: var(--space-12);">
+    <svg width="48" height="48" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary); overflow: visible;">
+        <use href="/static/icons/lucide-sprite.svg#image"></use>
+    </svg>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-6);">No meals logged yet</p>
+    <a href="/meals/log" class="btn-primary">Log your first meal</a>
+</div>
+{% endif %}

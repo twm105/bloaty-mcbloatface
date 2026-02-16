@@ -79,7 +79,7 @@
     <!-- Copy button (absolute positioned, top-left) -->
     <button
         hx-post="/meals/{{ meal.id }}/duplicate"
-        hx-target="#recent-meals-grid"
+        hx-target="closest .card-grid"
         hx-swap="afterbegin"
         class="icon-button"
         style="position: absolute; top: var(--space-2); left: var(--space-2);"

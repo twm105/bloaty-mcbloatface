@@ -3,8 +3,10 @@
 {% block title %}Meal History - Bloaty McBloatface{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: var(--space-6);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+<div class="history-page" style="margin-bottom: var(--space-6);"
+     x-data="{ searchQuery: '{{ search_query|default('', true)|e }}' }">
+    <!-- Header (hidden on mobile when search is focused via CSS) -->
+    <div class="history-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
         <div>
             <h1 style="margin-bottom: var(--space-2);">Meal History</h1>
             <p class="text-muted" style="margin: 0;">View and manage your logged meals</p>
@@ -17,55 +19,43 @@
         </a>
     </div>
 
-    {% if recent_meals or collapsed_days %}
-
-    <!-- Recent Meals (expanded as grid) -->
-    <div id="recent-meals-grid" class="card-grid" x-data="{ expandedMeal: null }">
-        {% for meal in recent_meals %}
-        {% include "meals/_meal_card.html" %}
-        {% endfor %}
-    </div>
-
-    <!-- Collapsed Day Sections -->
-    {% for day in collapsed_days %}
-    <details class="day-section">
-        <summary class="day-header">
-            <div class="day-header-left">
-                <span class="day-date">{{ day.date.strftime('%A, %B %d') }}</span>
-                <!-- Mini thumbnails (max 3) -->
-                <div class="day-thumbnails">
-                    {% for meal in day.meals[:3] %}
-                    {% if meal.image_path %}
-                    <img src="/{{ meal.image_path }}" alt="" class="day-thumb"
-                         style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;">
-                    {% endif %}
-                    {% endfor %}
-                    {% if day.meals|length > 3 %}
-                    <span class="day-thumb-more">+{{ day.meals|length - 3 }}</span>
-                    {% endif %}
-                </div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs chevron-icon" aria-hidden="true" style="overflow: visible;">
-                <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
-            </svg>
-        </summary>
-        <div class="card-grid" x-data="{ expandedMeal: null }">
-            {% for meal in day.meals %}
-            {% include "meals/_meal_card.html" %}
-            {% endfor %}
+    <!-- Search Bar (transforms to full-width on mobile when focused) -->
+    <div class="search-bar-container" style="margin-bottom: var(--space-6);">
+        <div class="search-bar-inner">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search meals..."
+                class="form-input search-input"
+                hx-get="/meals/history/results"
+                hx-trigger="input changed delay:300ms, search"
+                hx-target="#meal-results"
+                x-ref="searchInput"
+                x-model="searchQuery"
+                {% if search_active %}autofocus{% endif %}
+            >
+            <button type="button"
+                    class="search-clear-btn"
+                    x-show="searchQuery"
+                    x-cloak
+                    @click="searchQuery = ''; $nextTick(() => $refs.searchInput.dispatchEvent(new Event('input')))">
+                <svg width="16" height="16" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="overflow: visible;">
+                    <use href="/static/icons/lucide-sprite.svg#x"></use>
+                </svg>
+            </button>
         </div>
-    </details>
-    {% endfor %}
-
-    {% else %}
-    <div class="card" style="text-align: center; padding: var(--space-12);">
-        <svg class="icon icon-lg" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary);">
-            <use href="/static/icons/lucide-sprite.svg#image"></use>
-        </svg>
-        <p style="font-size: var(--text-lg); margin-bottom: var(--space-6);">No meals logged yet</p>
-        <a href="/meals/log" class="btn-primary">Log your first meal</a>
     </div>
-    {% endif %}
+
+    <!-- Meal Results Container -->
+    <div id="meal-results">
+        {% if search_results is not none %}
+            {% set meals = search_results %}
+            {% set query = search_query %}
+            {% include "meals/partials/meal_cards.html" %}
+        {% else %}
+            {% include "meals/partials/meal_results_grouped.html" %}
+        {% endif %}
+    </div>
 
     <!-- Back Button -->
     <div style="margin-top: var(--space-8); text-align: center;">

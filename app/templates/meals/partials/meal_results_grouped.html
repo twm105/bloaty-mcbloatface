@@ -1,0 +1,49 @@
+{% if recent_meals or collapsed_days %}
+
+<!-- Recent Meals (expanded as grid) -->
+<div id="recent-meals-grid" class="card-grid" x-data="{ expandedMeal: null }">
+    {% for meal in recent_meals %}
+    {% include "meals/_meal_card.html" %}
+    {% endfor %}
+</div>
+
+<!-- Collapsed Day Sections -->
+{% for day in collapsed_days %}
+<details class="day-section">
+    <summary class="day-header">
+        <div class="day-header-left">
+            <span class="day-date">{{ day.date.strftime('%A, %B %d') }}</span>
+            <!-- Mini thumbnails (max 3) -->
+            <div class="day-thumbnails">
+                {% for meal in day.meals[:3] %}
+                {% if meal.image_path %}
+                <img src="/{{ meal.image_path }}" alt="" class="day-thumb"
+                     style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;">
+                {% endif %}
+                {% endfor %}
+                {% if day.meals|length > 3 %}
+                <span class="day-thumb-more">+{{ day.meals|length - 3 }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs chevron-icon" aria-hidden="true" style="overflow: visible;">
+            <use href="/static/icons/lucide-sprite.svg#chevron-down"></use>
+        </svg>
+    </summary>
+    <div class="card-grid" x-data="{ expandedMeal: null }">
+        {% for meal in day.meals %}
+        {% include "meals/_meal_card.html" %}
+        {% endfor %}
+    </div>
+</details>
+{% endfor %}
+
+{% else %}
+<div class="card" style="text-align: center; padding: var(--space-12);">
+    <svg width="48" height="48" viewBox="0 0 24 24" class="icon" aria-hidden="true" style="margin: 0 auto var(--space-4); color: var(--color-text-secondary); overflow: visible;">
+        <use href="/static/icons/lucide-sprite.svg#image"></use>
+    </svg>
+    <p style="font-size: var(--text-lg); margin-bottom: var(--space-6);">No meals logged yet</p>
+    <a href="/meals/log" class="btn-primary">Log your first meal</a>
+</div>
+{% endif %}
