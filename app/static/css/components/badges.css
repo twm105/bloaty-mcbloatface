@@ -179,3 +179,21 @@
 .badge-removable .remove-btn:hover {
   opacity: 1;
 }
+
+/* ============================================
+   COPY BADGE (for duplicated meals)
+   ============================================ */
+
+.badge-copy {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: var(--color-info);
+  color: white;
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

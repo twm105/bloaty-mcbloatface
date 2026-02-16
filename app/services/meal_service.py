@@ -488,6 +488,61 @@ class MealService:
             return True
         return False
 
+    @staticmethod
+    def duplicate_meal(db: Session, meal_id: int, user_id: UUID) -> Optional[Meal]:
+        """
+        Create a copy of an existing meal with all its ingredients.
+
+        Args:
+            db: Database session
+            meal_id: ID of the meal to duplicate
+            user_id: ID of the user requesting the duplication (for ownership verification)
+
+        Returns:
+            New Meal object if successful, None if source meal not found or not owned by user
+        """
+        # Fetch source meal
+        source_meal = db.query(Meal).filter(Meal.id == meal_id).first()
+        if not source_meal:
+            return None
+
+        # Verify ownership
+        if source_meal.user_id != user_id:
+            return None
+
+        # Create new meal with copied fields
+        new_meal = Meal(
+            user_id=source_meal.user_id,
+            name=source_meal.name,
+            name_source="copy",
+            status="published",  # Skip draft, go straight to published
+            timestamp=datetime.utcnow(),
+            country=source_meal.country,
+            image_path=source_meal.image_path,
+            meal_image_crop_x=source_meal.meal_image_crop_x,
+            meal_image_crop_y=source_meal.meal_image_crop_y,
+            user_notes=source_meal.user_notes,
+            copied_from_id=source_meal.id,
+        )
+        db.add(new_meal)
+        db.flush()  # Get the new meal ID
+
+        # Copy all ingredients
+        for source_ingredient in source_meal.meal_ingredients:
+            new_ingredient = MealIngredient(
+                meal_id=new_meal.id,
+                ingredient_id=source_ingredient.ingredient_id,
+                state=source_ingredient.state,
+                quantity_description=source_ingredient.quantity_description,
+                confidence=source_ingredient.confidence,
+                source="copy",
+            )
+            db.add(new_ingredient)
+
+        db.commit()
+        db.refresh(new_meal)
+        return new_meal
+
 
 # Singleton instance
 meal_service = MealService()

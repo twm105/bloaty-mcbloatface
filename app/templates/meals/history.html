@@ -20,13 +20,11 @@
     {% if recent_meals or collapsed_days %}
 
     <!-- Recent Meals (expanded as grid) -->
-    {% if recent_meals %}
-    <div class="card-grid" x-data="{ expandedMeal: null }">
+    <div id="recent-meals-grid" class="card-grid" x-data="{ expandedMeal: null }">
         {% for meal in recent_meals %}
         {% include "meals/_meal_card.html" %}
         {% endfor %}
     </div>
-    {% endif %}
 
     <!-- Collapsed Day Sections -->
     {% for day in collapsed_days %}

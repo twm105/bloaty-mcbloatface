@@ -9,7 +9,7 @@
 >
     <!-- Circular Image -->
     {% if meal.image_path %}
-    <div class="meal-card-image-container">
+    <div class="meal-card-image-container" style="position: relative;">
         <img
             src="/{{ meal.image_path }}"
             alt="{{ meal.name or 'Meal' }}"
@@ -17,6 +17,9 @@
             style="--crop-x: {{ meal.meal_image_crop_x or 50 }}%; --crop-y: {{ meal.meal_image_crop_y or 50 }}%;"
             loading="lazy"
         >
+        {% if meal.is_copy %}
+        <span class="badge-copy">Copy</span>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -73,7 +76,23 @@
     </p>
     {% endif %}
 
-    <!-- Delete button (absolute positioned) -->
+    <!-- Copy button (absolute positioned, top-left) -->
+    <button
+        hx-post="/meals/{{ meal.id }}/duplicate"
+        hx-target="#recent-meals-grid"
+        hx-swap="afterbegin"
+        class="icon-button"
+        style="position: absolute; top: var(--space-2); left: var(--space-2);"
+        onclick="event.preventDefault(); event.stopPropagation();"
+        @click.stop
+        title="Duplicate meal"
+    >
+        <svg width="12" height="12" viewBox="0 0 24 24" class="icon icon-xxs" aria-hidden="true" style="stroke-width: 1.5;">
+            <use href="/static/icons/lucide-sprite.svg#copy"></use>
+        </svg>
+    </button>
+
+    <!-- Delete button (absolute positioned, top-right) -->
     <button
         hx-delete="/meals/{{ meal.id }}"
         hx-target="closest .meal-card"

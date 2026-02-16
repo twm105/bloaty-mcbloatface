@@ -486,3 +486,36 @@ async def delete_meal(
     from fastapi.responses import Response
 
     return Response(status_code=200)
+
+
+@router.post("/{meal_id}/duplicate")
+async def duplicate_meal(
+    request: Request,
+    meal_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Duplicate a meal with all its ingredients.
+
+    Returns: HTML partial with the new meal card for htmx insertion
+    """
+    # Check if source meal exists
+    source_meal = meal_service.get_meal(db, meal_id)
+    if not source_meal:
+        raise HTTPException(status_code=404, detail="Meal not found")
+
+    # Verify ownership
+    if source_meal.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Duplicate the meal
+    new_meal = meal_service.duplicate_meal(db, meal_id, user.id)
+    if not new_meal:
+        raise HTTPException(status_code=500, detail="Failed to duplicate meal")
+
+    # Return the new meal card for htmx insertion
+    return templates.TemplateResponse(
+        "meals/_meal_card.html",
+        {"request": request, "meal": new_meal, "expandedMeal": None},
+    )

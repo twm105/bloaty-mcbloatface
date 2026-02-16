@@ -43,8 +43,16 @@ class Meal(Base):
     ai_suggested_ingredients = Column(
         JSONB
     )  # Original AI suggestions for evals/data science
+    copied_from_id = Column(
+        Integer, ForeignKey("meals.id", ondelete="SET NULL"), nullable=True
+    )  # Reference to original meal if this is a copy
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    @property
+    def is_copy(self) -> bool:
+        """Returns True if this meal was duplicated from another meal."""
+        return self.copied_from_id is not None
 
     # Relationships
     user = relationship("User", back_populates="meals")
@@ -56,4 +64,5 @@ class Meal(Base):
         Index("idx_meals_user_id", "user_id"),
         Index("idx_meals_timestamp", "timestamp"),
         Index("idx_meals_country", "country"),
+        Index("idx_meals_copied_from_id", "copied_from_id"),
     )
