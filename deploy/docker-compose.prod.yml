@@ -17,7 +17,7 @@ services:
   web:
     # Don't mount source code in production - use built image
     volumes: !override
-      - uploads:/app/uploads
+      - /opt/bloaty/uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/bloaty
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -30,7 +30,7 @@ services:
 
   worker:
     volumes: !override
-      - uploads:/app/uploads
+      - /opt/bloaty/uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/bloaty
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -47,10 +47,9 @@ services:
       - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/conf.d/ssl.conf.prod:/etc/nginx/conf.d/ssl.conf:ro
       - ./app/static:/app/static:ro
-      - uploads:/app/uploads:ro
+      - /opt/bloaty/uploads:/app/uploads:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
 
 volumes:
   postgres_data:
-  uploads:
