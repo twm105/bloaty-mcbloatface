@@ -8,9 +8,11 @@ This service provides three core AI capabilities:
 """
 
 import json
+import re
 import base64
 import asyncio
 import random
+import logging
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
@@ -19,8 +21,17 @@ from functools import wraps
 from anthropic import Anthropic
 import anthropic
 import httpx
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from app.config import settings
+from app.services.ai_schemas import (
+    MealAnalysisSchema,
+    ClarifySymptomSchema,
+    EpisodeContinuationSchema,
+    DiagnosisCorrelationsSchema,
+    SingleIngredientDiagnosisSchema,
+    RootCauseSchema,
+)
 from app.services.prompts import (
     MEAL_VALIDATION_SYSTEM_PROMPT,
     MEAL_ANALYSIS_SYSTEM_PROMPT,
@@ -31,6 +42,25 @@ from app.services.prompts import (
     ROOT_CAUSE_CLASSIFICATION_PROMPT,
     build_cached_analysis_context,
 )
+
+
+logger = logging.getLogger(__name__)
+
+
+def _strip_markdown_json(text: str) -> str:
+    """Strip markdown code block wrappers from JSON text."""
+    if "```json" in text:
+        text = text.split("```json")[1].split("```")[0].strip()
+    elif "```" in text:
+        text = text.split("```")[1].split("```")[0].strip()
+    return text
+
+
+def _fix_trailing_commas(text: str) -> str:
+    """Fix trailing commas in JSON (common LLM error)."""
+    text = re.sub(r",\s*}", "}", text)
+    text = re.sub(r",\s*]", "]", text)
+    return text
 
 
 def retry_on_connection_error(max_attempts=3, base_delay=1.0):
@@ -90,6 +120,123 @@ class ClaudeService:
         self.client = Anthropic(api_key=settings.anthropic_api_key, timeout=timeout)
         self.haiku_model = settings.haiku_model
         self.sonnet_model = settings.sonnet_model
+
+    # =========================================================================
+    # SCHEMA VALIDATION + CONVERSATIONAL RETRY
+    # =========================================================================
+
+    def _call_with_schema_retry(
+        self,
+        messages: list[dict],
+        schema_class: type[BaseModel],
+        request_params: dict,
+        max_retries: int = 2,
+        prefill: str | None = "{",
+    ) -> tuple[dict, str, object]:
+        """
+        Call Claude API with JSON schema validation and conversational retry.
+
+        On schema failure: appends the bad response + error feedback to messages,
+        re-calls with full conversation context so the LLM can self-correct.
+
+        Args:
+            messages: The messages list (will be mutated on retry)
+            schema_class: Pydantic model class to validate against
+            request_params: Dict of params for client.messages.create
+                            (model, max_tokens, system, etc.)
+                            NOTE: do NOT include 'messages' - they're passed separately
+            max_retries: Number of retry attempts after initial call (default 2, so 3 total)
+            prefill: Assistant prefill string, or None for no prefill
+
+        Returns:
+            (validated_dict, raw_response_text, response_object) tuple
+
+        Raises:
+            ValueError: If all attempts fail schema validation
+        """
+        response = None
+
+        for attempt in range(1 + max_retries):
+            # Build messages with prefill
+            call_messages = list(messages)  # copy
+            if prefill:
+                call_messages.append({"role": "assistant", "content": prefill})
+
+            # Make API call
+            response = self.client.messages.create(
+                messages=call_messages,
+                **request_params,
+            )
+
+            # Extract text from response (handle multi-block web search responses)
+            response_text = ""
+            for block in response.content:
+                if hasattr(block, "text"):
+                    response_text += block.text
+
+            if not response_text:
+                if attempt < max_retries:
+                    messages.append(
+                        {"role": "assistant", "content": "(empty response)"}
+                    )
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": "Your response contained no text. Please respond with valid JSON.",
+                        }
+                    )
+                    continue
+                raise ValueError("No text content in AI response after retries")
+
+            # Reconstruct JSON (handle prefill)
+            raw_text = response_text.strip()
+            json_str = (prefill or "") + raw_text if prefill else raw_text
+
+            # Handle markdown code blocks and trailing commas
+            json_str = _strip_markdown_json(json_str)
+            json_str = _fix_trailing_commas(json_str)
+
+            # Try parse + validate
+            try:
+                parsed = json.loads(json_str)
+                adapter = TypeAdapter(schema_class)
+                validated = adapter.validate_python(parsed)
+                return validated.model_dump(), raw_text, response
+            except (json.JSONDecodeError, ValidationError) as e:
+                error_msg = str(e)
+                logger.warning(
+                    "AI response schema validation failed (attempt %d/%d) for %s: %s",
+                    attempt + 1,
+                    1 + max_retries,
+                    schema_class.__name__,
+                    error_msg,
+                )
+
+                if attempt < max_retries:
+                    # Append the failed attempt + error to conversation
+                    messages.append(
+                        {
+                            "role": "assistant",
+                            "content": (prefill or "") + raw_text,
+                        }
+                    )
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": (
+                                f"Your response had a schema error:\n{error_msg}\n\n"
+                                f"Please fix and return valid JSON matching the required schema."
+                            ),
+                        }
+                    )
+                    continue
+
+                raise ValueError(
+                    f"AI response failed schema validation after {1 + max_retries} attempts: {error_msg}"
+                )
+
+        # Should not reach here, but just in case
+        raise ValueError("AI response failed schema validation")
 
     # =========================================================================
     # MEAL IMAGE ANALYSIS (Task #5)
@@ -217,40 +364,22 @@ class ClaudeService:
                     {"type": "text", "text": f"User notes: {user_notes}"}
                 )
 
-            # Call Claude
-            response = self.client.messages.create(
-                model=self.haiku_model,
-                max_tokens=1024,
-                messages=[{"role": "user", "content": user_message}],
-                system=MEAL_ANALYSIS_SYSTEM_PROMPT,
+            messages = [{"role": "user", "content": user_message}]
+
+            validated, raw_text, _response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=MealAnalysisSchema,
+                request_params={
+                    "model": self.haiku_model,
+                    "max_tokens": 1024,
+                    "system": MEAL_ANALYSIS_SYSTEM_PROMPT,
+                },
             )
 
-            raw_response = response.content[0].text
-
-            # Parse JSON response - handle markdown code blocks
-            try:
-                # First try direct parsing
-                if "```json" in raw_response or "```" in raw_response:
-                    # Extract from markdown code block
-                    json_str = raw_response
-                    if "```json" in json_str:
-                        json_str = json_str.split("```json")[1]
-                    elif "```" in json_str:
-                        json_str = json_str.split("```")[1]
-                    json_str = json_str.split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                else:
-                    parsed = json.loads(raw_response)
-
-                ingredients = parsed.get("ingredients", [])
-                meal_name = parsed.get("meal_name", "Untitled Meal")
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Could not parse AI response as JSON: {str(e)}")
-
             return {
-                "meal_name": meal_name,
-                "ingredients": ingredients,
-                "raw_response": raw_response,
+                "meal_name": validated["meal_name"],
+                "ingredients": validated["ingredients"],
+                "raw_response": raw_text,
                 "model": self.haiku_model,
             }
 
@@ -264,8 +393,6 @@ class ClaudeService:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Failed to parse AI response: {str(e)}") from e
 
     # =========================================================================
     # SYMPTOM CLARIFICATION (Task #6)
@@ -351,28 +478,17 @@ class ClaudeService:
                 }
             )
 
-            # Call Claude
-            response = self.client.messages.create(
-                model=self.sonnet_model,
-                max_tokens=512,
+            validated, _raw_text, _response = self._call_with_schema_retry(
                 messages=messages,
-                system=SYMPTOM_CLARIFICATION_SYSTEM_PROMPT,
+                schema_class=ClarifySymptomSchema,
+                request_params={
+                    "model": self.sonnet_model,
+                    "max_tokens": 512,
+                    "system": SYMPTOM_CLARIFICATION_SYSTEM_PROMPT,
+                },
             )
 
-            raw_response = response.content[0].text
-
-            # Parse JSON response
-            try:
-                parsed = json.loads(raw_response)
-            except json.JSONDecodeError:
-                # Try to extract JSON from markdown
-                if "```json" in raw_response:
-                    json_str = raw_response.split("```json")[1].split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                else:
-                    raise ValueError("Could not parse AI response as JSON")
-
-            return parsed
+            return validated
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
@@ -384,8 +500,6 @@ class ClaudeService:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Failed to parse AI response: {str(e)}") from e
 
     # =========================================================================
     # SYMPTOM ELABORATION & EPISODE DETECTION
@@ -586,42 +700,33 @@ class ClaudeService:
                 },
             }
 
-            # Call Claude with episode continuation prompt (reuse existing logic)
-            response = self.client.messages.create(
-                model=self.sonnet_model,
-                max_tokens=512,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"Analyze if this symptom is ongoing:\n\n{json.dumps(analysis_data, indent=2)}",
-                    }
-                ],
-                system=EPISODE_CONTINUATION_SYSTEM_PROMPT,  # Reuse existing prompt
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"Analyze if this symptom is ongoing:\n\n{json.dumps(analysis_data, indent=2)}",
+                }
+            ]
+
+            validated, _raw_text, _response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=EpisodeContinuationSchema,
+                request_params={
+                    "model": self.sonnet_model,
+                    "max_tokens": 512,
+                    "system": EPISODE_CONTINUATION_SYSTEM_PROMPT,
+                },
             )
 
-            raw_response = response.content[0].text
-
-            # Parse JSON response
-            try:
-                parsed = json.loads(raw_response)
-            except json.JSONDecodeError:
-                if "```json" in raw_response:
-                    json_str = raw_response.split("```json")[1].split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                elif "```" in raw_response:
-                    json_str = raw_response.split("```")[1].split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                else:
-                    raise ValueError("Could not parse AI response as JSON")
-
             return {
-                "is_ongoing": parsed.get(
-                    "is_continuation", False
-                ),  # Reuse continuation logic
-                "confidence": parsed.get("confidence", 0.0),
-                "reasoning": parsed.get("reasoning", ""),
+                "is_ongoing": validated[
+                    "is_continuation"
+                ],  # Remap field name for caller
+                "confidence": validated["confidence"],
+                "reasoning": validated["reasoning"],
             }
 
+        except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.APIStatusError):
+            raise
         except Exception as e:
             raise ValueError(f"AI ongoing detection failed: {str(e)}")
 
@@ -667,39 +772,27 @@ class ClaudeService:
                 },
             }
 
-            # Call Claude
-            response = self.client.messages.create(
-                model=self.sonnet_model,
-                max_tokens=512,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"Analyze if these symptoms are a continuation:\n\n{json.dumps(analysis_data, indent=2)}",
-                    }
-                ],
-                system=EPISODE_CONTINUATION_SYSTEM_PROMPT,
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"Analyze if these symptoms are a continuation:\n\n{json.dumps(analysis_data, indent=2)}",
+                }
+            ]
+
+            validated, _raw_text, _response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=EpisodeContinuationSchema,
+                request_params={
+                    "model": self.sonnet_model,
+                    "max_tokens": 512,
+                    "system": EPISODE_CONTINUATION_SYSTEM_PROMPT,
+                },
             )
 
-            raw_response = response.content[0].text
-
-            # Parse JSON response
-            try:
-                parsed = json.loads(raw_response)
-            except json.JSONDecodeError:
-                # Try to extract JSON from markdown
-                if "```json" in raw_response:
-                    json_str = raw_response.split("```json")[1].split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                elif "```" in raw_response:
-                    json_str = raw_response.split("```")[1].split("```")[0].strip()
-                    parsed = json.loads(json_str)
-                else:
-                    raise ValueError("Could not parse AI response as JSON")
-
             return {
-                "is_continuation": parsed.get("is_continuation", False),
-                "confidence": parsed.get("confidence", 0.0),
-                "reasoning": parsed.get("reasoning", ""),
+                "is_continuation": validated["is_continuation"],
+                "confidence": validated["confidence"],
+                "reasoning": validated["reasoning"],
             }
 
         except anthropic.APIConnectionError as e:
@@ -712,8 +805,6 @@ class ClaudeService:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Failed to parse AI response: {str(e)}") from e
 
     # =========================================================================
     # PATTERN ANALYSIS (Task #8)
@@ -844,7 +935,7 @@ class ClaudeService:
             # Validate request size before sending
             self._validate_request_size(formatted_data, DIAGNOSIS_SYSTEM_PROMPT)
 
-            # Prepare messages with prefill to force JSON output
+            # Prepare messages (prefill handled by _call_with_schema_retry)
             messages = [
                 {
                     "role": "user",
@@ -859,15 +950,13 @@ Remember to:
 4. Include plain-language interpretation
 5. Suggest next steps including professional consultation""",
                 },
-                {"role": "assistant", "content": "{"},
             ]
 
-            # Call Claude API with web search if enabled
+            # Build request parameters (without messages - passed separately)
             request_params = {
                 "model": self.sonnet_model,
-                "max_tokens": 8192,  # Increased to prevent truncation
-                "messages": messages,
-                "stop_sequences": ["\n```", "```"],  # Prevent markdown wrapping
+                "max_tokens": 8192,
+                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -883,41 +972,21 @@ Remember to:
                     {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
-            response = self.client.messages.create(**request_params)
-
-            # Extract JSON from response
-            response_text = ""
-            for content_block in response.content:
-                if hasattr(content_block, "text"):
-                    response_text += content_block.text
-
-            if not response_text:
-                raise ValueError(
-                    f"No text content in Claude response. Content blocks: {[c.type for c in response.content]}"
-                )
-
-            response_text = response_text.strip()
-
-            # Prepend the opening brace from prefill (Claude continues from "{")
-            response_text = "{" + response_text
-
-            # Parse JSON directly (no markdown wrapper expected with prefill)
-            try:
-                result = json.loads(response_text)
-            except json.JSONDecodeError as e:
-                raise ValueError(
-                    f"Invalid JSON response from AI at line {e.lineno}, col {e.colno}: {e.msg}"
-                ) from e
+            validated, _raw_text, response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=DiagnosisCorrelationsSchema,
+                request_params=request_params,
+            )
 
             # Add usage stats
             usage = response.usage
-            result["usage_stats"] = {
+            validated["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
                 "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
                 "cache_hit": getattr(usage, "cache_read_input_tokens", 0) > 0,
             }
 
-            return result
+            return validated
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
@@ -929,8 +998,6 @@ Remember to:
             if e.status_code >= 500:
                 raise ServiceUnavailableError("AI service error") from e
             raise ValueError(f"Request error: {e.message}") from e
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON response from AI: {e}") from e
 
     @retry_on_connection_error(max_attempts=3, base_delay=2.0)
     async def diagnose_single_ingredient(
@@ -983,17 +1050,13 @@ USER'S RECENT MEALS (for alternative suggestions):
 
 Provide your analysis in the specified JSON format."""
 
-            # Prepare messages with prefill
-            messages = [
-                {"role": "user", "content": user_message},
-                {"role": "assistant", "content": "{"},
-            ]
+            # Prepare messages (prefill handled by _call_with_schema_retry)
+            messages = [{"role": "user", "content": user_message}]
 
-            # Build request parameters
+            # Build request parameters (without messages)
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 2048,
-                "messages": messages,
                 "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
@@ -1010,35 +1073,22 @@ Provide your analysis in the specified JSON format."""
                     {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
-            response = self.client.messages.create(**request_params)
-
-            # Extract JSON from response
-            response_text = ""
-            for content_block in response.content:
-                if hasattr(content_block, "text"):
-                    response_text += content_block.text
-
-            if not response_text:
-                raise ValueError("No text content in Claude response")
-
-            response_text = "{" + response_text.strip()
-
-            # Parse JSON
-            try:
-                result = json.loads(response_text)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON response: {e.msg}") from e
+            validated, _raw_text, response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=SingleIngredientDiagnosisSchema,
+                request_params=request_params,
+            )
 
             # Add usage stats
             usage = response.usage
-            result["usage_stats"] = {
+            validated["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
                 "output_tokens": getattr(usage, "output_tokens", 0),
                 "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
                 "cache_hit": getattr(usage, "cache_read_input_tokens", 0) > 0,
             }
 
-            return result
+            return validated
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e
@@ -1093,17 +1143,13 @@ Provide your analysis in the specified JSON format."""
                 ingredient_data, cooccurrence_data, medical_grounding
             )
 
-            # Prepare messages with prefill
-            messages = [
-                {"role": "user", "content": formatted_input},
-                {"role": "assistant", "content": "{"},
-            ]
+            # Prepare messages (prefill handled by _call_with_schema_retry)
+            messages = [{"role": "user", "content": formatted_input}]
 
-            # Build request parameters
+            # Build request parameters (without messages)
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 1024,
-                "messages": messages,
                 "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
@@ -1120,41 +1166,21 @@ Provide your analysis in the specified JSON format."""
                     {"type": "web_search_20250305", "name": "web_search"}
                 ]
 
-            response = self.client.messages.create(**request_params)
-
-            # Extract JSON from response
-            response_text = ""
-            for content_block in response.content:
-                if hasattr(content_block, "text"):
-                    response_text += content_block.text
-
-            if not response_text:
-                raise ValueError("No text content in Claude response")
-
-            # Reconstruct JSON with prefilled opening brace
-            json_text = "{" + response_text.strip()
-
-            # Handle trailing commas (common JSON error)
-            import re
-
-            json_text = re.sub(r",\s*}", "}", json_text)
-            json_text = re.sub(r",\s*]", "]", json_text)
-
-            # Parse JSON
-            try:
-                result = json.loads(json_text)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON response: {e.msg}") from e
+            validated, _raw_text, response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=RootCauseSchema,
+                request_params=request_params,
+            )
 
             # Add usage stats
             usage = response.usage
-            result["usage_stats"] = {
+            validated["usage_stats"] = {
                 "input_tokens": usage.input_tokens,
                 "output_tokens": getattr(usage, "output_tokens", 0),
                 "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
             }
 
-            return result
+            return validated
 
         except anthropic.APIConnectionError as e:
             raise ServiceUnavailableError("AI service temporarily unavailable") from e

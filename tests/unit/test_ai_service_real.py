@@ -188,7 +188,7 @@ class TestAnalyzeMealImage:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         result = await claude_service.analyze_meal_image(sample_image_file)
@@ -215,7 +215,7 @@ class TestAnalyzeMealImage:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         result = await claude_service.analyze_meal_image(
@@ -283,7 +283,7 @@ class TestAnalyzeMealImage:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         result = await claude_service.analyze_meal_image(sample_image_file)
@@ -297,7 +297,7 @@ class TestAnalyzeMealImage:
             "Not valid JSON {"
         )
 
-        with pytest.raises(ValueError, match="parse"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.analyze_meal_image(sample_image_file)
 
     @pytest.mark.asyncio
@@ -391,7 +391,7 @@ class TestDetectEpisodeContinuation:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         current_tags = [{"name": "bloating", "severity": 6}]
@@ -422,7 +422,7 @@ class TestDetectEpisodeContinuation:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         current_tags = [{"name": "headache", "severity": 5}]
@@ -470,7 +470,7 @@ class TestDetectEpisodeContinuation:
             "Not JSON"
         )
 
-        with pytest.raises(ValueError, match="parse"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.detect_episode_continuation(
                 [{"name": "test", "severity": 5}],
                 datetime.now(timezone.utc),
@@ -498,7 +498,7 @@ class TestClarifySymptom:
             {"mode": "question", "question": "When did the symptoms start?"}
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         result = await claude_service.clarify_symptom("I feel sick")
@@ -520,7 +520,7 @@ class TestClarifySymptom:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         history = [
@@ -545,7 +545,7 @@ class TestClarifySymptom:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         history = [{"question": "How severe?", "answer": "", "skipped": True}]
@@ -1011,7 +1011,7 @@ class TestDetectOngoingSymptom:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         previous = {
@@ -1041,7 +1041,7 @@ class TestDetectOngoingSymptom:
             }
         )
         claude_service.client.messages.create.return_value = create_mock_response(
-            response_json
+            response_json[1:]
         )
 
         previous = {
@@ -1127,7 +1127,7 @@ class TestDetectOngoingSymptom:
             "Not valid JSON at all"
         )
 
-        with pytest.raises(ValueError, match="parse"):
+        with pytest.raises(ValueError, match="AI ongoing detection failed"):
             await claude_service.detect_ongoing_symptom(
                 {
                     "name": "test",
@@ -1204,7 +1204,7 @@ class TestAnalyzeMealImageErrors:
             "This is not valid JSON {["
         )
 
-        with pytest.raises(ValueError, match="parse"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.analyze_meal_image(sample_image_file)
 
 
@@ -1414,7 +1414,7 @@ class TestDetectEpisodeContinuationErrors:
             "Invalid JSON here!"
         )
 
-        with pytest.raises(ValueError, match="parse"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.detect_episode_continuation(
                 [{"name": "test", "severity": 5}],
                 datetime.now(timezone.utc),
@@ -1498,7 +1498,7 @@ class TestDiagnoseCorrelationsErrors:
         mock_response = create_mock_response("Invalid JSON {{{{")
         claude_service.client.messages.create.return_value = mock_response
 
-        with pytest.raises(ValueError, match="Invalid JSON"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.diagnose_correlations([])
 
     @pytest.mark.asyncio
@@ -1559,7 +1559,7 @@ class TestDiagnoseSingleIngredientErrors:
         claude_service.client.messages.create.return_value = mock_response
 
         ingredient_data = {"ingredient_name": "test", "associated_symptoms": []}
-        with pytest.raises(ValueError, match="Invalid JSON"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.diagnose_single_ingredient(ingredient_data, [])
 
     @pytest.mark.asyncio
@@ -1623,7 +1623,7 @@ class TestClassifyRootCauseErrors:
         claude_service.client.messages.create.return_value = mock_response
 
         ingredient_data = {"ingredient_name": "test", "associated_symptoms": []}
-        with pytest.raises(ValueError, match="Invalid JSON"):
+        with pytest.raises(ValueError, match="schema validation"):
             await claude_service.classify_root_cause(ingredient_data, [], "")
 
     @pytest.mark.asyncio
