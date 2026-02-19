@@ -17,7 +17,11 @@ The evals system measures AI accuracy against ground truth datasets scraped from
 | Symptom Elaboration | `elaborate_symptom_tags()` | P3 | Completeness, Clinical Tone | 100% symptoms mentioned |
 | Episode Detection | `detect_episode_continuation()` | P3 | Accuracy, Confidence Calibration | Acc ≥0.85 |
 | Symptom Clarification | `clarify_symptom()` | P3 | Question Limit, Extraction | Max 3 questions |
-| Diagnosis | `diagnose_correlations()` | P4 | JSON Validity, Citation Quality | Manual review |
+| Diagnosis Confidence | `calculate_confidence()` | P1 | Level Accuracy, Distribution Spread | Accuracy ≥0.90 |
+| Diagnosis Root Cause | `classify_root_cause()` | P1 | Precision, Recall, F1 | F1 ≥0.85, Recall ≥0.90 |
+| Diagnosis Single Ingredient | `diagnose_single_ingredient()` | P1 | Readability, Relevance, Ethics | Readability ≥0.80 |
+| Diagnosis Correlations | `diagnose_correlations()` | P2 | Relevance, Ethics, Citation Quality | Relevance ≥0.80 |
+| Diagnosis E2E | Full pipeline | P2 | Kept/Discarded P/R, Plain English | Kept Recall ≥0.90 |
 
 ## Dataset
 
@@ -69,6 +73,7 @@ evals/
 ├── config.py                   # Configuration
 ├── metrics.py                  # Scoring functions
 ├── results.py                  # Database storage
+├── judge_prompts.py            # LLM-as-judge prompts
 ├── scrapers/
 │   ├── base.py                 # Abstract scraper
 │   ├── bbc_good_food.py        # BBC Good Food
@@ -76,10 +81,24 @@ evals/
 ├── datasets/
 │   ├── meal_images/            # Images (gitignored)
 │   ├── ground_truth/           # JSON truth files
+│   │   ├── meal_analysis.json
+│   │   ├── diagnosis_confidence.json      # 30 test vectors
+│   │   ├── diagnosis_root_cause.json      # 40 cases (20 keep + 20 discard)
+│   │   ├── diagnosis_correlations.json    # 15 cases
+│   │   ├── diagnosis_single_ingredient.json # 20 cases
+│   │   └── diagnosis_e2e.json             # 10 full-pipeline scenarios
 │   └── manifest.yaml           # Metadata
 ├── runners/
 │   ├── base.py                 # BaseEvalRunner ABC
-│   └── meal_analysis.py        # Meal analysis eval
+│   ├── meal_analysis.py        # Meal analysis eval
+│   ├── diagnosis_confidence.py # Deterministic scoring eval
+│   ├── diagnosis_root_cause.py # Root cause classification eval
+│   ├── diagnosis_correlations.py # Medical analysis quality eval
+│   ├── diagnosis_single_ingredient.py # Plain English quality eval
+│   └── diagnosis_e2e.py        # Full pipeline integration eval
+├── prompts/
+│   ├── meal_analysis/          # Meal analysis prompt versions
+│   └── diagnosis/              # Diagnosis prompt versions
 └── fixtures/
     ├── api_cache/              # Cached responses (gitignored)
     └── cache_manager.py        # Cache logic
@@ -206,6 +225,48 @@ See `evals/prompts/meal_analysis/history.md` for full experiment log with:
 
 **Current best (v3_recipe_inference)**: F1=0.522, Recall=0.514 (+45.7% from baseline)
 
+## Diagnosis Evals
+
+**Full implementation plan**: `.claude/plans/rosy-zooming-blanket.md`
+
+The diagnosis feature has 5 eval suites covering each pipeline step ("unit evals") plus end-to-end integration. Implementation is phased — Phase 1 (confidence) costs zero API calls, subsequent phases build on each other.
+
+### Eval 1: Confidence Scoring (Deterministic, zero API cost)
+- **What**: 30 test vectors for `calculate_confidence()` covering all 4 confidence levels
+- **Why**: Validates the scoring formula produces realistic spread (currently everything is "medium")
+- **Scoring**: Exact level match + score range check + distribution spread across high/medium/low/insufficient
+- **Targets**: level_accuracy ≥0.90, distribution_spread = 4
+
+### Eval 2: Root Cause Classification (AI, ~$0.08)
+- **What**: 40 cases — 20 should-discard (chicken, rice, carrots, etc.) + 20 should-keep (garlic, onion, dairy, allergens)
+- **Why**: Directly addresses broken non-root-cause bucketing
+- **Ground truth sources**: Monash FODMAP database, FDA Top 9 Allergens, NICE IBS guidelines
+- **Scoring**: Binary accuracy, precision, recall (recall ≥0.90 — missing a trigger is worse than a false alarm)
+- **Targets**: F1 ≥0.85, recall ≥0.90, confounder_mentioned ≥0.70
+
+### Eval 3: Plain English Quality (AI + LLM judge, ~$0.40)
+- **What**: 20 cases across trigger types, confidence levels, and states
+- **Why**: User-facing explanations should be readable, non-technical, actionable
+- **Scoring**: Deterministic (forbidden terms, no raw statistics, sentence count) + LLM-as-judge (readability, relevance, actionability, medical caution)
+- **Targets**: readability ≥0.80, forbidden_terms_absent ≥0.95, relevance ≥0.85
+
+### Eval 4: Medical Analysis Quality (AI + LLM judge, ~$0.75)
+- **What**: 15 batch analysis cases with mixed confidence levels
+- **Why**: Medical context should be relevant, well-cited, ethically sound, with confidence variability
+- **Scoring**: LLM judges for relevance, ethics, citation quality + deterministic checks (ingredient coverage, confidence consistency)
+- **Targets**: relevance ≥0.80, ethics ≥0.90, citation_quality ≥0.70
+
+### Eval 5: End-to-End Pipeline (~$1.50)
+- **What**: 10 full scenarios with 3-5 ingredients each (mix of triggers and bystanders)
+- **Why**: Validates the complete flow: scoring → root cause → medical grounding → explanation
+- **Scoring**: Kept/discarded precision and recall, plain English pass rate, citations present
+- **Targets**: kept_recall ≥0.90, discarded_recall ≥0.85
+
+### Dataset Strategy
+- **Primary**: Synthetic — programmatically constructed correlation scenarios with known expected outcomes
+- **Ground truth grounding**: Monash FODMAP App, FDA Top 9 Allergens, NICE IBS guidelines, BDA food fact sheets, elimination diet protocols (UW Integrative Health, Stanford Low-FODMAP)
+- **Future**: Scrape Monash FODMAP food guide for structured FODMAP ratings per food
+
 ## Metrics
 
 ### Meal Analysis
@@ -230,6 +291,45 @@ See `evals/prompts/meal_analysis/history.md` for full experiment log with:
 | Accuracy | ≥0.95 |
 | True Positive Rate | ≥0.98 |
 | True Negative Rate | ≥0.90 |
+
+### Diagnosis Confidence
+
+| Metric | Target |
+|--------|--------|
+| Level Accuracy | ≥0.90 |
+| Score in Range | ≥0.95 |
+| Distribution Spread | 4 levels |
+
+### Diagnosis Root Cause
+
+| Metric | Target |
+|--------|--------|
+| Accuracy | ≥0.85 |
+| Precision | ≥0.80 |
+| Recall | ≥0.90 |
+| F1 | ≥0.85 |
+| Confounder Mentioned | ≥0.70 |
+
+### Diagnosis Single Ingredient
+
+| Metric | Target |
+|--------|--------|
+| Readability (LLM judge) | ≥0.80 |
+| Relevance (LLM judge) | ≥0.85 |
+| Actionability (LLM judge) | ≥0.75 |
+| Medical Caution (LLM judge) | ≥0.90 |
+| Forbidden Terms Absent | ≥0.95 |
+| No Raw Statistics | ≥0.90 |
+
+### Diagnosis Correlations
+
+| Metric | Target |
+|--------|--------|
+| Ingredient Coverage | 1.0 |
+| Relevance (LLM judge) | ≥0.80 |
+| Ethics (LLM judge) | ≥0.90 |
+| Citation Quality (LLM judge) | ≥0.70 |
+| Confidence Consistency | ≥0.80 |
 
 ## Results Storage
 
@@ -266,6 +366,11 @@ To avoid repeated API costs during development:
 | Meal Analysis | ~$0.003 | ~$0.30 |
 | Meal Validation | ~$0.0005 | ~$0.05 |
 | Symptom Elaboration | ~$0.003 | ~$0.30 |
+| Diagnosis Confidence | $0 | $0 |
+| Diagnosis Root Cause | ~$0.002 | ~$0.08 |
+| Diagnosis Single Ingredient | ~$0.02 | ~$0.40 |
+| Diagnosis Correlations | ~$0.05 | ~$0.75 |
+| Diagnosis E2E | ~$0.15 | ~$1.50 |
 
 ## Implementation Phases
 
@@ -285,18 +390,30 @@ To avoid repeated API costs during development:
 - [x] Prompt versioning infrastructure
 - [x] First iteration experiments (F1=0.52)
 
-### Phase 3: Secondary Evals
+### Phase 3: Diagnosis Evals ← NEXT
+Full plan: `.claude/plans/rosy-zooming-blanket.md`
+- [ ] Confidence scoring eval (deterministic, 30 test vectors)
+- [ ] Root cause classification eval (40 cases, 20 keep + 20 discard)
+- [ ] Single ingredient plain English eval (20 cases + LLM judges)
+- [ ] Correlations medical analysis eval (15 cases + LLM judges)
+- [ ] End-to-end pipeline eval (10 scenarios)
+- [ ] LLM judge prompts for relevance, ethics, plain English, citation quality
+- [ ] Prompt versioning for diagnosis methods
+- [ ] Config + metric targets for all diagnosis evals
+
+### Phase 4: Secondary Evals
 - [ ] AllRecipes scraper
 - [ ] Meal validation eval
 - [ ] Symptom elaboration eval
 - [ ] Edge case images
 
-### Phase 4: Polish ✅
+### Phase 5: Polish ✅
 - [x] HTML report generation (`scripts/generate_eval_report.py`)
 - [x] History and comparison commands
 - [x] Documentation updates
 
-### Phase 5: Iterate to Target
-- [ ] Continue prompt experiments to F1 ≥0.77
+### Phase 6: Iterate to Target
+- [ ] Continue meal analysis prompt experiments to F1 ≥0.77
 - [ ] State accuracy improvements (currently ~16%)
-- [ ] Expand dataset to 100 images
+- [ ] Expand meal dataset to 100 images
+- [ ] Iterate diagnosis prompts based on eval results
