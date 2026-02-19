@@ -21,7 +21,6 @@ from app.services.ai_schemas import (
     SingleIngredientDiagnosisSchema,
     RootCauseSchema,
     CitationSchema,
-    IngredientSchema,
 )
 from app.services.ai_service import (
     _strip_markdown_json,

@@ -303,7 +303,7 @@ class TestSearchEndpoint:
         create_meal(db, test_user, name=f"FullPageSearch {suffix}")
         create_meal(db, test_user, name=f"OtherMeal {suffix}")
 
-        response = auth_client.get(f"/meals/history?q=FullPageSearch")
+        response = auth_client.get("/meals/history?q=FullPageSearch")
 
         assert response.status_code == 200
         # Should be a full HTML page (not a partial)
