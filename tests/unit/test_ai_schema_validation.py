@@ -54,18 +54,14 @@ class TestMealAnalysisSchema:
     def test_valid_meal_default_quantity(self):
         data = {
             "meal_name": "Toast",
-            "ingredients": [
-                {"name": "bread", "state": "cooked", "confidence": 0.8}
-            ],
+            "ingredients": [{"name": "bread", "state": "cooked", "confidence": 0.8}],
         }
         result = MealAnalysisSchema.model_validate(data)
         assert result.ingredients[0].quantity == ""
 
     def test_missing_meal_name_uses_default(self):
         data = {
-            "ingredients": [
-                {"name": "bread", "state": "cooked", "confidence": 0.8}
-            ]
+            "ingredients": [{"name": "bread", "state": "cooked", "confidence": 0.8}]
         }
         result = MealAnalysisSchema.model_validate(data)
         assert result.meal_name == "Untitled Meal"
@@ -78,9 +74,7 @@ class TestMealAnalysisSchema:
     def test_confidence_out_of_range(self):
         data = {
             "meal_name": "Toast",
-            "ingredients": [
-                {"name": "bread", "state": "cooked", "confidence": 1.5}
-            ],
+            "ingredients": [{"name": "bread", "state": "cooked", "confidence": 1.5}],
         }
         with pytest.raises(ValidationError):
             MealAnalysisSchema.model_validate(data)
@@ -88,9 +82,7 @@ class TestMealAnalysisSchema:
     def test_confidence_negative(self):
         data = {
             "meal_name": "Toast",
-            "ingredients": [
-                {"name": "bread", "state": "cooked", "confidence": -0.1}
-            ],
+            "ingredients": [{"name": "bread", "state": "cooked", "confidence": -0.1}],
         }
         with pytest.raises(ValidationError):
             MealAnalysisSchema.model_validate(data)
@@ -350,7 +342,7 @@ class TestFixTrailingCommas:
         assert _fix_trailing_commas('{"a": 1,}') == '{"a": 1}'
 
     def test_trailing_comma_in_array(self):
-        assert _fix_trailing_commas('[1, 2, 3,]') == '[1, 2, 3]'
+        assert _fix_trailing_commas("[1, 2, 3,]") == "[1, 2, 3]"
 
     def test_trailing_comma_with_whitespace(self):
         assert _fix_trailing_commas('{"a": 1 , }') == '{"a": 1 }'
@@ -488,7 +480,9 @@ class TestCallWithSchemaRetry:
         service = self._make_service(mock_create)
 
         messages = [{"role": "user", "content": "Analyze this meal."}]
-        with pytest.raises(ValueError, match="failed schema validation after 3 attempts"):
+        with pytest.raises(
+            ValueError, match="failed schema validation after 3 attempts"
+        ):
             service._call_with_schema_retry(
                 messages=messages,
                 schema_class=MealAnalysisSchema,
@@ -632,10 +626,10 @@ class TestCallWithSchemaRetry:
 
     def test_trailing_commas_fixed(self):
         """Response with trailing commas is fixed before parsing."""
-        json_with_commas = '"root_cause": true, "medical_reasoning": "Strong evidence.",}'
-        mock_create = MagicMock(
-            return_value=_make_mock_response(json_with_commas)
+        json_with_commas = (
+            '"root_cause": true, "medical_reasoning": "Strong evidence.",}'
         )
+        mock_create = MagicMock(return_value=_make_mock_response(json_with_commas))
         service = self._make_service(mock_create)
 
         messages = [{"role": "user", "content": "Classify."}]
@@ -683,7 +677,9 @@ class TestCallWithSchemaRetry:
     def test_error_feedback_includes_schema_error(self):
         """Retry feedback message includes the actual validation error."""
         # Valid JSON but ingredient has confidence > 1 (violates ge=0, le=1)
-        bad_schema = '"ingredients": [{"name": "x", "state": "raw", "confidence": 5.0}]}'
+        bad_schema = (
+            '"ingredients": [{"name": "x", "state": "raw", "confidence": 5.0}]}'
+        )
         bad_response = _make_mock_response(bad_schema)
         good_json = '"meal_name": "X", "ingredients": [{"name": "x", "state": "raw", "confidence": 0.9}]}'
         good_response = _make_mock_response(good_json)

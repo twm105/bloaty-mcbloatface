@@ -725,7 +725,11 @@ class ClaudeService:
                 "reasoning": validated["reasoning"],
             }
 
-        except (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.APIStatusError):
+        except (
+            anthropic.APIConnectionError,
+            anthropic.RateLimitError,
+            anthropic.APIStatusError,
+        ):
             raise
         except Exception as e:
             raise ValueError(f"AI ongoing detection failed: {str(e)}")
