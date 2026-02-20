@@ -30,7 +30,13 @@ def main():
     eval_parser = subparsers.add_parser("eval", help="Run evaluations")
     eval_parser.add_argument(
         "--eval-type",
-        choices=["meal_analysis", "meal_validation", "symptom_elaboration", "all"],
+        choices=[
+            "meal_analysis",
+            "meal_validation",
+            "symptom_elaboration",
+            "diagnosis_root_cause",
+            "all",
+        ],
         required=True,
         help="Type of evaluation to run",
     )
@@ -82,6 +88,11 @@ def main():
         type=str,
         default="",
         help="Experiment hypothesis/notes to store with results",
+    )
+    eval_parser.add_argument(
+        "--web-search",
+        action="store_true",
+        help="Enable web search for diagnosis_root_cause (realistic but expensive/slow)",
     )
 
     # Scrape command
@@ -186,6 +197,7 @@ async def run_eval(args):
         use_llm_judge=not args.no_llm_judge,
         prompt_version=args.prompt_version,
         notes=args.notes,
+        web_search=args.web_search,
     )
 
     try:
@@ -201,6 +213,8 @@ async def run_eval(args):
     print(f"Scoring mode: {scoring_mode}")
     if config.prompt_version != "current":
         print(f"Prompt version: {config.prompt_version}")
+    if config.web_search:
+        print("Web search: ENABLED (realistic mode — expensive)")
     if config.notes:
         print(f"Notes: {config.notes}")
 

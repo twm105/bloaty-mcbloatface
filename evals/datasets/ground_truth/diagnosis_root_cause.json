@@ -1,0 +1,1044 @@
+{
+  "version": "2.0",
+  "description": "Ground truth for root cause classification eval. Tests whether the classifier correctly keeps real triggers and discards innocent bystanders. Includes gap foods (not in prompt lists), adversarial stats, and weak-stats triggers to challenge the classifier beyond simple list lookup.",
+  "positive_class": "KEEP (root_cause=true)",
+  "difficulty_tiers": {
+    "listed_with_confounders": "Easy: food is in prompt's DISCARD list AND has co-occurring triggers to blame",
+    "listed_no_confounders": "Easy: food is in prompt's DISCARD list, no co-occurrence data",
+    "gap_food_discard": "Hard: food is NOT in either prompt list, should be discarded. Tests medical reasoning beyond hardcoded lists.",
+    "adversarial_stats": "Hard: food IS in DISCARD list but has very strong trigger-looking stats AND no confounders. Tests whether the model trusts medical knowledge over statistics.",
+    "listed_trigger": "Easy: food is in prompt's KEEP list with moderate stats",
+    "gap_food_keep": "Hard: food is a real trigger NOT in the prompt's KEEP list. Tests medical knowledge beyond hardcoded lists.",
+    "weak_stats_trigger": "Medium: food is in KEEP list but has unconvincing stats. Must keep based on medical risk, not statistics."
+  },
+  "test_cases": [
+
+    {
+      "id": "discard_chicken_breast",
+      "ingredient_data": {
+        "ingredient_name": "chicken breast",
+        "times_eaten": 12,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "garlic",
+          "cooccurrence_meals": 9,
+          "conditional_probability": 0.75
+        },
+        {
+          "with_ingredient_name": "onion",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.67
+        }
+      ],
+      "medical_context": "Chicken breast is a lean, low-fat protein with no fibre, no FODMAPs, and no known allergens (outside rare poultry allergy). It is universally recommended on elimination diets including low-FODMAP, GAPS, and autoimmune protocol diets. One of the most easily digestible proteins. Source: Monash University FODMAP App; NICE IBS guidelines CG61.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["garlic", "onion"]
+      },
+      "category": "listed_with_confounders"
+    },
+    {
+      "id": "discard_salmon_fillet",
+      "ingredient_data": {
+        "ingredient_name": "salmon fillet",
+        "times_eaten": 8,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "cream",
+          "cooccurrence_meals": 6,
+          "conditional_probability": 0.75
+        }
+      ],
+      "medical_context": "Salmon is a lean fish rich in omega-3 fatty acids. Contains no FODMAPs, no fibre, and no fermentable carbohydrates. Recommended on virtually all elimination and therapeutic diets. Anti-inflammatory properties may actually help gut health. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["cream"]
+      },
+      "category": "listed_with_confounders"
+    },
+    {
+      "id": "discard_white_rice",
+      "ingredient_data": {
+        "ingredient_name": "white rice",
+        "times_eaten": 15,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 6},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "garlic",
+          "cooccurrence_meals": 12,
+          "conditional_probability": 0.80
+        }
+      ],
+      "medical_context": "White rice is the most easily digestible starch. It is low-FODMAP, gluten-free, and contains no known digestive irritants. It is the standard 'safe food' used in elimination diets worldwide. Source: Monash University FODMAP App; American College of Gastroenterology.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["garlic"]
+      },
+      "category": "listed_with_confounders"
+    },
+    {
+      "id": "discard_pasta",
+      "ingredient_data": {
+        "ingredient_name": "pasta",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "cream",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.57
+        },
+        {
+          "with_ingredient_name": "full-fat cheese",
+          "cooccurrence_meals": 10,
+          "conditional_probability": 0.71
+        }
+      ],
+      "medical_context": "Wheat pasta in standard portions (1 cup cooked) is low-FODMAP according to Monash testing. While wheat contains fructans, the amount in a normal pasta serving is below the trigger threshold for most people. Source: Monash University FODMAP App; Gibson & Shepherd 2010.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["cream", "full-fat cheese"]
+      },
+      "category": "listed_with_confounders"
+    },
+    {
+      "id": "discard_carrots",
+      "ingredient_data": {
+        "ingredient_name": "carrots",
+        "times_eaten": 11,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "onion",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.73
+        }
+      ],
+      "medical_context": "Carrots are low-FODMAP at standard portions and contain no known digestive irritants. One of the safest vegetables for sensitive digestive systems. Source: Monash University FODMAP App; British Dietetic Association IBS guidelines.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["onion"]
+      },
+      "category": "listed_with_confounders"
+    },
+
+    {
+      "id": "discard_salt",
+      "ingredient_data": {
+        "ingredient_name": "salt",
+        "times_eaten": 15,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 3}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Salt (sodium chloride) is an inorganic mineral with zero fermentable content. It contains no FODMAPs, no allergens, and no compounds that cause digestive symptoms at culinary quantities. Source: FDA GRAS designation.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "listed_no_confounders"
+    },
+    {
+      "id": "discard_banana",
+      "ingredient_data": {
+        "ingredient_name": "banana",
+        "times_eaten": 12,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Firm bananas are low-FODMAP and well-tolerated. Recommended on BRAT diets for upset stomachs. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "listed_no_confounders"
+    },
+    {
+      "id": "discard_black_pepper",
+      "ingredient_data": {
+        "ingredient_name": "black pepper",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "cramping", "frequency": 3}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Black pepper in culinary quantities contains piperine which may actually aid digestion. Not a FODMAP, not an allergen. Source: Monash University; Srinivasan 2007.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "listed_no_confounders"
+    },
+
+    {
+      "id": "discard_olive_oil",
+      "ingredient_data": {
+        "ingredient_name": "olive oil",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 6},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "garlic",
+          "cooccurrence_meals": 11,
+          "conditional_probability": 0.79
+        },
+        {
+          "with_ingredient_name": "onion",
+          "cooccurrence_meals": 9,
+          "conditional_probability": 0.64
+        }
+      ],
+      "medical_context": "Olive oil is a monounsaturated fat and a cornerstone of the Mediterranean diet. Contains no FODMAPs, no known allergens, and no compounds associated with digestive intolerance. Used as the recommended cooking fat on low-FODMAP and elimination diets. Source: Monash University FODMAP guidelines.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["garlic", "onion"]
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_vegetable_oil",
+      "ingredient_data": {
+        "ingredient_name": "vegetable oil",
+        "times_eaten": 13,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "onion",
+          "cooccurrence_meals": 10,
+          "conditional_probability": 0.77
+        }
+      ],
+      "medical_context": "Vegetable oil (canola, sunflower, etc.) is a refined fat with no FODMAPs, no allergens, no fibre, and no fermentable components. Contains no proteins or carbohydrates that could cause digestive reactions. Used freely on all elimination diets. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["onion"]
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_coconut_oil",
+      "ingredient_data": {
+        "ingredient_name": "coconut oil",
+        "times_eaten": 9,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "nausea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Coconut oil is a refined fat. Unlike coconut milk or coconut cream (which contain FODMAPs from the coconut flesh), refined coconut oil contains no FODMAPs, no fibre, and no fermentable carbohydrates. It is pure fat. Low-FODMAP safe. Source: Monash University FODMAP App (coconut oil is green-light).",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_cucumber",
+      "ingredient_data": {
+        "ingredient_name": "cucumber",
+        "times_eaten": 10,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Cucumber is low-FODMAP and extremely well-tolerated. It is mostly water with minimal fibre and no fermentable carbohydrates. No known allergens or intolerance triggers. Safe on all elimination diets. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_oats",
+      "ingredient_data": {
+        "ingredient_name": "oats",
+        "times_eaten": 11,
+        "total_symptom_occurrences": 6,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "honey",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.73
+        }
+      ],
+      "medical_context": "Oats are NOT wheat and are naturally gluten-free (though may be cross-contaminated). Oats in standard portions (up to 1/2 cup dry) are low-FODMAP according to Monash testing. They are a well-tolerated whole grain for most people including those with IBS. Distinct from wheat which contains fructans. Source: Monash University FODMAP App (oats green-light at 1/2 cup); Coeliac UK (oats safe for most coeliacs).",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["honey"]
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_maple_syrup",
+      "ingredient_data": {
+        "ingredient_name": "maple syrup",
+        "times_eaten": 8,
+        "total_symptom_occurrences": 4,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "cramping", "frequency": 1}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Maple syrup is low-FODMAP and is actually the recommended sweetener alternative on low-FODMAP diets (replacing honey and agave which are high-FODMAP). Contains sucrose which is well-absorbed. No known allergens or digestive irritants. Source: Monash University FODMAP App (maple syrup green-light at 2 tbsp).",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_discard"
+    },
+    {
+      "id": "discard_firm_tofu",
+      "ingredient_data": {
+        "ingredient_name": "firm tofu",
+        "times_eaten": 9,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "soy sauce",
+          "cooccurrence_meals": 6,
+          "conditional_probability": 0.67
+        }
+      ],
+      "medical_context": "Firm tofu is low-FODMAP despite being made from soy. The pressing and processing removes the GOS (galacto-oligosaccharides) that make other soy products high-FODMAP. Firm tofu is explicitly approved on the Monash low-FODMAP diet. Soy ALLERGY (IgE-mediated) is separate from FODMAP intolerance and relatively rare in adults. Source: Monash University FODMAP App (firm tofu green-light); note: silken tofu IS high-FODMAP.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": ["soy sauce"]
+      },
+      "category": "gap_food_discard"
+    },
+
+    {
+      "id": "adversarial_chicken_breast",
+      "ingredient_data": {
+        "ingredient_name": "chicken breast",
+        "times_eaten": 15,
+        "total_symptom_occurrences": 11,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 8},
+          {"name": "cramping", "frequency": 5},
+          {"name": "gas", "frequency": 3}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Chicken breast is a lean, low-fat protein with no fibre, no FODMAPs, and no known allergens. Universally recommended on elimination diets. The 73% symptom rate with no confounders is statistically suggestive but medically implausible — chicken does not contain any compounds that cause bloating, cramping, or gas. Source: Monash University FODMAP App; NICE IBS guidelines.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_white_rice",
+      "ingredient_data": {
+        "ingredient_name": "white rice",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 9,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 6},
+          {"name": "cramping", "frequency": 4},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "White rice is the most easily digestible starch and the standard 'safe food' on elimination diets worldwide. The 64% symptom rate with no confounders is misleading — rice contains no FODMAPs, no allergens, and no irritants. Source: Monash University FODMAP App; American College of Gastroenterology.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_potato",
+      "ingredient_data": {
+        "ingredient_name": "potato",
+        "times_eaten": 12,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 3},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Potatoes are low-FODMAP, gluten-free, and contain no known digestive irritants. One of the safest starches for sensitive systems. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_spinach",
+      "ingredient_data": {
+        "ingredient_name": "spinach",
+        "times_eaten": 10,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 3},
+          {"name": "nausea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Spinach is low-FODMAP at standard portions. Contains no known digestive irritants. The 80% symptom rate with no confounders is high but medically unexplained — spinach does not cause bloating or cramping. High in oxalates (relevant for kidney stones, not GI symptoms). Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_pork_loin",
+      "ingredient_data": {
+        "ingredient_name": "pork loin",
+        "times_eaten": 12,
+        "total_symptom_occurrences": 9,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 6},
+          {"name": "cramping", "frequency": 4},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Pork loin is a lean cut of protein. Contains no FODMAPs, no fibre, and no fermentable carbohydrates. Not a recognised digestive trigger. The 75% symptom rate is statistically compelling but medically baseless. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_green_beans",
+      "ingredient_data": {
+        "ingredient_name": "green beans",
+        "times_eaten": 9,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Green beans (string beans) are low-FODMAP and well-tolerated. Unlike dried beans/legumes which are high in GOS, green beans have minimal fermentable carbohydrates. The 78% symptom rate with no confounders could mislead — the model must recognise that green beans ≠ dried beans. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+    {
+      "id": "adversarial_lettuce",
+      "ingredient_data": {
+        "ingredient_name": "lettuce",
+        "times_eaten": 11,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "cramping", "frequency": 3}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Lettuce is low-FODMAP and extremely low in fermentable carbohydrates. Mostly water and fibre. No known allergens or intolerance triggers. Source: Monash University FODMAP App.",
+      "expected": {
+        "root_cause": false,
+        "plausible_confounders": []
+      },
+      "category": "adversarial_stats"
+    },
+
+    {
+      "id": "keep_garlic",
+      "ingredient_data": {
+        "ingredient_name": "garlic",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 9,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 7},
+          {"name": "cramping", "frequency": 4},
+          {"name": "gas", "frequency": 3}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "olive oil",
+          "cooccurrence_meals": 11,
+          "conditional_probability": 0.55
+        },
+        {
+          "with_ingredient_name": "chicken breast",
+          "cooccurrence_meals": 9,
+          "conditional_probability": 0.45
+        }
+      ],
+      "medical_context": "Garlic is one of the highest-FODMAP foods, rich in fructans. Fructans are not absorbed in the small intestine and are rapidly fermented by gut bacteria. Garlic is the most commonly identified trigger in IBS patients. Source: Monash University FODMAP App (red-light at any quantity); Staudacher et al. 2012.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_onion",
+      "ingredient_data": {
+        "ingredient_name": "onion",
+        "times_eaten": 13,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "high",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 6},
+          {"name": "cramping", "frequency": 4},
+          {"name": "gas", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "beef mince",
+          "cooccurrence_meals": 9,
+          "conditional_probability": 0.50
+        },
+        {
+          "with_ingredient_name": "carrots",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.44
+        }
+      ],
+      "medical_context": "Onion is high-FODMAP, containing significant fructans and fructose. Along with garlic, onion is one of the two most commonly identified triggers in IBS and FODMAP-sensitive individuals. Source: Monash University FODMAP App (red-light); NICE IBS guidelines.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_butter",
+      "ingredient_data": {
+        "ingredient_name": "butter",
+        "times_eaten": 13,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "cramping", "frequency": 3},
+          {"name": "nausea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "potato",
+          "cooccurrence_meals": 10,
+          "conditional_probability": 0.56
+        }
+      ],
+      "medical_context": "Butter contains lactose and is high in saturated fat. Lactose intolerance affects 65-70% of the global population. High fat slows gastric emptying. Contains casein and whey which cause reactions in dairy-sensitive individuals. Source: NIH Genetics Home Reference; Monash University.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_cream",
+      "ingredient_data": {
+        "ingredient_name": "cream",
+        "times_eaten": 10,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "cramping", "frequency": 3},
+          {"name": "nausea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "pasta",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.47
+        }
+      ],
+      "medical_context": "Cream is high in lactose and saturated fat. A significant trigger for lactose-intolerant individuals and those with IBS. Source: Monash University FODMAP App; Suchy et al. 2010.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_coffee",
+      "ingredient_data": {
+        "ingredient_name": "coffee",
+        "times_eaten": 14,
+        "total_symptom_occurrences": 8,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "cramping", "frequency": 5},
+          {"name": "diarrhoea", "frequency": 3},
+          {"name": "bloating", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "whole milk",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.36
+        }
+      ],
+      "medical_context": "Coffee stimulates gastric acid secretion and accelerates colonic motility. Caffeine is a known GI stimulant. A well-documented trigger for IBS and functional dyspepsia. Source: Boekema et al. 1999; Rao et al. 1998.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_kidney_beans",
+      "ingredient_data": {
+        "ingredient_name": "kidney beans",
+        "times_eaten": 8,
+        "total_symptom_occurrences": 6,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 4},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "pork loin",
+          "cooccurrence_meals": 6,
+          "conditional_probability": 0.43
+        }
+      ],
+      "medical_context": "Kidney beans are high-FODMAP, rich in GOS and resistant starch. One of the most universally recognised gas-producing foods. Source: Monash University FODMAP App (red-light); Winham & Hutchins 2011.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_prawns",
+      "ingredient_data": {
+        "ingredient_name": "prawns",
+        "times_eaten": 7,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "cramping", "frequency": 3},
+          {"name": "nausea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "white rice",
+          "cooccurrence_meals": 5,
+          "conditional_probability": 0.42
+        }
+      ],
+      "medical_context": "Prawns are a top-9 FDA allergen (crustacean shellfish). Shellfish allergy often has prominent GI manifestation including cramping and nausea. Source: FDA Major Allergens; Lopata et al. 2010.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+    {
+      "id": "keep_chilli_peppers",
+      "ingredient_data": {
+        "ingredient_name": "chilli peppers",
+        "times_eaten": 9,
+        "total_symptom_occurrences": 6,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "cramping", "frequency": 4},
+          {"name": "bloating", "frequency": 3},
+          {"name": "diarrhoea", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "white rice",
+          "cooccurrence_meals": 6,
+          "conditional_probability": 0.40
+        }
+      ],
+      "medical_context": "Chilli peppers contain capsaicin, a TRPV1 receptor agonist that stimulates pain receptors in the GI tract. Spicy food is one of the most commonly self-reported IBS triggers. Source: Gonlachanvit et al. 2003; Bortolotti et al. 2002.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "listed_trigger"
+    },
+
+    {
+      "id": "keep_mushrooms",
+      "ingredient_data": {
+        "ingredient_name": "mushrooms",
+        "times_eaten": 10,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "gas", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "chicken breast",
+          "cooccurrence_meals": 7,
+          "conditional_probability": 0.50
+        }
+      ],
+      "medical_context": "Mushrooms are high-FODMAP, containing significant mannitol (a polyol/sugar alcohol). Mannitol is poorly absorbed and osmotically active — it draws water into the bowel and is fermented by gut bacteria, causing bloating, gas, and diarrhoea. Button mushrooms, portobello, shiitake, and oyster mushrooms are ALL high-FODMAP. One of the most commonly missed triggers because people think of them as 'just a vegetable.' Source: Monash University FODMAP App (red-light for all varieties at standard portions).",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_honey",
+      "ingredient_data": {
+        "ingredient_name": "honey",
+        "times_eaten": 11,
+        "total_symptom_occurrences": 6,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "oats",
+          "cooccurrence_meals": 8,
+          "conditional_probability": 0.55
+        }
+      ],
+      "medical_context": "Honey is high-FODMAP due to excess fructose (more fructose than glucose). Excess fructose is poorly absorbed via GLUT5 transporters in many people, leading to malabsorption, osmotic diarrhoea, and fermentation. Honey is one of the first foods eliminated on a low-FODMAP diet. Source: Monash University FODMAP App (red-light at > 1 tsp); Rumessen & Gudmand-Hoyer 1988 (fructose malabsorption).",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_apple",
+      "ingredient_data": {
+        "ingredient_name": "apple",
+        "times_eaten": 12,
+        "total_symptom_occurrences": 7,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 5},
+          {"name": "gas", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "banana",
+          "cooccurrence_meals": 6,
+          "conditional_probability": 0.35
+        }
+      ],
+      "medical_context": "Apples are high-FODMAP, containing both excess fructose and sorbitol (a polyol). The combination of two FODMAP types makes apples a potent trigger. Apples are one of the most commonly identified fruit triggers on the low-FODMAP diet. Both raw and cooked apples are high-FODMAP. Source: Monash University FODMAP App (red-light at > 1/4 apple); Shepherd et al. 2008.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_cauliflower",
+      "ingredient_data": {
+        "ingredient_name": "cauliflower",
+        "times_eaten": 8,
+        "total_symptom_occurrences": 6,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 4},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "potato",
+          "cooccurrence_meals": 5,
+          "conditional_probability": 0.38
+        }
+      ],
+      "medical_context": "Cauliflower is high-FODMAP, containing significant mannitol (a polyol). It is a cruciferous vegetable which also produces gas through sulphur compounds. Unlike its cousin broccoli (which is low-FODMAP in small portions), cauliflower is high-FODMAP at standard serving sizes. A commonly missed trigger. Source: Monash University FODMAP App (red-light at > 1/3 cup).",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_watermelon",
+      "ingredient_data": {
+        "ingredient_name": "watermelon",
+        "times_eaten": 7,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "gas", "frequency": 2},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Watermelon is high-FODMAP, containing both excess fructose and mannitol. Despite being mostly water, the fructose-to-glucose ratio exceeds the threshold for malabsorption. A commonly missed trigger because people assume 'it's just water.' Source: Monash University FODMAP App (red-light at > 1/2 cup); Barrett & Gibson 2012.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_artichoke",
+      "ingredient_data": {
+        "ingredient_name": "artichoke",
+        "times_eaten": 6,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 4},
+          {"name": "gas", "frequency": 3},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "olive oil",
+          "cooccurrence_meals": 4,
+          "conditional_probability": 0.33
+        }
+      ],
+      "medical_context": "Artichoke (both globe and Jerusalem) is among the highest-FODMAP vegetables, extremely rich in fructans and inulin. Jerusalem artichoke is essentially pure inulin and is used as a FODMAP challenge food in clinical testing. Globe artichoke is also high-FODMAP. Artichoke extract supplements are even marketed as prebiotics specifically because they feed gut bacteria so aggressively. Source: Monash University FODMAP App (red-light); Van Loo et al. 1995 (inulin content).",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+    {
+      "id": "keep_mango",
+      "ingredient_data": {
+        "ingredient_name": "mango",
+        "times_eaten": 8,
+        "total_symptom_occurrences": 5,
+        "confidence_level": "medium",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 3},
+          {"name": "gas", "frequency": 2},
+          {"name": "cramping", "frequency": 2}
+        ]
+      },
+      "cooccurrence_data": [],
+      "medical_context": "Mango is high-FODMAP due to excess fructose content. The fructose-to-glucose ratio exceeds the absorption threshold, leading to fructose malabsorption and fermentation. Mango is commonly missed as a trigger because it is a 'healthy fruit' but is one of the highest-fructose fruits. Source: Monash University FODMAP App (red-light at > 1/3 cup); Rumessen & Gudmand-Hoyer 1988.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "gap_food_keep"
+    },
+
+    {
+      "id": "weak_keep_eggs",
+      "ingredient_data": {
+        "ingredient_name": "eggs",
+        "times_eaten": 6,
+        "total_symptom_occurrences": 3,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 2},
+          {"name": "nausea", "frequency": 1}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "bread",
+          "cooccurrence_meals": 4,
+          "conditional_probability": 0.33
+        }
+      ],
+      "medical_context": "Eggs are a top-9 FDA allergen. Egg intolerance can cause GI symptoms. Sulphur content can cause gas. Despite weak statistics, eggs remain a plausible trigger that warrants investigation. Source: FDA Major Allergens; Caubet & Wang 2011.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "weak_stats_trigger"
+    },
+    {
+      "id": "weak_keep_whole_milk",
+      "ingredient_data": {
+        "ingredient_name": "whole milk",
+        "times_eaten": 5,
+        "total_symptom_occurrences": 3,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 2},
+          {"name": "cramping", "frequency": 1}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "bread",
+          "cooccurrence_meals": 3,
+          "conditional_probability": 0.30
+        }
+      ],
+      "medical_context": "Whole milk is one of the highest-lactose dairy products. Lactose intolerance affects 65-70% of the global adult population. Despite weak statistics, whole milk is a high-probability trigger that must be investigated. Source: NIH Genetics Home Reference; Suchy et al. 2010.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "weak_stats_trigger"
+    },
+    {
+      "id": "weak_keep_red_wine",
+      "ingredient_data": {
+        "ingredient_name": "red wine",
+        "times_eaten": 4,
+        "total_symptom_occurrences": 3,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 2},
+          {"name": "cramping", "frequency": 1}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "full-fat cheese",
+          "cooccurrence_meals": 3,
+          "conditional_probability": 0.38
+        }
+      ],
+      "medical_context": "Red wine contains multiple GI irritants: alcohol, histamine, sulphites, and tannins. Alcohol is a well-documented IBS trigger. Red wine has the highest histamine content of all alcoholic drinks. Despite weak statistics, red wine is a high-probability trigger. Source: Maintz & Novak 2007; Reding et al. 2013.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "weak_stats_trigger"
+    },
+    {
+      "id": "weak_keep_tomatoes",
+      "ingredient_data": {
+        "ingredient_name": "tomatoes",
+        "times_eaten": 7,
+        "total_symptom_occurrences": 3,
+        "confidence_level": "low",
+        "associated_symptoms": [
+          {"name": "bloating", "frequency": 2},
+          {"name": "acid reflux", "frequency": 1}
+        ]
+      },
+      "cooccurrence_data": [
+        {
+          "with_ingredient_name": "pasta",
+          "cooccurrence_meals": 5,
+          "conditional_probability": 0.42
+        }
+      ],
+      "medical_context": "Tomatoes are acidic and can exacerbate acid reflux/GERD. They contain histamine and are high-FODMAP when consumed as paste or sauce (fructose excess). As a nightshade, they contain solanine. Despite weak statistics, tomatoes are a plausible trigger. Source: Monash University; Jarisch & Wantke 1996.",
+      "expected": {
+        "root_cause": true,
+        "plausible_confounders": []
+      },
+      "category": "weak_stats_trigger"
+    }
+  ]
+}

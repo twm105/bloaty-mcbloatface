@@ -66,6 +66,12 @@ class BaseEvalRunner(ABC):
         """
         pass
 
+    def _print_verbose_score(self, result: dict):
+        """Print verbose score for a single result. Override in subclasses."""
+        score = result.get("score", {})
+        f1 = score.get("f1", 0)
+        print(f"    F1: {f1:.3f}")
+
     async def run(self) -> EvalResult:
         """Run the full evaluation.
 
@@ -100,9 +106,7 @@ class BaseEvalRunner(ABC):
                 results.append(result)
 
                 if self.config.verbose:
-                    score = result.get("score", {})
-                    f1 = score.get("f1", 0)
-                    print(f"    F1: {f1:.3f}")
+                    self._print_verbose_score(result)
 
             except Exception as e:
                 error_info = {"case_id": case.get("id"), "error": str(e)}

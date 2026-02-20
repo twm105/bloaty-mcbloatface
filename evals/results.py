@@ -35,9 +35,11 @@ def store_eval_result(result: EvalResult) -> int:
         run = EvalRun(
             model_name=result.model,
             eval_type=result.eval_type,
-            precision=result.metrics.get("mean_precision"),
-            recall=result.metrics.get("mean_recall"),
-            f1_score=result.metrics.get("mean_f1"),
+            precision=result.metrics.get("mean_precision")
+            or result.metrics.get("precision"),
+            recall=result.metrics.get("mean_recall")
+            or result.metrics.get("recall"),
+            f1_score=result.metrics.get("mean_f1") or result.metrics.get("f1"),
             accuracy=result.metrics.get("accuracy"),
             num_test_cases=result.num_cases,
             test_data_source="scraped_recipes",

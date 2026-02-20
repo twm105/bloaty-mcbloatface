@@ -20,6 +20,7 @@ class EvalConfig:
     use_llm_judge: bool = True  # Use LLM-as-judge for soft scoring (meal_analysis)
     prompt_version: str = "current"  # Prompt version for meal_analysis experiments
     notes: str = ""  # Experiment hypothesis/notes
+    web_search: bool = False  # Enable web search for diagnosis_root_cause evals
 
 
 # Default models
@@ -45,6 +46,14 @@ METRIC_TARGETS = {
     },
     "episode_continuation": {
         "accuracy": 0.85,
+    },
+    "diagnosis_root_cause": {
+        "accuracy": 0.85,
+        "precision": 0.85,
+        "recall": 0.90,
+        "f1": 0.87,
+        "discard_accuracy": 0.85,
+        "keep_accuracy": 0.90,
     },
 }
 

@@ -466,6 +466,138 @@ async def score_meal_analysis_soft(
     )
 
 
+# --- Root Cause Classification Scoring ---
+
+
+@dataclass
+class RootCauseScore:
+    """Score for a single root cause classification prediction."""
+
+    correct: bool
+    predicted: bool  # predicted root_cause value
+    expected: bool  # expected root_cause value
+    confounder_mentioned: bool  # did the model mention a plausible confounder?
+    discard_justification: Optional[str]
+    medical_reasoning: Optional[str]
+
+
+def score_root_cause_classification(
+    predicted: dict, expected: dict
+) -> RootCauseScore:
+    """Score a single root cause classification prediction.
+
+    Args:
+        predicted: AI prediction with 'root_cause', 'discard_justification',
+                   'confounded_by', 'medical_reasoning'
+        expected: Ground truth with 'root_cause', 'plausible_confounders'
+
+    Returns:
+        RootCauseScore with correctness and detail fields
+    """
+    pred_root_cause = predicted.get("root_cause", True)
+    exp_root_cause = expected.get("root_cause", True)
+    correct = pred_root_cause == exp_root_cause
+
+    # Check if model mentioned a plausible confounder
+    confounder_mentioned = False
+    plausible = expected.get("plausible_confounders", [])
+    if plausible:
+        confounded_by = (predicted.get("confounded_by") or "").lower()
+        discard_text = (predicted.get("discard_justification") or "").lower()
+        medical_text = (predicted.get("medical_reasoning") or "").lower()
+        combined = f"{confounded_by} {discard_text} {medical_text}"
+        for confounder in plausible:
+            if confounder.lower() in combined:
+                confounder_mentioned = True
+                break
+
+    return RootCauseScore(
+        correct=correct,
+        predicted=pred_root_cause,
+        expected=exp_root_cause,
+        confounder_mentioned=confounder_mentioned,
+        discard_justification=predicted.get("discard_justification"),
+        medical_reasoning=predicted.get("medical_reasoning"),
+    )
+
+
+def aggregate_root_cause_scores(results: list[dict]) -> dict:
+    """Compute aggregate metrics from root cause classification results.
+
+    Positive class = KEEP (root_cause=true).
+
+    Args:
+        results: List of dicts from evaluate_single(), each with a 'score' dict
+
+    Returns:
+        Dict with accuracy, precision, recall, f1, discard_accuracy,
+        keep_accuracy, confounder_mention_rate, confusion_matrix
+    """
+    if not results:
+        return {}
+
+    scores = [r["score"] for r in results if "score" in r]
+    if not scores:
+        return {}
+
+    total = len(scores)
+    correct = sum(1 for s in scores if s["correct"])
+
+    # Confusion matrix (positive = KEEP/root_cause=true)
+    tp = sum(1 for s in scores if s["predicted"] and s["expected"])
+    fp = sum(1 for s in scores if s["predicted"] and not s["expected"])
+    tn = sum(1 for s in scores if not s["predicted"] and not s["expected"])
+    fn = sum(1 for s in scores if not s["predicted"] and s["expected"])
+
+    accuracy = correct / total if total > 0 else 0.0
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
+
+    # Per-class accuracy
+    discard_cases = [s for s in scores if not s["expected"]]
+    keep_cases = [s for s in scores if s["expected"]]
+    discard_accuracy = (
+        sum(1 for s in discard_cases if s["correct"]) / len(discard_cases)
+        if discard_cases
+        else 0.0
+    )
+    keep_accuracy = (
+        sum(1 for s in keep_cases if s["correct"]) / len(keep_cases)
+        if keep_cases
+        else 0.0
+    )
+
+    # Confounder mention rate (only for discard cases with plausible confounders)
+    confounder_cases = [s for s in scores if s.get("confounder_mentioned") is not None]
+    cases_with_confounders = [
+        r for r in results
+        if "score" in r and r.get("expected", {}).get("plausible_confounders")
+    ]
+    confounder_mention_rate = (
+        sum(1 for r in cases_with_confounders if r["score"]["confounder_mentioned"])
+        / len(cases_with_confounders)
+        if cases_with_confounders
+        else 0.0
+    )
+
+    return {
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "discard_accuracy": discard_accuracy,
+        "keep_accuracy": keep_accuracy,
+        "confounder_mention_rate": confounder_mention_rate,
+        "confusion_matrix": {"tp": tp, "fp": fp, "tn": tn, "fn": fn},
+        "total_cases": total,
+    }
+
+
 def score_meal_validation(predicted: bool, expected: bool) -> dict:
     """Score a single meal validation prediction.
 

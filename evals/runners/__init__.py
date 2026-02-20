@@ -2,10 +2,12 @@
 
 from .base import BaseEvalRunner
 from .meal_analysis import MealAnalysisRunner
+from .diagnosis_root_cause import DiagnosisRootCauseRunner
 
 # Registry of available runners
 RUNNERS = {
     "meal_analysis": MealAnalysisRunner,
+    "diagnosis_root_cause": DiagnosisRootCauseRunner,
 }
 
 
@@ -30,4 +32,10 @@ def get_runner(config):
     return runner_class(config)
 
 
-__all__ = ["BaseEvalRunner", "MealAnalysisRunner", "get_runner", "RUNNERS"]
+__all__ = [
+    "BaseEvalRunner",
+    "MealAnalysisRunner",
+    "DiagnosisRootCauseRunner",
+    "get_runner",
+    "RUNNERS",
+]
