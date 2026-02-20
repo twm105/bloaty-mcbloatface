@@ -46,6 +46,9 @@ evals/data/downloaded/
 evals/datasets/meal_images/
 evals/fixtures/api_cache/
 
+# Security reports
+docs/security-reports/
+
 # Backups
 backups/
 .playwright-mcp/
