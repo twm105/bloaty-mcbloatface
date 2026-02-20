@@ -530,8 +530,8 @@ tool_command() {
     bandit)
       echo "bandit -r . -f json --severity-level medium 2>/dev/null" ;;
     shellcheck)
-      # Find shell files and pass to shellcheck
-      echo "find . -name '*.sh' -o -name '*.bash' -o -name '*.zsh' | xargs shellcheck -f json --severity=warning 2>/dev/null" ;;
+      # Find shell files and pass to shellcheck (exclude .git and other non-source dirs)
+      echo "find . -not -path './.git/*' -not -path './node_modules/*' -not -path './.venv/*' \\( -name '*.sh' -o -name '*.bash' -o -name '*.zsh' \\) | xargs shellcheck -f json --severity=warning 2>/dev/null" ;;
     hadolint)
       echo "find . -name 'Dockerfile*' | xargs hadolint --format json 2>/dev/null" ;;
     checkov)
