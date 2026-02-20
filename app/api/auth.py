@@ -66,7 +66,9 @@ async def login(
     token = await auth_provider.create_session(db, user, request)
 
     # Redirect to next URL or home
-    redirect_url = next if next and next.startswith("/") and not next.startswith("//") else "/"
+    redirect_url = (
+        next if next and next.startswith("/") and not next.startswith("//") else "/"
+    )
     response = RedirectResponse(url=redirect_url, status_code=303)
     response.set_cookie(
         key=settings.session_cookie_name,
