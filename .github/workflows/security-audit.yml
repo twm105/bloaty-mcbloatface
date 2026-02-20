@@ -50,8 +50,8 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
             | sh -s -- -b /usr/local/bin
 
-          # opengrep (semgrep-compatible SAST)
-          pip install opengrep
+          # opengrep (semgrep-compatible SAST) — do NOT use pip, the pypi package is hijacked
+          python3 -m pip install semgrep
 
           # bandit
           pip install bandit
@@ -78,8 +78,8 @@ jobs:
         continue-on-error: true
 
       - name: Upload to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
           category: security-audit
