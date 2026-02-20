@@ -93,6 +93,68 @@ class TestCSRFProtection:
         # Should redirect to login or handle gracefully
         assert response.status_code in [303, 302, 307]
 
+    def test_cross_origin_post_rejected(self, client: TestClient):
+        """Test that POST with a foreign Origin header is rejected."""
+        response = client.post(
+            "/auth/login",
+            data={"email": "test@example.com", "password": "password"},
+            headers={"Origin": "https://evil.com", "Referer": ""},
+            follow_redirects=False,
+        )
+        assert response.status_code == 403
+
+    def test_cross_origin_delete_rejected(
+        self, auth_client: TestClient, test_user: User, db: Session
+    ):
+        """Test that DELETE with a foreign Origin header is rejected."""
+        meal = create_meal(db, test_user)
+        response = auth_client.delete(
+            f"/meals/{meal.id}",
+            headers={"Origin": "https://evil.com", "Referer": ""},
+            follow_redirects=False,
+        )
+        assert response.status_code == 403
+
+    def test_same_origin_post_allowed(self, client: TestClient):
+        """Test that POST with matching Origin passes through (normal auth applies)."""
+        response = client.post(
+            "/auth/login",
+            data={"email": "nonexistent@example.com", "password": "password"},
+            headers={"Origin": "http://testserver"},
+            follow_redirects=False,
+        )
+        # Should get through CSRF check (303 redirect = login error, not 403)
+        assert response.status_code != 403
+
+    def test_no_origin_with_referer_allowed(self, client: TestClient):
+        """Test that POST with valid Referer (no Origin) is allowed."""
+        response = client.post(
+            "/auth/login",
+            data={"email": "nonexistent@example.com", "password": "password"},
+            headers={"Referer": "http://testserver/auth/login"},
+            follow_redirects=False,
+        )
+        # Should get through CSRF check (303 redirect = login error, not 403)
+        assert response.status_code != 403
+
+    def test_no_origin_no_referer_rejected(self, client: TestClient):
+        """Test that POST with neither Origin nor Referer is rejected."""
+        response = client.post(
+            "/auth/login",
+            data={"email": "test@example.com", "password": "password"},
+            headers={"Origin": "", "Referer": ""},
+            follow_redirects=False,
+        )
+        assert response.status_code == 403
+
+    def test_safe_methods_skip_origin_check(self, client: TestClient):
+        """Test that GET with foreign Origin is allowed (no mutation)."""
+        response = client.get(
+            "/auth/login",
+            headers={"Origin": "https://evil.com"},
+        )
+        assert response.status_code == 200
+
 
 @pytest.mark.security
 class TestHtmxHeaders:

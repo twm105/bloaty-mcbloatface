@@ -1,7 +1,9 @@
 """Diagnosis service for analyzing ingredient-symptom correlations."""
 
+import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
+
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 
@@ -15,6 +17,8 @@ from app.models import (
     Ingredient,
 )
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class DiagnosisService:
@@ -264,8 +268,6 @@ class DiagnosisService:
             "min_symptom_occurrences": self.MIN_SYMPTOM_OCCURRENCES,
         }
 
-        print(f"DEBUG get_temporal_correlations params: {params}")
-
         result = self.db.execute(query, params)
 
         return [
@@ -482,9 +484,10 @@ class DiagnosisService:
                 }
             )
 
-        print(
-            f"DEBUG get_ingredient_cooccurrence: Found {len(cooccurrence_data)} pairs, "
-            f"{sum(1 for c in cooccurrence_data if c['is_high_cooccurrence'])} high co-occurrence"
+        logger.debug(
+            "get_ingredient_cooccurrence: Found %d pairs, %d high co-occurrence",
+            len(cooccurrence_data),
+            sum(1 for c in cooccurrence_data if c["is_high_cooccurrence"]),
         )
 
         return cooccurrence_data
@@ -805,14 +808,20 @@ class DiagnosisService:
         Returns:
             Dict mapping ingredient_id to aggregated data including all symptoms
         """
-        print(
-            f"DEBUG aggregate_correlations_by_ingredient: Processing {len(correlations)} correlations"
+        logger.debug(
+            "aggregate_correlations_by_ingredient: Processing %d correlations",
+            len(correlations),
         )
         aggregated = {}
 
         for idx, corr in enumerate(correlations):
-            print(
-                f"DEBUG Correlation {idx}: ingredient={corr['ingredient_name']}, state={corr['ingredient_state']}, times_eaten={corr['times_eaten']}, symptom_occurrences={corr['symptom_occurrences']}"
+            logger.debug(
+                "Correlation %d: ingredient=%s, state=%s, times_eaten=%s, symptom_occurrences=%s",
+                idx,
+                corr["ingredient_name"],
+                corr["ingredient_state"],
+                corr["times_eaten"],
+                corr["symptom_occurrences"],
             )
             ingredient_id = corr["ingredient_id"]
             state = corr["ingredient_state"]
@@ -845,12 +854,17 @@ class DiagnosisService:
                 }
             )
 
-        print(
-            f"DEBUG aggregate_correlations_by_ingredient OUTPUT: {len(aggregated)} unique ingredients"
+        logger.debug(
+            "aggregate_correlations_by_ingredient OUTPUT: %d unique ingredients",
+            len(aggregated),
         )
         for key, agg in aggregated.items():
-            print(
-                f"  {agg['ingredient_name']} ({agg['state']}): times_eaten={agg['times_eaten']}, total_symptom_occurrences={agg['total_symptom_occurrences']}"
+            logger.debug(
+                "  %s (%s): times_eaten=%s, total_symptom_occurrences=%s",
+                agg["ingredient_name"],
+                agg["state"],
+                agg["times_eaten"],
+                agg["total_symptom_occurrences"],
             )
 
         return aggregated
@@ -892,14 +906,19 @@ class DiagnosisService:
             s.get("frequency", 0) for s in associated_symptoms
         )
 
-        print("DEBUG calculate_confidence INPUT:")
-        print(f"  times_eaten: {times_eaten}, MIN_MEALS: {self.MIN_MEALS}")
-        print(
-            f"  total_symptom_occurrences: {total_symptom_occurrences}, MIN_SYMPTOM_OCCURRENCES: {self.MIN_SYMPTOM_OCCURRENCES}"
+        logger.debug("calculate_confidence INPUT:")
+        logger.debug("  times_eaten: %s, MIN_MEALS: %s", times_eaten, self.MIN_MEALS)
+        logger.debug(
+            "  total_symptom_occurrences: %s, MIN_SYMPTOM_OCCURRENCES: %s",
+            total_symptom_occurrences,
+            self.MIN_SYMPTOM_OCCURRENCES,
         )
-        print(f"  associated_symptoms: {associated_symptoms}")
-        print(
-            f"  immediate: {immediate_count}, delayed: {delayed_count}, cumulative: {cumulative_count}"
+        logger.debug("  associated_symptoms: %s", associated_symptoms)
+        logger.debug(
+            "  immediate: %s, delayed: %s, cumulative: %s",
+            immediate_count,
+            delayed_count,
+            cumulative_count,
         )
 
         # Minimum thresholds
@@ -974,14 +993,18 @@ class DiagnosisService:
         else:
             level = "low"
 
-        print("DEBUG calculate_confidence OUTPUT:")
-        print(
-            f"  correlation_strength: {correlation_strength}, statistical_conf: {statistical_conf}"
+        logger.debug("calculate_confidence OUTPUT:")
+        logger.debug(
+            "  correlation_strength: %s, statistical_conf: %s",
+            correlation_strength,
+            statistical_conf,
         )
-        print(
-            f"  temporal_specificity: {temporal_specificity}, severity_component: {severity_component}"
+        logger.debug(
+            "  temporal_specificity: %s, severity_component: %s",
+            temporal_specificity,
+            severity_component,
         )
-        print(f"  final confidence: {round(confidence, 3)}, level: {level}")
+        logger.debug("  final confidence: %s, level: %s", round(confidence, 3), level)
 
         return (round(confidence, 3), level)
 
@@ -1018,8 +1041,10 @@ class DiagnosisService:
         """
         from app.services.ai_service import ClaudeService
 
-        print(
-            f"DEBUG run_diagnosis: date_range_start={date_range_start}, date_range_end={date_range_end}"
+        logger.debug(
+            "run_diagnosis: date_range_start=%s, date_range_end=%s",
+            date_range_start,
+            date_range_end,
         )
 
         # Step 1: Check data sufficiency
@@ -1157,8 +1182,10 @@ class DiagnosisService:
                     )
             except Exception as e:
                 # On error, keep ingredient (err on side of showing triggers)
-                print(
-                    f"Root cause classification error for {ingredient['ingredient_name']}: {e}"
+                logger.warning(
+                    "Root cause classification error for %s: %s",
+                    ingredient["ingredient_name"],
+                    e,
                 )
                 confirmed_ingredients.append(ingredient)
 

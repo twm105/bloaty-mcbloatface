@@ -267,6 +267,67 @@ class TestPasswordSecurity:
 
 
 @pytest.mark.security
+class TestRedirectSecurity:
+    """Tests for open redirect prevention."""
+
+    def test_open_redirect_double_slash_blocked(self, client: TestClient, db: Session):
+        """Test that login with next=//evil.com redirects to / not //evil.com."""
+        create_user(db, email="redirect_test@example.com", password="password123")
+
+        response = client.post(
+            "/auth/login",
+            data={
+                "email": "redirect_test@example.com",
+                "password": "password123",
+                "next": "//evil.com",
+            },
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 303
+        location = response.headers.get("location", "")
+        assert location == "/"
+
+    def test_open_redirect_protocol_relative_blocked(
+        self, client: TestClient, db: Session
+    ):
+        """Test that login with next=//evil.com/path redirects to /."""
+        create_user(db, email="redirect_test2@example.com", password="password123")
+
+        response = client.post(
+            "/auth/login",
+            data={
+                "email": "redirect_test2@example.com",
+                "password": "password123",
+                "next": "//evil.com/path",
+            },
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 303
+        location = response.headers.get("location", "")
+        assert location == "/"
+
+    def test_valid_next_redirect_works(self, client: TestClient, db: Session):
+        """Test that login with next=/meals redirects to /meals."""
+        create_user(db, email="redirect_test3@example.com", password="password123")
+
+        response = client.post(
+            "/auth/login",
+            data={
+                "email": "redirect_test3@example.com",
+                "password": "password123",
+                "next": "/meals",
+            },
+            follow_redirects=False,
+        )
+
+        assert response.status_code == 303
+        location = response.headers.get("location", "")
+        assert location == "/meals"
+
+
+@pytest.mark.security
 class TestAdminPrivilegeEscalation:
     """Tests for admin privilege escalation prevention."""
 

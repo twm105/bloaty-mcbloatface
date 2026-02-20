@@ -95,12 +95,15 @@ def retry_on_connection_error(max_attempts=3, base_delay=1.0):
                         )  # ±10% random variance
                         sleep_time = delay + jitter
 
-                        print(
-                            f"Connection error on attempt {attempt + 1}/{max_attempts}, retrying in {sleep_time:.1f}s..."
+                        logger.warning(
+                            "Connection error on attempt %d/%d, retrying in %.1fs...",
+                            attempt + 1,
+                            max_attempts,
+                            sleep_time,
                         )
                         await asyncio.sleep(sleep_time)
                     else:
-                        print(f"All {max_attempts} attempts failed")
+                        logger.error("All %d attempts failed", max_attempts)
 
             # All retries exhausted, raise the last exception
             raise ServiceUnavailableError(

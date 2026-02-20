@@ -5,6 +5,7 @@ This worker handles individual ingredient analysis tasks, allowing
 parallel processing and real-time progress updates via SSE.
 """
 
+import logging
 import dramatiq
 from datetime import datetime
 import asyncio
@@ -19,6 +20,8 @@ from app.models import (
 )
 from app.services.sse_publisher import SSEPublisher
 from app.services.ai_usage_service import AIUsageService
+
+logger = logging.getLogger(__name__)
 
 
 def run_async(coro):
@@ -106,7 +109,7 @@ def analyze_ingredient(
             )
         except Exception as e:
             # On research error, proceed without medical context
-            print(f"Research error for {ingredient_name}: {e}")
+            logger.warning("Research error for %s: %s", ingredient_name, e)
             research = None
 
         # Step 2: Classify root cause — now informed by medical research
@@ -129,7 +132,9 @@ def analyze_ingredient(
             is_confounder = not confounder_result.get("root_cause", True)
         except Exception as e:
             # On classification error, treat as root cause (don't discard)
-            print(f"Root cause classification error for {ingredient_name}: {e}")
+            logger.warning(
+                "Root cause classification error for %s: %s", ingredient_name, e
+            )
             is_confounder = False
 
         # If confounder, store as DiscountedIngredient and exit early

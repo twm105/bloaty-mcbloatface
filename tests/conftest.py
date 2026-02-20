@@ -196,6 +196,8 @@ def client(db: Session) -> Generator[TestClient, None, None]:
     app.dependency_overrides[get_db] = override_get_db
 
     with TestClient(app) as test_client:
+        # Set default Referer so CSRF Origin middleware allows requests
+        test_client.headers["referer"] = "http://testserver/"
         yield test_client
 
     app.dependency_overrides.clear()
@@ -291,6 +293,8 @@ def auth_client(
 
     with TestClient(app) as test_client:
         test_client.cookies.set(settings.session_cookie_name, test_session.token)
+        # Set default Referer so CSRF Origin middleware allows requests
+        test_client.headers["referer"] = "http://testserver/"
         yield test_client
 
     app.dependency_overrides.clear()
@@ -317,6 +321,8 @@ def admin_client(
 
     with TestClient(app) as test_client:
         test_client.cookies.set(settings.session_cookie_name, admin_session.token)
+        # Set default Referer so CSRF Origin middleware allows requests
+        test_client.headers["referer"] = "http://testserver/"
         yield test_client
 
     app.dependency_overrides.clear()
