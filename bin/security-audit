@@ -526,7 +526,7 @@ tool_command() {
     sast)
       local sast_cmd
       sast_cmd="$(command -v opengrep 2>/dev/null || command -v semgrep 2>/dev/null)"
-      echo "$sast_cmd scan --config=auto --json --quiet . 2>/dev/null" ;;
+      echo "$sast_cmd scan --config=p/security-audit --config=p/owasp-top-ten --json --quiet . 2>/dev/null" ;;
     bandit)
       echo "bandit -r . -f json --severity-level medium 2>/dev/null" ;;
     shellcheck)
@@ -1244,6 +1244,9 @@ generate_sarif() {
       if . == "Critical" or . == "High" then "error"
       elif . == "Medium" then "warning"
       else "note" end;
+
+    # Filter to Medium+ severity only (exclude Low/note noise)
+    [.[] | select(.severity != "Low")] |
 
     # Build unique rules list
     (map({ rule_id, title, description, severity }) | unique_by(.rule_id)) as $rules |
