@@ -107,6 +107,16 @@ class SingleIngredientDiagnosisSchema(BaseModel):
     citations: list[CitationSchema] = []
 
 
+# --- Research Ingredient (research_ingredient) ---
+
+
+class ResearchIngredientSchema(BaseModel):
+    medical_assessment: str  # Technical summary: known trigger? mechanism? evidence?
+    known_trigger_categories: list[str] = []  # e.g. ["high_fodmap", "fructans"]
+    risk_level: str  # "high_risk", "low_risk", "no_known_risk"
+    citations: list[CitationSchema] = []
+
+
 # --- Root Cause Classification (classify_root_cause) ---
 
 
@@ -115,3 +125,14 @@ class RootCauseSchema(BaseModel):
     discard_justification: Optional[str] = None
     confounded_by: Optional[str] = None
     medical_reasoning: str
+
+
+# --- Adapt to Plain English (adapt_to_plain_english) ---
+
+
+class AdaptToPlainEnglishSchema(BaseModel):
+    diagnosis_summary: str
+    recommendations_summary: str
+    processing_suggestions: Optional[ProcessingSuggestionsSchema] = None
+    alternative_meals: list[AlternativeMealSchema] = []
+    citations: list[CitationSchema] = []

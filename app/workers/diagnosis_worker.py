@@ -74,8 +74,46 @@ def analyze_ingredient(
 
         claude_service = ClaudeService()
 
-        # Step 1: Always run classification to check if ingredient is a real trigger or bystander
-        # This catches both co-occurrence confounders AND medically implausible triggers
+        # =====================================================================
+        # PIPELINE: research → classify → adapt_to_plain_english
+        #
+        # Step 1: Medical research (web search + technical assessment)
+        # Step 2: Classify root cause (with research context, no web search)
+        # Step 3: If kept, adapt to plain English (no web search)
+        # =====================================================================
+
+        # Step 1: Medical research — technical assessment with web search
+        research = None
+        try:
+            research = run_async(
+                claude_service.research_ingredient(
+                    ingredient_data=ingredient_data,
+                    web_search_enabled=web_search_enabled,
+                )
+            )
+            # Log research AI usage
+            research_usage = research.get("usage_stats", {})
+            ai_usage_service.log_usage(
+                service_type="diagnosis_research",
+                model=claude_service.sonnet_model,
+                input_tokens=research_usage.get("input_tokens", 0),
+                output_tokens=research_usage.get("output_tokens", 0),
+                cached_tokens=research_usage.get("cached_tokens", 0),
+                request_id=str(run_id),
+                request_type="diagnosis_run",
+                web_search_enabled=web_search_enabled,
+                success=True,
+            )
+        except Exception as e:
+            # On research error, proceed without medical context
+            print(f"Research error for {ingredient_name}: {e}")
+            research = None
+
+        # Step 2: Classify root cause — now informed by medical research
+        medical_grounding = ""
+        if research:
+            medical_grounding = research.get("medical_assessment", "")
+
         is_confounder = False
         confounder_result = None
 
@@ -84,8 +122,8 @@ def analyze_ingredient(
                 claude_service.classify_root_cause(
                     ingredient_data=ingredient_data,
                     cooccurrence_data=cooccurrence_data,
-                    medical_grounding="",  # Will use web search
-                    web_search_enabled=web_search_enabled,
+                    medical_grounding=medical_grounding,
+                    web_search_enabled=False,  # Already searched in step 1
                 )
             )
             is_confounder = not confounder_result.get("root_cause", True)
@@ -94,7 +132,7 @@ def analyze_ingredient(
             print(f"Root cause classification error for {ingredient_name}: {e}")
             is_confounder = False
 
-        # Step 2: If confounder, store as DiscountedIngredient and skip normal analysis
+        # If confounder, store as DiscountedIngredient and exit early
         if is_confounder and confounder_result:
             # Find confounded_by ingredient ID
             confounded_by_name = confounder_result.get("confounded_by")
@@ -189,17 +227,16 @@ def analyze_ingredient(
 
             return  # Exit early - don't do full analysis for confounders
 
-        # Step 3: Call Claude API for single-ingredient analysis (not a confounder)
+        # Step 3: Adapt to plain English — uses research, no web search
         try:
             result = run_async(
-                claude_service.diagnose_single_ingredient(
+                claude_service.adapt_to_plain_english(
                     ingredient_data=ingredient_data,
+                    medical_research=research or {},
                     user_meal_history=user_meal_history,
-                    web_search_enabled=web_search_enabled,
                 )
             )
         except ServiceUnavailableError as e:
-            # Log failure and publish error
             ai_usage_service.log_usage(
                 service_type="diagnosis_ingredient",
                 model=claude_service.sonnet_model,
@@ -208,7 +245,7 @@ def analyze_ingredient(
                 cached_tokens=0,
                 request_id=str(run_id),
                 request_type="diagnosis_run",
-                web_search_enabled=web_search_enabled,
+                web_search_enabled=False,
                 success=False,
                 error_message=str(e),
             )
@@ -222,7 +259,7 @@ def analyze_ingredient(
             )
             raise
 
-        # Log AI usage
+        # Log AI usage for the adapt step
         usage_stats = result.get("usage_stats", {})
         ai_usage_service.log_usage(
             service_type="diagnosis_ingredient",
@@ -232,7 +269,7 @@ def analyze_ingredient(
             cached_tokens=usage_stats.get("cached_tokens", 0),
             request_id=str(run_id),
             request_type="diagnosis_run",
-            web_search_enabled=web_search_enabled,
+            web_search_enabled=False,
             success=True,
         )
 
@@ -265,17 +302,27 @@ def analyze_ingredient(
         db.add(diagnosis_result)
         db.flush()
 
-        # Create citations
-        for citation in result.get("citations", []):
-            citation_obj = DiagnosisCitation(
-                result_id=diagnosis_result.id,
-                source_url=citation.get("url", ""),
-                source_title=citation.get("title", ""),
-                source_type=citation.get("source_type", "other"),
-                snippet=citation.get("snippet", ""),
-                relevance_score=citation.get("relevance", 0.0),
-            )
-            db.add(citation_obj)
+        # Create citations — merge from research + adapt steps
+        all_citations = []
+        if research:
+            all_citations.extend(research.get("citations", []))
+        all_citations.extend(result.get("citations", []))
+
+        # Deduplicate by URL
+        seen_urls = set()
+        for citation in all_citations:
+            url = citation.get("url", "")
+            if url and url not in seen_urls:
+                seen_urls.add(url)
+                citation_obj = DiagnosisCitation(
+                    result_id=diagnosis_result.id,
+                    source_url=url,
+                    source_title=citation.get("title", ""),
+                    source_type=citation.get("source_type", "other"),
+                    snippet=citation.get("snippet", ""),
+                    relevance_score=citation.get("relevance", 0.0),
+                )
+                db.add(citation_obj)
 
         # Increment completed count atomically to avoid race conditions with parallel workers
         from sqlalchemy import text
@@ -315,12 +362,13 @@ def analyze_ingredient(
             "times_followed_by_symptoms": diagnosis_result.times_followed_by_symptoms,
             "citations": [
                 {
-                    "url": c.get("url"),
-                    "title": c.get("title"),
-                    "source_type": c.get("source_type"),
-                    "snippet": c.get("snippet"),
+                    "url": c.get("url", ""),
+                    "title": c.get("title", ""),
+                    "source_type": c.get("source_type", ""),
+                    "snippet": c.get("snippet", ""),
                 }
-                for c in result.get("citations", [])
+                for c in all_citations
+                if c.get("url")
             ],
         }
         sse_publisher.publish_result(run_id, result_dict)

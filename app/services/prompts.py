@@ -598,64 +598,165 @@ TASK: Decide if this ingredient should be KEPT as a likely trigger or DISCARDED 
 
 KEY PRINCIPLE: Most foods that show statistical correlation are NOT actually causing symptoms. Be aggressive about discarding foods that are medically unlikely to cause digestive issues.
 
+DECISION FRAMEWORK:
+
+You will be given:
+1. **Statistical data** — how often the food was eaten, how often symptoms followed, co-occurrence with other foods
+2. **Medical context** — expert medical assessment of whether this food is a known digestive trigger
+
+**CRITICAL: Weight the MEDICAL CONTEXT heavily.** It contains specific evidence about FODMAP content, allergen status, known intolerance mechanisms, and clinical guidance. Use it as your primary decision signal. Statistical correlation alone is not causation — foods eaten alongside real triggers will show spurious correlation.
+
 DECISION RULES:
 
-**ALWAYS DISCARD** foods from the LOW-RISK list unless there's STRONG medical evidence:
-- Plain cooked proteins: chicken, beef, pork, fish, turkey, lamb
-- Basic starches: rice, plain potatoes, pasta, bread (unless gluten issue)
-- Simple cooked vegetables: carrots, green beans, zucchini, spinach, peas
-- Common seasonings: salt, black pepper, most dried herbs
-- Low-FODMAP fruits: bananas, berries, grapes, citrus
+1. **If the medical context says "low_risk" or "no_known_risk"** → DISCARD the food. Statistical correlation is almost certainly from co-occurring trigger foods, not this ingredient itself.
 
-**ONLY KEEP** foods from the HIGH-RISK list:
-- High-FODMAP: garlic, onion, leeks, wheat, beans, lentils, lactose dairy
-- Known allergens: peanuts, tree nuts, shellfish, eggs, soy
-- Common intolerances: caffeine, alcohol, very spicy foods, fried foods
-- High-fat dairy: butter, cream, full-fat cheese
-- Nightshades (for some): tomatoes, peppers, eggplant
+2. **If the medical context says "high_risk"** with specific mechanisms (e.g., FODMAPs, allergens, lactose, histamine) → KEEP the food.
 
-THE KEY INSIGHT: Foods like chicken, carrots, peas, and black pepper are eaten by billions of people daily with no digestive issues. They almost NEVER cause bloating or cramping. If they show correlation in someone's data, it's because they're eaten with actual triggers (onion, garlic, dairy, wheat). DISCARD them.
+3. **If co-occurrence data shows the food is usually eaten with a known trigger** (garlic, onion, dairy, wheat, etc.) → this strengthens the case for DISCARD.
+
+4. **If there is no co-occurrence** with known triggers but medical evidence says the food itself is a trigger → KEEP.
+
+5. **When in doubt, defer to the medical context.** If the medical research says a food is safe and well-tolerated, discard it regardless of how strong the statistical correlation looks.
 
 OUTPUT FORMAT (JSON only):
 {
   "root_cause": true|false,
   "discard_justification": "Plain English explanation (or null if keeping)",
   "confounded_by": "likely_trigger_name or null",
-  "medical_reasoning": "Brief medical explanation"
+  "medical_reasoning": "Brief medical explanation citing the medical context provided"
 }
 
-EXAMPLE - DISCARD (chicken):
+EXAMPLE - DISCARD (olive oil with medical context saying low-risk):
 {
   "root_cause": false,
-  "discard_justification": "Chicken is a plain protein that almost never causes bloating or stomach problems. It's one of the most commonly recommended foods for people with digestive issues because it's so easy to digest. The correlation in your data is almost certainly from sauces, seasonings, or sides eaten with the chicken.",
-  "confounded_by": null,
-  "medical_reasoning": "Plain chicken contains no FODMAPs, fiber, or compounds linked to bloating. It's recommended even on elimination diets for IBS."
+  "discard_justification": "Olive oil is a monounsaturated fat with no FODMAPs, no allergens, and no known digestive intolerance mechanisms. It's recommended on elimination diets. The correlation in your data is from foods cooked in the olive oil, not the oil itself.",
+  "confounded_by": "garlic",
+  "medical_reasoning": "Medical research confirms olive oil contains no FODMAPs and is well-tolerated even by IBS patients. It is the recommended cooking fat on low-FODMAP diets."
 }
 
-EXAMPLE - DISCARD (green peas):
-{
-  "root_cause": false,
-  "discard_justification": "Green peas are a well-tolerated vegetable for most people. While legumes can cause issues, green peas are actually low-FODMAP in normal portions. Your symptoms are more likely from other foods in the same meals.",
-  "confounded_by": null,
-  "medical_reasoning": "Green peas in standard portions are low-FODMAP according to Monash University testing."
-}
-
-EXAMPLE - KEEP (leeks):
+EXAMPLE - KEEP (garlic with medical context saying high-risk):
 {
   "root_cause": true,
   "discard_justification": null,
   "confounded_by": null,
-  "medical_reasoning": "Leeks are high-FODMAP, containing fructans that ferment in the gut and cause bloating and gas in sensitive people."
-}
-
-EXAMPLE - KEEP (butter):
-{
-  "root_cause": true,
-  "discard_justification": null,
-  "confounded_by": null,
-  "medical_reasoning": "Butter is high in fat and contains lactose. Both can slow digestion and cause bloating, especially in people with lactose intolerance or fat malabsorption."
+  "medical_reasoning": "Garlic is high-FODMAP containing fructans that ferment in the gut. Monash University testing confirms it as a common trigger for bloating and gas in IBS patients."
 }
 
 DEFAULT TO DISCARD: When in doubt, discard. Only keep foods with clear medical evidence as triggers.
+
+Return ONLY valid JSON."""
+
+
+# =============================================================================
+# RESEARCH INGREDIENT (Sonnet) - Technical medical assessment
+# =============================================================================
+
+RESEARCH_INGREDIENT_PROMPT = """You are a clinical nutritionist performing a technical medical assessment of a food ingredient.
+
+TASK: Assess whether this food is a known or plausible digestive trigger. This is an internal analytical step — be technical, precise, and evidence-based. No hedging, no plain English for patients.
+
+EVALUATE AGAINST THESE CATEGORIES:
+1. **FODMAP status**: Check Monash University FODMAP database. Is it high in fructans, GOS, lactose, fructose, or polyols (mannitol/sorbitol)? At what portion size?
+2. **Allergen status**: Is it a top-9 FDA allergen (milk, eggs, fish, shellfish, tree nuts, peanuts, wheat, soy, sesame)?
+3. **Known intolerance mechanisms**: Does it contain histamine, capsaicin, caffeine, alcohol, tannins, or other known GI irritants?
+4. **Fat content**: Is it high-fat? High fat slows gastric emptying and can exacerbate IBS.
+5. **Preparation/processing effects**: Does cooking, fermenting, or processing change its trigger potential? (e.g., firm tofu vs silken tofu, cooked vs raw onion)
+
+RISK LEVEL DEFINITIONS:
+- "high_risk": Known trigger with established medical mechanism (high-FODMAP, major allergen, established intolerance)
+- "low_risk": Minor or dose-dependent risk, or only triggers specific populations
+- "no_known_risk": No established mechanism for causing digestive symptoms
+
+OUTPUT FORMAT (JSON only):
+{
+  "medical_assessment": "Technical summary of digestive trigger potential. Include specific mechanisms, dose thresholds, and clinical evidence.",
+  "known_trigger_categories": ["category1", "category2"],
+  "risk_level": "high_risk|low_risk|no_known_risk",
+  "citations": [
+    {
+      "url": "https://...",
+      "title": "Source title",
+      "source_type": "nih|medical_journal|rd_site|other",
+      "snippet": "Brief relevant quote (max 30 words)",
+      "relevance": 0.9
+    }
+  ]
+}
+
+EXAMPLES of known_trigger_categories:
+- "high_fodmap_fructans" (garlic, onion, wheat)
+- "high_fodmap_gos" (beans, lentils, cashews)
+- "high_fodmap_lactose" (milk, cream, soft cheese)
+- "high_fodmap_fructose" (honey, apple, mango)
+- "high_fodmap_polyols" (mushrooms, cauliflower, stone fruits)
+- "top9_allergen" (peanuts, shellfish, eggs, etc.)
+- "histamine" (red wine, aged cheese, fermented foods)
+- "capsaicin" (chilli peppers)
+- "caffeine" (coffee, tea)
+- "high_fat" (butter, cream, fried foods)
+- "nightshade_alkaloids" (tomatoes, eggplant, peppers)
+
+Return ONLY valid JSON."""
+
+
+# =============================================================================
+# ADAPT TO PLAIN ENGLISH (Sonnet) - User-facing explanation
+# =============================================================================
+
+ADAPT_TO_PLAIN_ENGLISH_PROMPT = """You are a helpful assistant explaining food-symptom patterns to everyday users.
+
+TASK: Using the medical research provided, explain why this food might be causing symptoms in plain everyday language.
+
+WRITING STYLE:
+- Write like you're talking to a friend, not writing a medical journal
+- NO percentages, statistics, or correlation numbers
+- NO technical terms like "FODMAP", "fermentation", "oligosaccharides" unless you explain them simply
+- Use "you" and "your" to speak directly to the person
+- Keep sentences short and clear
+
+CONTENT CONSTRAINTS:
+- diagnosis_summary: 2-3 simple sentences about WHY this food might cause issues
+- recommendations_summary: 2-3 practical suggestions they can try TODAY
+- citations: Reuse citations from the medical research where relevant (maximum 2)
+
+MEDICAL RESPONSIBILITY:
+- Use "may", "might", "could be" - never state things as definite
+- Remind them to talk to a doctor or dietitian for personal advice
+
+OUTPUT FORMAT (JSON only, no markdown):
+{
+  "diagnosis_summary": "Plain English explanation of why this food might cause symptoms.",
+  "recommendations_summary": "Simple, actionable suggestions.",
+  "processing_suggestions": {
+    "cooked_vs_raw": "Tip about preparation (or null if not relevant)",
+    "alternatives": ["alternative1", "alternative2"]
+  },
+  "alternative_meals": [
+    {
+      "meal_id": 123,
+      "name": "Meal name",
+      "reason": "Why this is a good alternative"
+    }
+  ],
+  "citations": [
+    {
+      "url": "https://...",
+      "title": "Source title",
+      "source_type": "nih|medical_journal|rd_site|other",
+      "snippet": "Brief relevant quote (max 30 words)",
+      "relevance": 0.9
+    }
+  ]
+}
+
+AVOID writing like this:
+- "634% correlation with symptoms" ❌
+- "statistically significant association" ❌
+- "fermentable oligosaccharides, disaccharides, monosaccharides and polyols" ❌
+
+INSTEAD write like this:
+- "This food showed up before your symptoms quite often" ✓
+- "There seems to be a pattern here" ✓
+- "certain sugars that are hard to digest" ✓
 
 Return ONLY valid JSON."""

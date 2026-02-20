@@ -84,8 +84,31 @@ def sample_ingredient_data():
 
 
 @pytest.fixture
+def sample_research_result():
+    """Create sample research_ingredient result."""
+    return {
+        "medical_assessment": "Onion is high-FODMAP containing fructans.",
+        "known_trigger_categories": ["high_fodmap", "fructans"],
+        "risk_level": "high_risk",
+        "citations": [
+            {
+                "url": "https://www.monash.edu/fodmap",
+                "title": "Monash FODMAP",
+                "source_type": "medical",
+                "snippet": "Onion is high in fructans",
+            }
+        ],
+        "usage_stats": {
+            "input_tokens": 500,
+            "output_tokens": 200,
+            "cached_tokens": 0,
+        },
+    }
+
+
+@pytest.fixture
 def sample_diagnosis_result():
-    """Create sample AI diagnosis result."""
+    """Create sample adapt_to_plain_english result."""
     return {
         "diagnosis_summary": "Onion shows correlation with digestive symptoms.",
         "recommendations_summary": "Consider elimination diet.",
@@ -126,6 +149,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
         sample_diagnosis_result,
     ):
         """Test successful ingredient analysis."""
@@ -148,10 +172,11 @@ class TestAnalyzeIngredient:
             # Setup
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
-            # Mock root cause classification (not a confounder)
+            # Pipeline: research → classify → adapt
             mock_run_async.side_effect = [
+                sample_research_result,  # research_ingredient
                 {"root_cause": True, "confounded_by": None},  # classify_root_cause
-                sample_diagnosis_result,  # diagnose_single_ingredient
+                sample_diagnosis_result,  # adapt_to_plain_english
             ]
 
             # Import after patching
@@ -178,6 +203,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
     ):
         """Test that confounders are properly discounted."""
         # Add co-occurrence data that suggests confounding
@@ -210,13 +236,16 @@ class TestAnalyzeIngredient:
         ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
-            # Mock root cause classification as confounder
-            mock_run_async.return_value = {
-                "root_cause": False,
-                "discard_justification": "High co-occurrence with garlic",
-                "confounded_by": "garlic",
-                "medical_reasoning": "Garlic is the likely trigger",
-            }
+            # Pipeline: research → classify (confounder → early exit, no adapt)
+            mock_run_async.side_effect = [
+                sample_research_result,  # research_ingredient
+                {
+                    "root_cause": False,
+                    "discard_justification": "High co-occurrence with garlic",
+                    "confounded_by": "garlic",
+                    "medical_reasoning": "Garlic is the likely trigger",
+                },  # classify_root_cause
+            ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
 
@@ -268,6 +297,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
     ):
         """Test handling of AI service unavailability."""
         with (
@@ -288,10 +318,11 @@ class TestAnalyzeIngredient:
         ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
-            # First call (classify_root_cause) succeeds, second (diagnose) fails
+            # research succeeds, classify succeeds, adapt fails
             mock_run_async.side_effect = [
-                {"root_cause": True, "confounded_by": None},
-                ServiceUnavailableError("AI service down"),
+                sample_research_result,  # research_ingredient
+                {"root_cause": True, "confounded_by": None},  # classify_root_cause
+                ServiceUnavailableError("AI service down"),  # adapt_to_plain_english
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -314,6 +345,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
     ):
         """Test handling of rate limit error."""
         with (
@@ -334,9 +366,11 @@ class TestAnalyzeIngredient:
         ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
+            # research succeeds, classify succeeds, adapt hits rate limit
             mock_run_async.side_effect = [
-                {"root_cause": True, "confounded_by": None},
-                RateLimitError("Too many requests"),
+                sample_research_result,  # research_ingredient
+                {"root_cause": True, "confounded_by": None},  # classify_root_cause
+                RateLimitError("Too many requests"),  # adapt_to_plain_english
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -359,6 +393,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
         sample_diagnosis_result,
     ):
         """Test that last ingredient analysis completes the run."""
@@ -385,8 +420,9 @@ class TestAnalyzeIngredient:
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
-                {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result,
+                sample_research_result,  # research_ingredient
+                {"root_cause": True, "confounded_by": None},  # classify_root_cause
+                sample_diagnosis_result,  # adapt_to_plain_english
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -409,6 +445,7 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
         sample_diagnosis_result,
     ):
         """Test that root cause classification error doesn't stop analysis."""
@@ -430,10 +467,11 @@ class TestAnalyzeIngredient:
         ):
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
-            # Classification fails, but diagnosis should still proceed
+            # Research succeeds, classification fails, adapt should still proceed
             mock_run_async.side_effect = [
+                sample_research_result,  # research_ingredient
                 Exception("Classification failed"),  # classify_root_cause fails
-                sample_diagnosis_result,  # diagnose_single_ingredient succeeds
+                sample_diagnosis_result,  # adapt_to_plain_english succeeds
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -456,9 +494,10 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
         sample_diagnosis_result,
     ):
-        """Test that citations are created from AI response."""
+        """Test that citations are merged from research + adapt steps and deduplicated."""
         with (
             patch(
                 "app.workers.diagnosis_worker.SessionLocal",
@@ -478,8 +517,9 @@ class TestAnalyzeIngredient:
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
-                {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result,
+                sample_research_result,  # research_ingredient (has 1 citation)
+                {"root_cause": True, "confounded_by": None},  # classify_root_cause
+                sample_diagnosis_result,  # adapt_to_plain_english (has 1 citation)
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -491,8 +531,8 @@ class TestAnalyzeIngredient:
                 web_search_enabled=True,
             )
 
-            # Verify db.add was called for citations
-            # One for DiagnosisResult, one for each citation
+            # Verify db.add was called for DiagnosisResult + citations
+            # Research has 1 citation, adapt has 1 citation (different URLs) = 3 total adds
             assert mock_db_session.add.call_count >= 2
 
     def test_logs_ai_usage(
@@ -502,9 +542,10 @@ class TestAnalyzeIngredient:
         mock_claude_service,
         mock_sse_publisher,
         sample_ingredient_data,
+        sample_research_result,
         sample_diagnosis_result,
     ):
-        """Test that AI usage is logged."""
+        """Test that AI usage is logged for both research and adapt steps."""
         with (
             patch(
                 "app.workers.diagnosis_worker.SessionLocal",
@@ -528,8 +569,9 @@ class TestAnalyzeIngredient:
             mock_db_session.query.return_value.filter.return_value.first.return_value = mock_diagnosis_run
 
             mock_run_async.side_effect = [
-                {"root_cause": True, "confounded_by": None},
-                sample_diagnosis_result,
+                sample_research_result,  # research_ingredient
+                {"root_cause": True, "confounded_by": None},  # classify_root_cause
+                sample_diagnosis_result,  # adapt_to_plain_english
             ]
 
             from app.workers.diagnosis_worker import analyze_ingredient
@@ -541,8 +583,8 @@ class TestAnalyzeIngredient:
                 web_search_enabled=True,
             )
 
-            # Verify usage was logged
-            mock_usage_service.log_usage.assert_called()
+            # Verify usage was logged (research + adapt = at least 2 calls)
+            assert mock_usage_service.log_usage.call_count >= 2
 
 
 # =============================================================================

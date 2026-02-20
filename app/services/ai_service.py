@@ -31,6 +31,8 @@ from app.services.ai_schemas import (
     DiagnosisCorrelationsSchema,
     SingleIngredientDiagnosisSchema,
     RootCauseSchema,
+    ResearchIngredientSchema,
+    AdaptToPlainEnglishSchema,
 )
 from app.services.prompts import (
     MEAL_VALIDATION_SYSTEM_PROMPT,
@@ -40,6 +42,8 @@ from app.services.prompts import (
     EPISODE_CONTINUATION_SYSTEM_PROMPT,
     DIAGNOSIS_SINGLE_INGREDIENT_PROMPT,
     ROOT_CAUSE_CLASSIFICATION_PROMPT,
+    RESEARCH_INGREDIENT_PROMPT,
+    ADAPT_TO_PLAIN_ENGLISH_PROMPT,
     build_cached_analysis_context,
 )
 
@@ -1249,6 +1253,189 @@ Symptoms reported:"""
         formatted += "\n\nQUESTION: Is this food likely a real trigger, or is it just appearing alongside actual trigger foods?"
 
         return formatted
+
+    @retry_on_connection_error(max_attempts=3, base_delay=2.0)
+    async def research_ingredient(
+        self,
+        ingredient_data: dict,
+        web_search_enabled: bool = True,
+    ) -> dict:
+        """
+        Perform focused medical research on a single ingredient.
+
+        This is a lightweight technical assessment — no plain English,
+        no recommendations. Just: is this food a known digestive trigger,
+        what's the mechanism, and what's the evidence?
+
+        Args:
+            ingredient_data: Dict with ingredient stats and correlation data
+            web_search_enabled: Whether to enable web search for research
+
+        Returns:
+            Dict with structure:
+            {
+                "medical_assessment": str,
+                "known_trigger_categories": list[str],
+                "risk_level": str,
+                "citations": list[dict],
+                "usage_stats": {"input_tokens": int, "output_tokens": int}
+            }
+        """
+        try:
+            ingredient_name = ingredient_data.get("ingredient_name", "Unknown")
+            times_eaten = ingredient_data.get("times_eaten", 0)
+            symptom_count = ingredient_data.get("total_symptom_occurrences", 0)
+
+            user_message = f"""Research this ingredient for digestive trigger potential:
+
+INGREDIENT: {ingredient_name}
+
+CORRELATION DATA:
+- Eaten {times_eaten} times, symptoms followed {symptom_count} times
+- Confidence level: {ingredient_data.get("confidence_level", "unknown")}
+
+Symptoms reported:"""
+            for symptom in ingredient_data.get("associated_symptoms", []):
+                user_message += f"\n- {symptom.get('name', 'Unknown')}: {symptom.get('frequency', 0)} times"
+
+            user_message += "\n\nProvide your technical medical assessment in the specified JSON format."
+
+            messages = [{"role": "user", "content": user_message}]
+
+            request_params = {
+                "model": self.sonnet_model,
+                "max_tokens": 1024,
+                "stop_sequences": ["\n```", "```"],
+                "system": [
+                    {
+                        "type": "text",
+                        "text": RESEARCH_INGREDIENT_PROMPT,
+                        "cache_control": {"type": "ephemeral"},
+                    }
+                ],
+            }
+
+            if web_search_enabled:
+                request_params["tools"] = [
+                    {"type": "web_search_20250305", "name": "web_search"}
+                ]
+
+            validated, _raw_text, response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=ResearchIngredientSchema,
+                request_params=request_params,
+            )
+
+            usage = response.usage
+            validated["usage_stats"] = {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": getattr(usage, "output_tokens", 0),
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
+            }
+
+            return validated
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
+
+    @retry_on_connection_error(max_attempts=3, base_delay=2.0)
+    async def adapt_to_plain_english(
+        self,
+        ingredient_data: dict,
+        medical_research: dict,
+        user_meal_history: list,
+    ) -> dict:
+        """
+        Adapt technical medical research into user-facing plain English.
+
+        Takes the output from research_ingredient() and produces the
+        user-facing diagnosis summary, recommendations, and alternatives.
+        No web search needed — the research was already done.
+
+        Args:
+            ingredient_data: Dict with ingredient stats and correlation data
+            medical_research: Dict from research_ingredient() with
+                              medical_assessment, risk_level, citations
+            user_meal_history: List of user's recent meals for alternatives
+
+        Returns:
+            Dict with structure matching SingleIngredientDiagnosisSchema:
+            {
+                "diagnosis_summary": str,
+                "recommendations_summary": str,
+                "processing_suggestions": {...},
+                "alternative_meals": [...],
+                "citations": [...],
+                "usage_stats": {...}
+            }
+        """
+        try:
+            formatted_ingredient = self._format_single_ingredient_data(ingredient_data)
+            meal_history_str = self._format_meal_history(user_meal_history)
+
+            user_message = f"""Explain this food-symptom pattern in plain English for the user.
+
+{formatted_ingredient}
+
+MEDICAL RESEARCH FINDINGS:
+{medical_research.get("medical_assessment", "No research available.")}
+
+Risk level: {medical_research.get("risk_level", "unknown")}
+Trigger categories: {", ".join(medical_research.get("known_trigger_categories", []))}
+
+USER'S RECENT MEALS (for alternative suggestions):
+{meal_history_str}
+
+Provide your explanation in the specified JSON format."""
+
+            messages = [{"role": "user", "content": user_message}]
+
+            request_params = {
+                "model": self.sonnet_model,
+                "max_tokens": 2048,
+                "stop_sequences": ["\n```", "```"],
+                "system": [
+                    {
+                        "type": "text",
+                        "text": ADAPT_TO_PLAIN_ENGLISH_PROMPT,
+                        "cache_control": {"type": "ephemeral"},
+                    }
+                ],
+            }
+
+            validated, _raw_text, response = self._call_with_schema_retry(
+                messages=messages,
+                schema_class=AdaptToPlainEnglishSchema,
+                request_params=request_params,
+            )
+
+            usage = response.usage
+            validated["usage_stats"] = {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": getattr(usage, "output_tokens", 0),
+                "cached_tokens": getattr(usage, "cache_read_input_tokens", 0),
+            }
+
+            return validated
+
+        except anthropic.APIConnectionError as e:
+            raise ServiceUnavailableError("AI service temporarily unavailable") from e
+        except anthropic.RateLimitError as e:
+            raise RateLimitError(
+                "Too many requests, please try again in 1 minute"
+            ) from e
+        except anthropic.APIStatusError as e:
+            if e.status_code >= 500:
+                raise ServiceUnavailableError("AI service error") from e
+            raise ValueError(f"Request error: {e.message}") from e
 
     def _format_single_ingredient_data(self, ingredient_data: dict) -> str:
         """Format single ingredient data for AI analysis."""

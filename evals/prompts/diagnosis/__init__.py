@@ -13,11 +13,12 @@ import importlib
 from typing import Optional
 
 # The currently active prompt version (matches production)
-CURRENT_VERSION = "v1_baseline"
+CURRENT_VERSION = "v2_with_research"
 
 # Available versions
 VERSIONS = [
     "v1_baseline",
+    "v2_with_research",
 ]
 
 
