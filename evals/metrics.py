@@ -481,9 +481,7 @@ class RootCauseScore:
     medical_reasoning: Optional[str]
 
 
-def score_root_cause_classification(
-    predicted: dict, expected: dict
-) -> RootCauseScore:
+def score_root_cause_classification(predicted: dict, expected: dict) -> RootCauseScore:
     """Score a single root cause classification prediction.
 
     Args:
@@ -573,9 +571,9 @@ def aggregate_root_cause_scores(results: list[dict]) -> dict:
     )
 
     # Confounder mention rate (only for discard cases with plausible confounders)
-    confounder_cases = [s for s in scores if s.get("confounder_mentioned") is not None]
     cases_with_confounders = [
-        r for r in results
+        r
+        for r in results
         if "score" in r and r.get("expected", {}).get("plausible_confounders")
     ]
     confounder_mention_rate = (
