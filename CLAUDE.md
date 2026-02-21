@@ -127,6 +127,7 @@ Project documentation lives in the `docs/` folder:
 **docs/SECURITY_INTERNAL.md** - Operational security details (gitignored, not committed)
 - Known gaps, hardening roadmap, infrastructure specifics, incident history
 - Supplements SECURITY.md — read that first
+- **Never commit vulnerability details, infrastructure specifics, or security gaps to public docs — these belong in SECURITY_INTERNAL.md only**
 
 **docs/PRIVACY.md** - Data practices and privacy information
 - Reference when handling user data, images, or health information
