@@ -1,8 +1,8 @@
 # Bloaty McBloatface - Implementation Status
 
-**Last Updated:** February 16, 2026
+**Last Updated:** February 21, 2026
 **Overall Progress:** ~90% MVP Complete
-**Recent:** Fixed shared image deletion bug, automated S3 backups, bind mount for uploads
+**Recent:** Fixed SSL auto-renewal (switched from standalone to webroot method)
 
 ## 🚀 Production Deployment - COMPLETE (Feb 9, 2026)
 
@@ -15,7 +15,10 @@
 - Secrets Manager for credentials
 - S3 bucket for backups (automated daily at 3am)
 
-**Recent Fixes (Feb 16, 2026):**
+**Recent Fixes (Feb 21, 2026):**
+- ✅ **SSL auto-renewal** - Switched certbot from standalone to webroot method; standalone fails silently when nginx holds port 80. Added `/var/www/certbot` volume mount, fixed nginx `server_name` conflict, updated cron job and setup docs.
+
+**Previous Fixes (Feb 16, 2026):**
 - ✅ **Shared image deletion bug** - Duplicated meals share `image_path`; deleting one no longer deletes the shared image file (checks reference count first)
 - ✅ **Uploads bind mount** - Changed from named Docker volume to `/opt/bloaty/uploads` bind mount for easier backups and EBS snapshots
 - ✅ **Automated backups** - `backup.sh` now sources `.env` for S3 bucket config; daily cron job configured
