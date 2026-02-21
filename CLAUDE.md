@@ -187,6 +187,15 @@ Project documentation lives in the `docs/` folder:
 - Consult for metrics definitions and target thresholds
 - Check for dataset requirements and CLI usage
 
+**docs/SECURITY.md** - Security architecture and developer guidance (public)
+- Reference when adding routes, handling user input, or working with AI features
+- Consult for authentication patterns, secrets management, and security headers
+- Check the PR security checklist before submitting changes
+
+**docs/SECURITY_INTERNAL.md** - Operational security details (gitignored, not committed)
+- Known gaps, hardening roadmap, infrastructure specifics, incident history
+- Supplements SECURITY.md — read that first
+
 ## Dependencies to Add
 - fastapi[all]
 - sqlalchemy

@@ -48,6 +48,7 @@ evals/fixtures/api_cache/
 
 # Security reports
 docs/security-reports/
+docs/SECURITY_INTERNAL.md
 
 # Backups
 backups/
