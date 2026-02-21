@@ -55,7 +55,7 @@ async def detect_meal_center(image_path: str) -> Tuple[float, float]:
 
         # Call Claude API
         message = client.messages.create(
-            model="claude-3-haiku-20240307",  # Use Haiku for fast, cost-effective analysis
+            model=settings.haiku_model,
             max_tokens=200,
             messages=[
                 {

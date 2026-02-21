@@ -19,6 +19,7 @@ from app.services.ai_schemas import (
     EpisodeContinuationSchema,
     DiagnosisCorrelationsSchema,
     SingleIngredientDiagnosisSchema,
+    AlternativeMealSchema,
     RootCauseSchema,
     CitationSchema,
 )
@@ -728,3 +729,187 @@ class TestCallWithSchemaRetry:
 
         assert validated["root_cause"] is True
         assert validated["medical_reasoning"] == "Evidence."
+
+    def test_retry_feedback_includes_schema_definition(self):
+        """Retry error feedback includes the JSON Schema so the model can self-correct."""
+        bad_schema = '"ingredients": [{"name": "x", "state": "raw", "confidence": 5.0}]}'
+        bad_response = _make_mock_response(bad_schema)
+        good_json = '"meal_name": "X", "ingredients": [{"name": "x", "state": "raw", "confidence": 0.9}]}'
+        good_response = _make_mock_response(good_json)
+
+        mock_create = MagicMock(side_effect=[bad_response, good_response])
+        service = self._make_service(mock_create)
+
+        messages = [{"role": "user", "content": "Analyze."}]
+        service._call_with_schema_retry(
+            messages=messages,
+            schema_class=MealAnalysisSchema,
+            request_params={"model": "test", "max_tokens": 100},
+        )
+
+        # The error feedback (messages[2]) should contain the JSON schema
+        error_feedback = messages[2]["content"]
+        assert "Required JSON Schema" in error_feedback
+        assert '"properties"' in error_feedback
+        assert "meal_name" in error_feedback
+
+
+# =============================================================================
+# Regression: stop_sequences must not appear in diagnosis request_params
+# =============================================================================
+
+
+class TestNoStopSequences:
+    """Ensure stop_sequences are not used in any diagnosis method."""
+
+    def _make_service(self):
+        """Create a ClaudeService with a recording mock client."""
+        with patch("app.services.ai_service.settings") as mock_settings:
+            mock_settings.anthropic_api_key = "test-key"
+            mock_settings.anthropic_timeout = 30
+            mock_settings.anthropic_connect_timeout = 10
+            mock_settings.haiku_model = "test-haiku"
+            mock_settings.sonnet_model = "test-sonnet"
+
+            with patch("app.services.ai_service.Anthropic") as MockAnthropic:
+                mock_client = MagicMock()
+                MockAnthropic.return_value = mock_client
+                from app.services.ai_service import ClaudeService
+
+                service = ClaudeService()
+                return service, mock_client
+
+    def _make_valid_response(self, schema_class):
+        """Return a mock response valid for the given schema."""
+        from app.services.ai_schemas import (
+            RootCauseSchema,
+            ResearchIngredientSchema,
+            SingleIngredientDiagnosisSchema,
+            DiagnosisCorrelationsSchema,
+        )
+
+        responses = {
+            DiagnosisCorrelationsSchema: '{"ingredient_analyses": [], "overall_summary": "ok", "caveats": []}',
+            SingleIngredientDiagnosisSchema: '{"diagnosis_summary": "s", "recommendations_summary": "r", "alternative_meals": [], "citations": []}',
+            RootCauseSchema: '{"root_cause": true, "medical_reasoning": "reason"}',
+            ResearchIngredientSchema: '{"medical_assessment": "ok", "known_trigger_categories": [], "risk_level": "low_risk", "citations": []}',
+        }
+        # Return prefill-compatible (without opening brace since prefill adds it)
+        full = responses[schema_class]
+        # Strip leading { since prefill adds it
+        return _make_mock_response(full[1:])
+
+    def test_diagnose_correlations_no_stop_sequences(self):
+        service, mock_client = self._make_service()
+        from app.services.ai_schemas import DiagnosisCorrelationsSchema
+
+        mock_client.messages.create.return_value = self._make_valid_response(
+            DiagnosisCorrelationsSchema
+        )
+
+        import asyncio
+
+        asyncio.get_event_loop().run_until_complete(
+            service.diagnose_correlations(
+                [{"ingredient_name": "milk", "state": "raw", "times_eaten": 5,
+                  "total_symptom_occurrences": 3, "immediate_total": 1,
+                  "delayed_total": 1, "cumulative_total": 1,
+                  "associated_symptoms": []}],
+                web_search_enabled=False,
+            )
+        )
+
+        call_kwargs = mock_client.messages.create.call_args[1]
+        assert "stop_sequences" not in call_kwargs
+
+    def test_classify_root_cause_no_stop_sequences(self):
+        service, mock_client = self._make_service()
+        from app.services.ai_schemas import RootCauseSchema
+
+        mock_client.messages.create.return_value = self._make_valid_response(
+            RootCauseSchema
+        )
+
+        import asyncio
+
+        asyncio.get_event_loop().run_until_complete(
+            service.classify_root_cause(
+                ingredient_data={"ingredient_name": "milk", "times_eaten": 5,
+                                  "total_symptom_occurrences": 3,
+                                  "confidence_level": "medium",
+                                  "associated_symptoms": []},
+                cooccurrence_data=[],
+                medical_grounding="Known trigger.",
+                web_search_enabled=False,
+            )
+        )
+
+        call_kwargs = mock_client.messages.create.call_args[1]
+        assert "stop_sequences" not in call_kwargs
+
+
+# =============================================================================
+# AlternativeMealSchema optional meal_id
+# =============================================================================
+
+
+class TestAlternativeMealSchemaOptionalId:
+    def test_meal_id_none(self):
+        data = {"meal_id": None, "name": "Oat Bowl", "reason": "No dairy"}
+        result = AlternativeMealSchema.model_validate(data)
+        assert result.meal_id is None
+
+    def test_meal_id_missing(self):
+        data = {"name": "Oat Bowl", "reason": "No dairy"}
+        result = AlternativeMealSchema.model_validate(data)
+        assert result.meal_id is None
+
+    def test_meal_id_present(self):
+        data = {"meal_id": 42, "name": "Oat Bowl", "reason": "No dairy"}
+        result = AlternativeMealSchema.model_validate(data)
+        assert result.meal_id == 42
+
+
+# =============================================================================
+# Extended _strip_markdown_json tests
+# =============================================================================
+
+
+class TestStripMarkdownJsonExtended:
+    def test_backticks_inside_json_string_values(self):
+        """JSON with backticks in string values (e.g. citations) should not break parsing."""
+        text = '{"url": "https://example.com/page```test", "title": "Study"}'
+        result = _strip_markdown_json(text)
+        assert '"url"' in result
+        parsed = json.loads(result)
+        assert parsed["title"] == "Study"
+
+    def test_explanatory_text_before_json(self):
+        """Explanatory text before JSON object is stripped."""
+        text = 'Here is the analysis result:\n{"key": "value"}'
+        result = _strip_markdown_json(text)
+        assert result == '{"key": "value"}'
+
+    def test_explanatory_text_after_json(self):
+        """Explanatory text after JSON object is stripped."""
+        text = '{"key": "value"}\n\nI hope this helps!'
+        result = _strip_markdown_json(text)
+        assert result == '{"key": "value"}'
+
+    def test_json_array_extraction(self):
+        """JSON array is extracted from surrounding text."""
+        text = 'Results:\n[{"a": 1}, {"a": 2}]\nDone.'
+        result = _strip_markdown_json(text)
+        assert result == '[{"a": 1}, {"a": 2}]'
+
+    def test_nested_json_preserved(self):
+        """Nested JSON objects are preserved."""
+        text = '{"outer": {"inner": "value"}}'
+        result = _strip_markdown_json(text)
+        parsed = json.loads(result)
+        assert parsed["outer"]["inner"] == "value"
+
+    def test_plain_json_unchanged(self):
+        """Plain JSON without any wrapping passes through."""
+        text = '{"key": "value"}'
+        assert _strip_markdown_json(text) == text

@@ -94,7 +94,7 @@ class ProcessingSuggestionsSchema(BaseModel):
 
 
 class AlternativeMealSchema(BaseModel):
-    meal_id: int
+    meal_id: Optional[int] = None
     name: str
     reason: str
 

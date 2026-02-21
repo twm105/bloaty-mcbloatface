@@ -52,11 +52,36 @@ logger = logging.getLogger(__name__)
 
 
 def _strip_markdown_json(text: str) -> str:
-    """Strip markdown code block wrappers from JSON text."""
-    if "```json" in text:
-        text = text.split("```json")[1].split("```")[0].strip()
-    elif "```" in text:
-        text = text.split("```")[1].split("```")[0].strip()
+    """Strip markdown code block wrappers from JSON text.
+
+    Handles:
+    - ```json ... ``` blocks (with optional language tag)
+    - Generic ``` ... ``` blocks
+    - Backticks embedded inside JSON string values (e.g. citation URLs)
+    - Explanatory text before/after the JSON block
+    Falls back to JSON boundary detection ({...} or [...]) if no code block found.
+    """
+    # Try regex: match ```json ... ``` or ``` ... ``` (non-greedy, DOTALL)
+    match = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+
+    # Fallback: find the outermost JSON object or array boundaries
+    # This handles cases where backticks appear inside JSON strings
+    # Pick whichever delimiter appears first ([ before { means it's an array)
+    candidates = []
+    for open_char, close_char in [("{", "}"), ("[", "]")]:
+        start = text.find(open_char)
+        if start == -1:
+            continue
+        end = text.rfind(close_char)
+        if end > start:
+            candidates.append((start, text[start : end + 1].strip()))
+    if candidates:
+        # Return the match that starts earliest in the text
+        candidates.sort(key=lambda c: c[0])
+        return candidates[0][1]
+
     return text
 
 
@@ -227,12 +252,18 @@ class ClaudeService:
                             "content": (prefill or "") + raw_text,
                         }
                     )
+                    # Include JSON Schema so the model can self-correct
+                    adapter = TypeAdapter(schema_class)
+                    schema_def = json.dumps(
+                        adapter.json_schema(), indent=2
+                    )
                     messages.append(
                         {
                             "role": "user",
                             "content": (
                                 f"Your response had a schema error:\n{error_msg}\n\n"
-                                f"Please fix and return valid JSON matching the required schema."
+                                f"Required JSON Schema:\n{schema_def}\n\n"
+                                f"Please fix and return valid JSON matching this schema."
                             ),
                         }
                     )
@@ -967,7 +998,6 @@ Remember to:
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 8192,
-                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -1068,7 +1098,6 @@ Provide your analysis in the specified JSON format."""
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 2048,
-                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -1161,7 +1190,6 @@ Provide your analysis in the specified JSON format."""
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 1024,
-                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -1308,7 +1336,6 @@ Symptoms reported:"""
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 1024,
-                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -1404,7 +1431,6 @@ Provide your explanation in the specified JSON format."""
             request_params = {
                 "model": self.sonnet_model,
                 "max_tokens": 2048,
-                "stop_sequences": ["\n```", "```"],
                 "system": [
                     {
                         "type": "text",
@@ -1480,7 +1506,10 @@ SYMPTOMS EXPERIENCED:"""
             ingredients = ", ".join(
                 i.get("name", "unknown") for i in meal.get("ingredients", [])
             )
-            formatted.append(f"- {meal.get('name', 'Meal')}: {ingredients}")
+            meal_id = meal.get("id", "?")
+            formatted.append(
+                f"- [ID:{meal_id}] {meal.get('name', 'Meal')}: {ingredients}"
+            )
 
         return "\n".join(formatted)
 

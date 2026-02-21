@@ -166,7 +166,6 @@ class DiagnosisRootCauseRunner(BaseEvalRunner):
         request_params = {
             "model": self.ai_service.sonnet_model,
             "max_tokens": 1024,
-            "stop_sequences": ["\n```", "```"],
             "system": [
                 {
                     "type": "text",
