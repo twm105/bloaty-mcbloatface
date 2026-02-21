@@ -256,8 +256,8 @@ sudo certbot certonly --standalone -d YOUR_DOMAIN --non-interactive --agree-tos 
 # Start services
 docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
 
-# Reconfigure certbot for webroot renewal (so renewals work while nginx is running)
-sudo certbot reconfigure -d YOUR_DOMAIN --authenticator webroot --webroot-path /var/www/certbot
+# Reconfigure certbot for webroot renewal (nginx must be running first)
+sudo certbot reconfigure --cert-name YOUR_DOMAIN --authenticator webroot --webroot-path /var/www/certbot
 ```
 
 ---
@@ -298,7 +298,7 @@ If renewal fails:
 
 If certbot is still configured for `standalone` (e.g., after initial setup), reconfigure:
 ```bash
-sudo certbot reconfigure -d bloaty-app.com --authenticator webroot --webroot-path /var/www/certbot
+sudo certbot reconfigure --cert-name bloaty-app.com --authenticator webroot --webroot-path /var/www/certbot
 ```
 
 ---
