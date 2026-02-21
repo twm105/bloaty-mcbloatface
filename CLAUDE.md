@@ -171,6 +171,11 @@ Project documentation lives in the `docs/` folder:
 - Consult when adding new components or pages
 - Check when debugging rendering issues (Alpine.js/Jinja2 patterns, icon sizing)
 
+**docs/ARCHITECTURE.md** - Internal system architecture and component design
+- Reference when understanding how layers connect (routes → services → models)
+- Consult when adding new features or services
+- Check for async processing patterns (Dramatiq, SSE) and AI integration details
+
 **docs/DEVOPS.md** - AWS deployment and infrastructure guide
 - Reference when deploying or updating production
 - Consult when troubleshooting infrastructure issues
