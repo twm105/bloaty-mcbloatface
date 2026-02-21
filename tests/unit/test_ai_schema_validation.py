@@ -732,7 +732,9 @@ class TestCallWithSchemaRetry:
 
     def test_retry_feedback_includes_schema_definition(self):
         """Retry error feedback includes the JSON Schema so the model can self-correct."""
-        bad_schema = '"ingredients": [{"name": "x", "state": "raw", "confidence": 5.0}]}'
+        bad_schema = (
+            '"ingredients": [{"name": "x", "state": "raw", "confidence": 5.0}]}'
+        )
         bad_response = _make_mock_response(bad_schema)
         good_json = '"meal_name": "X", "ingredients": [{"name": "x", "state": "raw", "confidence": 0.9}]}'
         good_response = _make_mock_response(good_json)
@@ -811,10 +813,18 @@ class TestNoStopSequences:
 
         asyncio.get_event_loop().run_until_complete(
             service.diagnose_correlations(
-                [{"ingredient_name": "milk", "state": "raw", "times_eaten": 5,
-                  "total_symptom_occurrences": 3, "immediate_total": 1,
-                  "delayed_total": 1, "cumulative_total": 1,
-                  "associated_symptoms": []}],
+                [
+                    {
+                        "ingredient_name": "milk",
+                        "state": "raw",
+                        "times_eaten": 5,
+                        "total_symptom_occurrences": 3,
+                        "immediate_total": 1,
+                        "delayed_total": 1,
+                        "cumulative_total": 1,
+                        "associated_symptoms": [],
+                    }
+                ],
                 web_search_enabled=False,
             )
         )
@@ -834,10 +844,13 @@ class TestNoStopSequences:
 
         asyncio.get_event_loop().run_until_complete(
             service.classify_root_cause(
-                ingredient_data={"ingredient_name": "milk", "times_eaten": 5,
-                                  "total_symptom_occurrences": 3,
-                                  "confidence_level": "medium",
-                                  "associated_symptoms": []},
+                ingredient_data={
+                    "ingredient_name": "milk",
+                    "times_eaten": 5,
+                    "total_symptom_occurrences": 3,
+                    "confidence_level": "medium",
+                    "associated_symptoms": [],
+                },
                 cooccurrence_data=[],
                 medical_grounding="Known trigger.",
                 web_search_enabled=False,

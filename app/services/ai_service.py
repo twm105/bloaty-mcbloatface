@@ -254,9 +254,7 @@ class ClaudeService:
                     )
                     # Include JSON Schema so the model can self-correct
                     adapter = TypeAdapter(schema_class)
-                    schema_def = json.dumps(
-                        adapter.json_schema(), indent=2
-                    )
+                    schema_def = json.dumps(adapter.json_schema(), indent=2)
                     messages.append(
                         {
                             "role": "user",

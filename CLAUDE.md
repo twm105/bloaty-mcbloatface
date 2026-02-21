@@ -70,6 +70,9 @@ docker compose exec web pytest tests/ -v
 # Run lint check
 docker compose exec web ruff check .
 
+# Run format check
+docker compose exec web ruff format --check .
+
 # Run any Python command
 docker compose exec web python -m <module>
 
@@ -77,7 +80,7 @@ docker compose exec web python -m <module>
 docker compose exec web bash
 ```
 Do NOT run pytest or python directly on the host - it will fail to connect to the database.
-**Always run both tests and lint** before considering work complete.
+**Always run tests, lint, and format check** before considering work complete.
 
 ### CI Status Check (IMPORTANT)
 At the start of each session, check if CI is green:
