@@ -20,6 +20,7 @@ VERSIONS = [
     "v1_baseline",
     "v2_recall_focus",
     "v3_recipe_inference",
+    "v4_atomic_ingredients",
 ]
 
 

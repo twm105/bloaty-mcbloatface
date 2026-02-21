@@ -329,7 +329,7 @@
         <div class="summary">
             <h1>Meal Analysis Eval Comparison</h1>
             <p style="color: #666; margin-bottom: 16px;">
-                Comparing 3 prompt versions. Select a version below to view per-case predictions.
+                Comparing 5 prompt versions. Select a version below to view per-case predictions.
             </p>
 
             <table class="comparison-table">
@@ -372,7 +372,7 @@
                         <td>2026-02-15</td>
                     </tr>
 
-                    <tr class="best">
+                    <tr class="">
                         <td>
                             <div class="version-label">v3_recipe_inference</div>
                             
@@ -383,6 +383,32 @@
                         <td class="metric-cell poor">16.6%</td>
                         <td>20</td>
                         <td>2026-02-15</td>
+                    </tr>
+
+                    <tr class="">
+                        <td>
+                            <div class="version-label">v3_recipe_inference</div>
+                            
+                        </td>
+                        <td class="metric-cell medium">52.8%<span class="delta positive">+9.9%</span></td>
+                        <td class="metric-cell medium">58.7%</td>
+                        <td class="metric-cell medium">52.0%</td>
+                        <td class="metric-cell poor">16.2%</td>
+                        <td>20</td>
+                        <td>2026-02-21</td>
+                    </tr>
+
+                    <tr class="best">
+                        <td>
+                            <div class="version-label">v4_atomic_ingredients</div>
+                            
+                        </td>
+                        <td class="metric-cell medium">55.0%<span class="delta positive">+12.1%</span></td>
+                        <td class="metric-cell medium">59.3%</td>
+                        <td class="metric-cell medium">53.8%</td>
+                        <td class="metric-cell poor">16.2%</td>
+                        <td>20</td>
+                        <td>2026-02-21</td>
                     </tr>
 
                 </tbody>
@@ -421,12 +447,22 @@
                 v3_recipe_inference
                 <span class="tab-score">F1: 52%</span>
             </button>
+
+            <button class="version-tab " data-version="3">
+                v3_recipe_inference
+                <span class="tab-score">F1: 53%</span>
+            </button>
+
+            <button class="version-tab " data-version="4">
+                v4_atomic_ingredients
+                <span class="tab-score">F1: 55%</span>
+            </button>
 </div>
         <div class="test-case">
             <div class="test-case-header">
                 <span class="test-case-id">bbc_beef-wellington</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 49%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 43%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 49%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 43%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 50%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 55%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -448,6 +484,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz</li><li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">250g/9oz chestnut mushroom include some wild ones if you like</li><li class="ingredient missed">50g/2oz butter</li><li class="ingredient matched">1 large sprig fresh thyme <span class="match-info">(matched by: thyme)</span></li><li class="ingredient missed">100ml/3.5 fl oz dry white wine</li><li class="ingredient matched">12 slices prosciutto <span class="match-info">(matched by: prosciutto or Parma ham)</span></li><li class="ingredient missed">500g/1lb 2oz pack puff pastry thawed if frozen</li><li class="ingredient missed">a little flour for dusting</li><li class="ingredient partial">2 egg yolks beaten with 1 tsp water <span class="match-info">(matched by: egg wash)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz <span class="match-info">(matched by: beef tenderloin)</span></li><li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">250g/9oz chestnut mushroom include some wild ones if you like</li><li class="ingredient missed">50g/2oz butter</li><li class="ingredient matched">1 large sprig fresh thyme <span class="match-info">(matched by: thyme)</span></li><li class="ingredient missed">100ml/3.5 fl oz dry white wine</li><li class="ingredient matched">12 slices prosciutto <span class="match-info">(matched by: prosciutto or Parma ham)</span></li><li class="ingredient missed">500g/1lb 2oz pack puff pastry thawed if frozen</li><li class="ingredient missed">a little flour for dusting</li><li class="ingredient partial">2 egg yolks beaten with 1 tsp water <span class="match-info">(matched by: egg wash)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz <span class="match-info">(matched by: beef tenderloin)</span></li><li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">250g/9oz chestnut mushroom include some wild ones if you like</li><li class="ingredient missed">50g/2oz butter</li><li class="ingredient matched">1 large sprig fresh thyme <span class="match-info">(matched by: thyme)</span></li><li class="ingredient missed">100ml/3.5 fl oz dry white wine</li><li class="ingredient missed">12 slices prosciutto</li><li class="ingredient missed">500g/1lb 2oz pack puff pastry thawed if frozen</li><li class="ingredient matched">a little flour for dusting <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">2 egg yolks beaten with 1 tsp water <span class="match-info">(matched by: egg)</span></li>
                     </ul>
 
                 </div>
@@ -477,6 +521,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (15 ingredients)</div>
+                        <div class="meal-title">Beef Wellington</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">beef tenderloin <em>(cooked)</em> <span class="match-info">(full: a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz)</span></li><li class="ingredient correct">puff pastry <em>(cooked)</em> <span class="match-info">(full: puff pastry)</span></li><li class="ingredient correct">mushroom duxelles <em>(cooked)</em> <span class="match-info">(full: chestnut mushroom)</span></li><li class="ingredient partial">egg wash <em>(cooked)</em> <span class="match-info">(partial: egg yolks beaten with 1 tsp water)</span></li><li class="ingredient wrong">pâté or liver mousse <em>(processed)</em></li><li class="ingredient correct">prosciutto or Parma ham <em>(processed)</em> <span class="match-info">(full: prosciutto)</span></li><li class="ingredient correct">mushrooms <em>(cooked)</em> <span class="match-info">(full: chestnut mushroom)</span></li><li class="ingredient wrong">shallots <em>(cooked)</em></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient correct">thyme <em>(cooked)</em> <span class="match-info">(full: sprig fresh thyme)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li><li class="ingredient wrong">Dijon mustard <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (13 ingredients)</div>
+                        <div class="meal-title">Beef Wellington</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">puff pastry <em>(cooked)</em> <span class="match-info">(full: puff pastry)</span></li><li class="ingredient correct">beef tenderloin <em>(cooked)</em> <span class="match-info">(full: a good beef fillet (preferably Aberdeen Angus) of around 1kg/2lb 4oz)</span></li><li class="ingredient correct">mushrooms <em>(cooked)</em> <span class="match-info">(full: chestnut mushroom)</span></li><li class="ingredient correct">egg <em>(cooked)</em> <span class="match-info">(full: egg yolks beaten with 1 tsp water)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient wrong">shallots <em>(cooked)</em></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient correct">thyme <em>(cooked)</em> <span class="match-info">(full: sprig fresh thyme)</span></li><li class="ingredient wrong">parsley <em>(raw)</em></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li><li class="ingredient correct">flour <em>(raw)</em> <span class="match-info">(full: a little flour for dusting)</span></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -485,7 +545,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_butter-chicken</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 59%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 67%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 56%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 59%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 67%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 56%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 56%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 56%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -507,6 +567,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">25g butter</li><li class="ingredient matched">1 onion halved and finely sliced <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">4 skinless chicken breasts cut into chunks <span class="match-info">(matched by: chicken breast)</span></li><li class="ingredient missed">2 tbsp garam masala</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">1 tbsp finely grated ginger <span class="match-info">(matched by: ginger)</span></li><li class="ingredient partial">500g passata <span class="match-info">(matched by: tomato sauce)</span></li><li class="ingredient missed">2 tbsp cashew nut butter</li><li class="ingredient missed">50ml double cream</li><li class="ingredient matched">handful coriander chopped <span class="match-info">(matched by: fresh cilantro)</span></li><li class="ingredient partial">cooked rice to serve <span class="match-info">(matched by: white rice)</span></li><li class="ingredient matched">wilted spinach to serve <span class="match-info">(matched by: spinach)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">25g butter</li><li class="ingredient matched">1 onion halved and finely sliced <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">4 skinless chicken breasts cut into chunks <span class="match-info">(matched by: chicken breast)</span></li><li class="ingredient missed">2 tbsp garam masala</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">1 tbsp finely grated ginger <span class="match-info">(matched by: ginger)</span></li><li class="ingredient partial">500g passata <span class="match-info">(matched by: tomato sauce)</span></li><li class="ingredient missed">2 tbsp cashew nut butter</li><li class="ingredient missed">50ml double cream</li><li class="ingredient matched">handful coriander chopped <span class="match-info">(matched by: fresh cilantro)</span></li><li class="ingredient partial">cooked rice to serve <span class="match-info">(matched by: white rice)</span></li><li class="ingredient matched">wilted spinach to serve <span class="match-info">(matched by: spinach)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">25g butter</li><li class="ingredient matched">1 onion halved and finely sliced <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">4 skinless chicken breasts cut into chunks <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">2 tbsp garam masala</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">1 tbsp finely grated ginger <span class="match-info">(matched by: ginger)</span></li><li class="ingredient missed">500g passata</li><li class="ingredient missed">2 tbsp cashew nut butter</li><li class="ingredient matched">50ml double cream <span class="match-info">(matched by: cream)</span></li><li class="ingredient matched">handful coriander chopped <span class="match-info">(matched by: coriander)</span></li><li class="ingredient partial">cooked rice to serve <span class="match-info">(matched by: white rice)</span></li><li class="ingredient matched">wilted spinach to serve <span class="match-info">(matched by: spinach)</span></li>
                     </ul>
 
                 </div>
@@ -536,6 +604,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (13 ingredients)</div>
+                        <div class="meal-title">Chicken Curry with Rice and Greens</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken breast <em>(cooked)</em> <span class="match-info">(full: skinless chicken breasts cut into chunks)</span></li><li class="ingredient partial">white rice <em>(cooked)</em> <span class="match-info">(partial: cooked rice to serve)</span></li><li class="ingredient correct">spinach <em>(cooked)</em> <span class="match-info">(full: wilted spinach to serve)</span></li><li class="ingredient partial">tomato sauce <em>(cooked)</em> <span class="match-info">(partial: passata)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion halved and finely sliced)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">ginger <em>(cooked)</em> <span class="match-info">(full: finely grated ginger)</span></li><li class="ingredient wrong">curry powder <em>(processed)</em></li><li class="ingredient wrong">coconut milk <em>(processed)</em></li><li class="ingredient wrong">vegetable oil <em>(processed)</em></li><li class="ingredient correct">fresh cilantro <em>(raw)</em> <span class="match-info">(full: coriander chopped)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (17 ingredients)</div>
+                        <div class="meal-title">Chicken Tikka Masala with Rice and Greens</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: skinless chicken breasts cut into chunks)</span></li><li class="ingredient partial">white rice <em>(cooked)</em> <span class="match-info">(partial: cooked rice to serve)</span></li><li class="ingredient correct">spinach <em>(cooked)</em> <span class="match-info">(full: wilted spinach to serve)</span></li><li class="ingredient wrong">tomato <em>(cooked)</em></li><li class="ingredient correct">cream <em>(cooked)</em> <span class="match-info">(full: double cream)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion halved and finely sliced)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">ginger <em>(cooked)</em> <span class="match-info">(full: finely grated ginger)</span></li><li class="ingredient wrong">yogurt <em>(cooked)</em></li><li class="ingredient wrong">cumin <em>(cooked)</em></li><li class="ingredient correct">coriander <em>(cooked)</em> <span class="match-info">(full: coriander chopped)</span></li><li class="ingredient wrong">paprika <em>(cooked)</em></li><li class="ingredient wrong">turmeric <em>(cooked)</em></li><li class="ingredient wrong">vegetable oil <em>(cooked)</em></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: coriander chopped)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -544,7 +628,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_chicken-fajitas</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 60%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 71%</span><span class="score-badge good" data-version="2"><span class="version-name">v3_recipe_:</span> 79%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 60%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 71%</span><span class="score-badge good" data-version="2"><span class="version-name">v3_recipe_:</span> 79%</span><span class="score-badge good" data-version="3"><span class="version-name">v3_recipe_:</span> 79%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 60%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -566,6 +650,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">24 flour tortillas <span class="match-info">(matched by: flour tortilla)</span></li><li class="ingredient matched">300g soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient matched">6 chicken breasts <span class="match-info">(matched by: chicken)</span></li><li class="ingredient matched">4 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">2 limes juiced <span class="match-info">(matched by: lime juice)</span></li><li class="ingredient matched">1 tsp chilli powder <span class="match-info">(matched by: chili powder)</span></li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient missed">small pack coriander finely chopped</li><li class="ingredient matched">2 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient partial">1 large red onion cut into thin wedges <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 red and 2 yellow peppers cut into thin strips <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient matched">200g cherry tomatoes halved <span class="match-info">(matched by: cherry tomatoes)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">24 flour tortillas <span class="match-info">(matched by: flour tortilla)</span></li><li class="ingredient matched">300g soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient matched">6 chicken breasts <span class="match-info">(matched by: chicken)</span></li><li class="ingredient matched">4 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">2 limes juiced <span class="match-info">(matched by: lime juice)</span></li><li class="ingredient matched">1 tsp chilli powder <span class="match-info">(matched by: chili powder)</span></li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient missed">small pack coriander finely chopped</li><li class="ingredient matched">2 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient partial">1 large red onion cut into thin wedges <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 red and 2 yellow peppers cut into thin strips <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient matched">200g cherry tomatoes halved <span class="match-info">(matched by: cherry tomatoes)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">24 flour tortillas <span class="match-info">(matched by: flour tortilla)</span></li><li class="ingredient matched">300g soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient missed">6 chicken breasts</li><li class="ingredient matched">4 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">2 limes juiced</li><li class="ingredient missed">1 tsp chilli powder</li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient missed">small pack coriander finely chopped</li><li class="ingredient matched">2 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient partial">1 large red onion cut into thin wedges <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 red and 2 yellow peppers cut into thin strips <span class="match-info">(matched by: bell pepper red)</span></li><li class="ingredient matched">200g cherry tomatoes halved <span class="match-info">(matched by: tomato cherry)</span></li>
                     </ul>
 
                 </div>
@@ -595,6 +687,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (16 ingredients)</div>
+                        <div class="meal-title">Grilled Chicken Fajita Taco</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">flour tortilla <em>(cooked)</em> <span class="match-info">(full: flour tortillas)</span></li><li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: chicken breasts)</span></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red and 2 yellow peppers cut into thin strips)</span></li><li class="ingredient correct">yellow bell pepper <em>(cooked)</em> <span class="match-info">(full: red and 2 yellow peppers cut into thin strips)</span></li><li class="ingredient correct">cherry tomatoes <em>(raw)</em> <span class="match-info">(full: cherry tomatoes halved)</span></li><li class="ingredient wrong">guacamole <em>(processed)</em></li><li class="ingredient correct">sour cream <em>(raw)</em> <span class="match-info">(full: soured cream)</span></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: coriander finely chopped)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: red onion cut into thin wedges)</span></li><li class="ingredient correct">olive oil <em>(processed)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient correct">lime juice <em>(raw)</em> <span class="match-info">(full: limes juiced)</span></li><li class="ingredient correct">cumin <em>(processed)</em> <span class="match-info">(full: ground cumin)</span></li><li class="ingredient correct">chili powder <em>(processed)</em> <span class="match-info">(full: chilli powder)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (15 ingredients)</div>
+                        <div class="meal-title">Grilled Meat Taco with Vegetables</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">flour tortilla <em>(cooked)</em> <span class="match-info">(full: flour tortillas)</span></li><li class="ingredient wrong">beef <em>(cooked)</em></li><li class="ingredient correct">bell pepper red <em>(cooked)</em> <span class="match-info">(full: red and 2 yellow peppers cut into thin strips)</span></li><li class="ingredient correct">bell pepper yellow <em>(cooked)</em> <span class="match-info">(full: red and 2 yellow peppers cut into thin strips)</span></li><li class="ingredient correct">tomato cherry <em>(raw)</em> <span class="match-info">(full: cherry tomatoes halved)</span></li><li class="ingredient wrong">avocado <em>(raw)</em></li><li class="ingredient correct">sour cream <em>(raw)</em> <span class="match-info">(full: soured cream)</span></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: coriander)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: red onion cut into thin wedges)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">cumin <em>(cooked)</em> <span class="match-info">(full: ground cumin)</span></li><li class="ingredient wrong">paprika <em>(cooked)</em></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -603,7 +711,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_chicken-jalfrezi</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 59%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 59%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 59%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 55%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -625,6 +733,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">½ large onion roughly chopped <span class="match-info">(matched by: onions)</span></li><li class="ingredient matched">2 garlic cloves chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 green chilli finely chopped</li><li class="ingredient matched">vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">400g can plum tomatoes <span class="match-info">(matched by: tomatoes)</span></li><li class="ingredient matched">1 tbsp ground coriander <span class="match-info">(matched by: coriander powder)</span></li><li class="ingredient matched">1 tbsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient matched">2-3 chicken breasts diced <span class="match-info">(matched by: chicken breast)</span></li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient matched">1 tsp ground coriander <span class="match-info">(matched by: coriander powder)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient missed">½ large onion sliced</li><li class="ingredient partial">1 red pepper chopped <span class="match-info">(matched by: bell peppers)</span></li><li class="ingredient missed">2 red chillies finely chopped (optional)</li><li class="ingredient matched">2 tsp garam masala <span class="match-info">(matched by: garam masala)</span></li><li class="ingredient missed">handful of fresh, chopped coriander leaves</li><li class="ingredient missed">cooked basmati rice or naan bread to serve</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">½ large onion roughly chopped <span class="match-info">(matched by: onions)</span></li><li class="ingredient matched">2 garlic cloves chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 green chilli finely chopped</li><li class="ingredient matched">vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">400g can plum tomatoes <span class="match-info">(matched by: tomatoes)</span></li><li class="ingredient matched">1 tbsp ground coriander <span class="match-info">(matched by: coriander powder)</span></li><li class="ingredient matched">1 tbsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient matched">2-3 chicken breasts diced <span class="match-info">(matched by: chicken breast)</span></li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient matched">1 tsp ground coriander <span class="match-info">(matched by: coriander powder)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient missed">½ large onion sliced</li><li class="ingredient partial">1 red pepper chopped <span class="match-info">(matched by: bell peppers)</span></li><li class="ingredient missed">2 red chillies finely chopped (optional)</li><li class="ingredient matched">2 tsp garam masala <span class="match-info">(matched by: garam masala)</span></li><li class="ingredient missed">handful of fresh, chopped coriander leaves</li><li class="ingredient missed">cooked basmati rice or naan bread to serve</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">½ large onion roughly chopped</li><li class="ingredient matched">2 garlic cloves chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">1 green chilli finely chopped <span class="match-info">(matched by: green chili)</span></li><li class="ingredient matched">vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">400g can plum tomatoes <span class="match-info">(matched by: tomato)</span></li><li class="ingredient partial">1 tbsp ground coriander <span class="match-info">(matched by: coriander)</span></li><li class="ingredient matched">1 tbsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient matched">2-3 chicken breasts diced <span class="match-info">(matched by: chicken)</span></li><li class="ingredient matched">1 tsp ground cumin <span class="match-info">(matched by: cumin)</span></li><li class="ingredient partial">1 tsp ground coriander <span class="match-info">(matched by: coriander)</span></li><li class="ingredient matched">1 tsp turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient missed">½ large onion sliced</li><li class="ingredient missed">1 red pepper chopped</li><li class="ingredient missed">2 red chillies finely chopped (optional)</li><li class="ingredient matched">2 tsp garam masala <span class="match-info">(matched by: garam masala)</span></li><li class="ingredient missed">handful of fresh, chopped coriander leaves</li><li class="ingredient missed">cooked basmati rice or naan bread to serve</li>
                     </ul>
 
                 </div>
@@ -654,6 +770,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (15 ingredients)</div>
+                        <div class="meal-title">Chicken Jalfrezi or Chicken Tikka Masala</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken breast <em>(cooked)</em> <span class="match-info">(full: chicken breasts diced)</span></li><li class="ingredient partial">bell peppers <em>(cooked)</em> <span class="match-info">(partial: red pepper chopped)</span></li><li class="ingredient correct">tomatoes <em>(cooked)</em> <span class="match-info">(full: can plum tomatoes)</span></li><li class="ingredient correct">onions <em>(cooked)</em> <span class="match-info">(full: onion roughly chopped)</span></li><li class="ingredient partial">tomato paste <em>(processed)</em> <span class="match-info">(partial: can plum tomatoes)</span></li><li class="ingredient correct">garam masala <em>(processed)</em> <span class="match-info">(full: garam masala)</span></li><li class="ingredient correct">cumin <em>(processed)</em> <span class="match-info">(full: ground cumin)</span></li><li class="ingredient correct">coriander powder <em>(processed)</em> <span class="match-info">(full: ground coriander)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves chopped)</span></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(processed)</em> <span class="match-info">(full: vegetable oil for frying)</span></li><li class="ingredient wrong">fresh cilantro <em>(raw)</em></li><li class="ingredient correct">turmeric <em>(processed)</em> <span class="match-info">(full: turmeric)</span></li><li class="ingredient wrong">chili powder <em>(processed)</em></li><li class="ingredient wrong">salt <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (16 ingredients)</div>
+                        <div class="meal-title">Chicken Jalfrezi</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: chicken breasts diced)</span></li><li class="ingredient partial">bell pepper <em>(cooked)</em> <span class="match-info">(partial: red pepper)</span></li><li class="ingredient correct">tomato <em>(cooked)</em> <span class="match-info">(full: can plum tomatoes)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion)</span></li><li class="ingredient wrong">cilantro <em>(raw)</em></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves chopped)</span></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient correct">cumin <em>(cooked)</em> <span class="match-info">(full: ground cumin)</span></li><li class="ingredient partial">coriander <em>(cooked)</em> <span class="match-info">(partial: ground coriander)</span></li><li class="ingredient correct">turmeric <em>(cooked)</em> <span class="match-info">(full: turmeric)</span></li><li class="ingredient correct">garam masala <em>(cooked)</em> <span class="match-info">(full: garam masala)</span></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil for frying)</span></li><li class="ingredient correct">green chili <em>(cooked)</em> <span class="match-info">(full: green chilli finely chopped)</span></li><li class="ingredient partial">tomato paste <em>(cooked)</em> <span class="match-info">(partial: can plum tomatoes)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -662,7 +794,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_chicken-tikka-masala</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 32%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 31%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 38%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 32%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 31%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 38%</span><span class="score-badge poor" data-version="3"><span class="version-name">v3_recipe_:</span> 38%</span><span class="score-badge poor" data-version="4"><span class="version-name">v4_atomic_:</span> 39%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -684,6 +816,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">4 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">25g butter</li><li class="ingredient matched">4 onions roughly chopped <span class="match-info">(matched by: onions)</span></li><li class="ingredient missed">6 tbsp chicken tikka masala paste (use shop-bought or make your own – see recipe, below)</li><li class="ingredient matched">2 red peppers deseeded and cut into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient matched">8 boneless, skinless chicken breasts cut into 2.5cm cubes <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">2 x 400g cans  chopped tomatoes</li><li class="ingredient missed">4 tbsp tomato purée</li><li class="ingredient missed">2-3 tbsp  mango chutney</li><li class="ingredient missed">150ml double cream</li><li class="ingredient missed">150ml natural  yogurt</li><li class="ingredient missed">chopped  coriander leaves, to serve</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">4 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">25g butter</li><li class="ingredient matched">4 onions roughly chopped <span class="match-info">(matched by: onions)</span></li><li class="ingredient missed">6 tbsp chicken tikka masala paste (use shop-bought or make your own – see recipe, below)</li><li class="ingredient matched">2 red peppers deseeded and cut into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient matched">8 boneless, skinless chicken breasts cut into 2.5cm cubes <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">2 x 400g cans  chopped tomatoes</li><li class="ingredient missed">4 tbsp tomato purée</li><li class="ingredient missed">2-3 tbsp  mango chutney</li><li class="ingredient missed">150ml double cream</li><li class="ingredient missed">150ml natural  yogurt</li><li class="ingredient missed">chopped  coriander leaves, to serve</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">4 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">25g butter</li><li class="ingredient matched">4 onions roughly chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">6 tbsp chicken tikka masala paste (use shop-bought or make your own – see recipe, below)</li><li class="ingredient matched">2 red peppers deseeded and cut into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient matched">8 boneless, skinless chicken breasts cut into 2.5cm cubes <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">2 x 400g cans  chopped tomatoes</li><li class="ingredient missed">4 tbsp tomato purée</li><li class="ingredient missed">2-3 tbsp  mango chutney</li><li class="ingredient missed">150ml double cream</li><li class="ingredient missed">150ml natural  yogurt</li><li class="ingredient missed">chopped  coriander leaves, to serve</li>
                     </ul>
 
                 </div>
@@ -713,6 +853,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (14 ingredients)</div>
+                        <div class="meal-title">Indian Chicken Curry</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: boneless)</span></li><li class="ingredient wrong">white rice <em>(cooked)</em></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: chopped coriander leaves)</span></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red peppers deseeded and cut into chunks)</span></li><li class="ingredient correct">tomatoes <em>(cooked)</em> <span class="match-info">(full: chopped tomatoes)</span></li><li class="ingredient correct">onions <em>(cooked)</em> <span class="match-info">(full: onions roughly chopped)</span></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient wrong">curry powder <em>(processed)</em></li><li class="ingredient wrong">coconut milk <em>(processed)</em></li><li class="ingredient correct">vegetable oil <em>(processed)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">turmeric <em>(processed)</em></li><li class="ingredient wrong">cumin <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (16 ingredients)</div>
+                        <div class="meal-title">Chicken Curry</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: boneless)</span></li><li class="ingredient wrong">rice <em>(cooked)</em></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: chopped coriander leaves)</span></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red peppers deseeded and cut into chunks)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onions roughly chopped)</span></li><li class="ingredient correct">tomato <em>(cooked)</em> <span class="match-info">(full: chopped tomatoes)</span></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient wrong">coconut milk <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">turmeric <em>(cooked)</em></li><li class="ingredient wrong">cumin <em>(cooked)</em></li><li class="ingredient correct">coriander <em>(cooked)</em> <span class="match-info">(full: chopped coriander leaves)</span></li><li class="ingredient wrong">chili powder <em>(cooked)</em></li><li class="ingredient partial">garam masala <em>(cooked)</em> <span class="match-info">(partial: chicken tikka masala paste)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -721,7 +877,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_cottage-pie</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 37%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 70%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 61%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 37%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 70%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 61%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 61%</span><span class="score-badge good" data-version="4"><span class="version-name">v4_atomic_:</span> 76%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -743,6 +899,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">3 tbsp olive oil</li><li class="ingredient matched">1¼kg beef mince <span class="match-info">(matched by: ground beef)</span></li><li class="ingredient matched">2 onions finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">3 carrots chopped <span class="match-info">(matched by: carrots)</span></li><li class="ingredient missed">3 celery sticks chopped</li><li class="ingredient missed">2 garlic cloves finely chopped</li><li class="ingredient matched">3 tbsp plain flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">1 tbsp tomato purée <span class="match-info">(matched by: tomato paste)</span></li><li class="ingredient missed">large glass of red wine (optional)</li><li class="ingredient matched">850ml beef stock <span class="match-info">(matched by: beef stock)</span></li><li class="ingredient matched">4 tbsp Worcestershire sauce <span class="match-info">(matched by: Worcestershire sauce)</span></li><li class="ingredient missed">a few thyme sprigs</li><li class="ingredient missed">2 bay leaves</li><li class="ingredient missed">1.8kg potatoes chopped</li><li class="ingredient matched">225ml milk <span class="match-info">(matched by: milk)</span></li><li class="ingredient matched">25g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient missed">200g strong cheddar grated</li><li class="ingredient missed">freshly grated  nutmeg</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">3 tbsp olive oil</li><li class="ingredient matched">1¼kg beef mince <span class="match-info">(matched by: ground beef)</span></li><li class="ingredient matched">2 onions finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">3 carrots chopped <span class="match-info">(matched by: carrots)</span></li><li class="ingredient missed">3 celery sticks chopped</li><li class="ingredient missed">2 garlic cloves finely chopped</li><li class="ingredient matched">3 tbsp plain flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">1 tbsp tomato purée <span class="match-info">(matched by: tomato paste)</span></li><li class="ingredient missed">large glass of red wine (optional)</li><li class="ingredient matched">850ml beef stock <span class="match-info">(matched by: beef stock)</span></li><li class="ingredient matched">4 tbsp Worcestershire sauce <span class="match-info">(matched by: Worcestershire sauce)</span></li><li class="ingredient missed">a few thyme sprigs</li><li class="ingredient missed">2 bay leaves</li><li class="ingredient missed">1.8kg potatoes chopped</li><li class="ingredient matched">225ml milk <span class="match-info">(matched by: milk)</span></li><li class="ingredient matched">25g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient missed">200g strong cheddar grated</li><li class="ingredient missed">freshly grated  nutmeg</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">1¼kg beef mince <span class="match-info">(matched by: ground beef)</span></li><li class="ingredient matched">2 onions finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">3 carrots chopped <span class="match-info">(matched by: carrot)</span></li><li class="ingredient matched">3 celery sticks chopped <span class="match-info">(matched by: celery)</span></li><li class="ingredient matched">2 garlic cloves finely chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">3 tbsp plain flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">1 tbsp tomato purée <span class="match-info">(matched by: tomato paste)</span></li><li class="ingredient missed">large glass of red wine (optional)</li><li class="ingredient matched">850ml beef stock <span class="match-info">(matched by: beef stock)</span></li><li class="ingredient missed">4 tbsp Worcestershire sauce</li><li class="ingredient missed">a few thyme sprigs</li><li class="ingredient matched">2 bay leaves <span class="match-info">(matched by: bay leaf)</span></li><li class="ingredient missed">1.8kg potatoes chopped</li><li class="ingredient matched">225ml milk <span class="match-info">(matched by: milk)</span></li><li class="ingredient matched">25g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient missed">200g strong cheddar grated</li><li class="ingredient missed">freshly grated  nutmeg</li>
                     </ul>
 
                 </div>
@@ -772,6 +936,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (13 ingredients)</div>
+                        <div class="meal-title">Cottage Pie</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient partial">mashed potatoes <em>(cooked)</em> <span class="match-info">(partial: potatoes chopped)</span></li><li class="ingredient correct">ground beef <em>(cooked)</em> <span class="match-info">(full: beef mince)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onions finely chopped)</span></li><li class="ingredient correct">carrots <em>(cooked)</em> <span class="match-info">(full: carrots chopped)</span></li><li class="ingredient correct">beef stock <em>(processed)</em> <span class="match-info">(full: beef stock)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">tomato paste <em>(processed)</em> <span class="match-info">(full: tomato purée)</span></li><li class="ingredient correct">Worcestershire sauce <em>(processed)</em> <span class="match-info">(full: Worcestershire sauce)</span></li><li class="ingredient correct">flour <em>(processed)</em> <span class="match-info">(full: plain flour)</span></li><li class="ingredient correct">milk <em>(processed)</em> <span class="match-info">(full: milk)</span></li><li class="ingredient partial">herbs <em>(processed)</em> <span class="match-info">(partial: thyme sprigs)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (16 ingredients)</div>
+                        <div class="meal-title">Cottage Pie</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">potato <em>(cooked)</em> <span class="match-info">(full: potatoes)</span></li><li class="ingredient correct">ground beef <em>(cooked)</em> <span class="match-info">(full: beef mince)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">milk <em>(cooked)</em> <span class="match-info">(full: milk)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onions finely chopped)</span></li><li class="ingredient correct">carrot <em>(cooked)</em> <span class="match-info">(full: carrots chopped)</span></li><li class="ingredient correct">celery <em>(cooked)</em> <span class="match-info">(full: celery sticks chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves finely chopped)</span></li><li class="ingredient correct">tomato paste <em>(cooked)</em> <span class="match-info">(full: tomato purée)</span></li><li class="ingredient correct">beef stock <em>(cooked)</em> <span class="match-info">(full: beef stock)</span></li><li class="ingredient correct">flour <em>(cooked)</em> <span class="match-info">(full: plain flour)</span></li><li class="ingredient correct">thyme <em>(cooked)</em> <span class="match-info">(full: thyme sprigs)</span></li><li class="ingredient correct">bay leaf <em>(cooked)</em> <span class="match-info">(full: bay leaves)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -780,7 +960,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_easy-chow-mein-for-kids</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 52%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 49%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 62%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 52%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 49%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 62%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 62%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 52%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -802,6 +982,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">thumb-size piece  fresh root ginger</li><li class="ingredient matched">2 garlic cloves <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp tomato ketchup</li><li class="ingredient matched">2 tbsp oyster sauce <span class="match-info">(matched by: oyster sauce)</span></li><li class="ingredient matched">2 tbsp reduced-salt soy sauce <span class="match-info">(matched by: soy sauce)</span></li><li class="ingredient matched">1 large red pepper <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient partial">5 spring onions <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">half a 400g bag beansprouts</li><li class="ingredient missed">1 large or 2 small  chicken breasts</li><li class="ingredient matched">3 nests medium egg noodles <span class="match-info">(matched by: egg noodles)</span></li><li class="ingredient partial">1 tbsp sunflower oil <span class="match-info">(matched by: vegetable oil)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">thumb-size piece  fresh root ginger</li><li class="ingredient matched">2 garlic cloves <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp tomato ketchup</li><li class="ingredient matched">2 tbsp oyster sauce <span class="match-info">(matched by: oyster sauce)</span></li><li class="ingredient matched">2 tbsp reduced-salt soy sauce <span class="match-info">(matched by: soy sauce)</span></li><li class="ingredient matched">1 large red pepper <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient partial">5 spring onions <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">half a 400g bag beansprouts</li><li class="ingredient missed">1 large or 2 small  chicken breasts</li><li class="ingredient matched">3 nests medium egg noodles <span class="match-info">(matched by: egg noodles)</span></li><li class="ingredient partial">1 tbsp sunflower oil <span class="match-info">(matched by: vegetable oil)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">thumb-size piece  fresh root ginger</li><li class="ingredient matched">2 garlic cloves <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp tomato ketchup</li><li class="ingredient missed">2 tbsp oyster sauce</li><li class="ingredient matched">2 tbsp reduced-salt soy sauce <span class="match-info">(matched by: soy sauce)</span></li><li class="ingredient matched">1 large red pepper <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient partial">5 spring onions <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">half a 400g bag beansprouts</li><li class="ingredient missed">1 large or 2 small  chicken breasts</li><li class="ingredient matched">3 nests medium egg noodles <span class="match-info">(matched by: egg noodles)</span></li><li class="ingredient partial">1 tbsp sunflower oil <span class="match-info">(matched by: vegetable oil)</span></li>
                     </ul>
 
                 </div>
@@ -831,6 +1019,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (12 ingredients)</div>
+                        <div class="meal-title">Asian Stir-Fried Noodles with Chicken and Vegetables</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">egg noodles <em>(cooked)</em> <span class="match-info">(full: nests medium egg noodles)</span></li><li class="ingredient correct">chicken breast <em>(cooked)</em> <span class="match-info">(full: chicken breasts)</span></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red pepper)</span></li><li class="ingredient wrong">green beans <em>(cooked)</em></li><li class="ingredient partial">yellow bell pepper <em>(cooked)</em> <span class="match-info">(partial: red pepper)</span></li><li class="ingredient correct">soy sauce <em>(processed)</em> <span class="match-info">(full: reduced-salt soy sauce)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves)</span></li><li class="ingredient correct">ginger <em>(cooked)</em> <span class="match-info">(full: fresh root ginger)</span></li><li class="ingredient partial">vegetable oil <em>(processed)</em> <span class="match-info">(partial: sunflower oil)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: spring onions)</span></li><li class="ingredient correct">oyster sauce <em>(processed)</em> <span class="match-info">(full: oyster sauce)</span></li><li class="ingredient wrong">sesame oil <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (13 ingredients)</div>
+                        <div class="meal-title">Asian Stir-Fried Noodles with Vegetables and Protein</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">egg noodles <em>(cooked)</em> <span class="match-info">(full: nests medium egg noodles)</span></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red pepper)</span></li><li class="ingredient partial">yellow bell pepper <em>(cooked)</em> <span class="match-info">(partial: red pepper)</span></li><li class="ingredient partial">green bell pepper <em>(cooked)</em> <span class="match-info">(partial: red pepper)</span></li><li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: chicken breasts)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: spring onions)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves)</span></li><li class="ingredient correct">soy sauce <em>(cooked)</em> <span class="match-info">(full: reduced-salt soy sauce)</span></li><li class="ingredient correct">ginger <em>(cooked)</em> <span class="match-info">(full: fresh root ginger)</span></li><li class="ingredient partial">vegetable oil <em>(cooked)</em> <span class="match-info">(partial: sunflower oil)</span></li><li class="ingredient wrong">sesame oil <em>(cooked)</em></li><li class="ingredient wrong">sugar <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -839,7 +1043,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_eggs-benedict</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 38%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 55%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 55%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 38%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 55%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 55%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 61%</span><span class="score-badge good" data-version="4"><span class="version-name">v4_atomic_:</span> 72%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -861,6 +1065,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient partial">3 tbsp white wine vinegar <span class="match-info">(matched by: white vinegar)</span></li><li class="ingredient partial">4 eggs <span class="match-info">(matched by: poached eggs)</span></li><li class="ingredient partial">2 toasting muffins <span class="match-info">(matched by: English muffin)</span></li><li class="ingredient partial">4 parma ham <span class="match-info">(matched by: Canadian bacon)</span></li><li class="ingredient matched">125g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient matched">2 egg yolks <span class="match-info">(matched by: egg yolks)</span></li><li class="ingredient missed">½ tsp white wine vinegar or tarragon vinegar</li><li class="ingredient matched">squeeze of lemon juice <span class="match-info">(matched by: lemon juice)</span></li><li class="ingredient missed">pinch of cayenne pepper</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient partial">3 tbsp white wine vinegar <span class="match-info">(matched by: white vinegar)</span></li><li class="ingredient matched">4 eggs <span class="match-info">(matched by: poached eggs)</span></li><li class="ingredient partial">2 toasting muffins <span class="match-info">(matched by: English muffin)</span></li><li class="ingredient partial">4 parma ham <span class="match-info">(matched by: Canadian bacon)</span></li><li class="ingredient matched">125g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient matched">2 egg yolks <span class="match-info">(matched by: egg yolks)</span></li><li class="ingredient missed">½ tsp white wine vinegar or tarragon vinegar</li><li class="ingredient matched">squeeze of lemon juice <span class="match-info">(matched by: lemon juice)</span></li><li class="ingredient missed">pinch of cayenne pepper</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient partial">3 tbsp white wine vinegar <span class="match-info">(matched by: white vinegar)</span></li><li class="ingredient matched">4 eggs <span class="match-info">(matched by: eggs)</span></li><li class="ingredient partial">2 toasting muffins <span class="match-info">(matched by: english muffin)</span></li><li class="ingredient partial">4 parma ham <span class="match-info">(matched by: canadian bacon)</span></li><li class="ingredient matched">125g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient matched">2 egg yolks <span class="match-info">(matched by: egg yolk)</span></li><li class="ingredient missed">½ tsp white wine vinegar or tarragon vinegar</li><li class="ingredient matched">squeeze of lemon juice <span class="match-info">(matched by: lemon juice)</span></li><li class="ingredient matched">pinch of cayenne pepper <span class="match-info">(matched by: cayenne pepper)</span></li>
                     </ul>
 
                 </div>
@@ -890,6 +1102,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (10 ingredients)</div>
+                        <div class="meal-title">Eggs Benedict</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">poached eggs <em>(cooked)</em> <span class="match-info">(full: eggs)</span></li><li class="ingredient partial">hollandaise sauce <em>(cooked)</em> <span class="match-info">(partial: eggs)</span></li><li class="ingredient partial">English muffin <em>(cooked)</em> <span class="match-info">(partial: toasting muffins)</span></li><li class="ingredient partial">Canadian bacon <em>(cooked)</em> <span class="match-info">(partial: parma ham)</span></li><li class="ingredient correct">butter <em>(processed)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">egg yolks <em>(cooked)</em> <span class="match-info">(full: egg yolks)</span></li><li class="ingredient correct">lemon juice <em>(raw)</em> <span class="match-info">(full: squeeze of lemon juice)</span></li><li class="ingredient partial">white vinegar <em>(raw)</em> <span class="match-info">(partial: white wine vinegar)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (9 ingredients)</div>
+                        <div class="meal-title">Eggs Benedict</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">eggs <em>(cooked)</em> <span class="match-info">(full: eggs)</span></li><li class="ingredient partial">english muffin <em>(cooked)</em> <span class="match-info">(partial: toasting muffins)</span></li><li class="ingredient partial">canadian bacon <em>(cooked)</em> <span class="match-info">(partial: parma ham)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">egg yolk <em>(cooked)</em> <span class="match-info">(full: egg yolks)</span></li><li class="ingredient correct">lemon juice <em>(raw)</em> <span class="match-info">(full: squeeze of lemon juice)</span></li><li class="ingredient partial">white vinegar <em>(raw)</em> <span class="match-info">(partial: white wine vinegar)</span></li><li class="ingredient wrong">salt <em>(raw)</em></li><li class="ingredient correct">cayenne pepper <em>(raw)</em> <span class="match-info">(full: of cayenne pepper)</span></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -898,7 +1126,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_gluten-free-banana-pancakes</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 40%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 43%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 56%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 40%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 43%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 56%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 56%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 59%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -920,6 +1148,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">1 large banana</li><li class="ingredient matched">2 medium eggs beaten <span class="match-info">(matched by: egg)</span></li><li class="ingredient matched">pinch of baking powder (gluten-free if coeliac) <span class="match-info">(matched by: baking powder)</span></li><li class="ingredient matched">splash of vanilla extract <span class="match-info">(matched by: vanilla extract)</span></li><li class="ingredient missed">1 tsp oil</li><li class="ingredient matched">25g pecans roughly chopped <span class="match-info">(matched by: pecans)</span></li><li class="ingredient matched">125g raspberries <span class="match-info">(matched by: raspberries)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">1 large banana</li><li class="ingredient matched">2 medium eggs beaten <span class="match-info">(matched by: egg)</span></li><li class="ingredient matched">pinch of baking powder (gluten-free if coeliac) <span class="match-info">(matched by: baking powder)</span></li><li class="ingredient matched">splash of vanilla extract <span class="match-info">(matched by: vanilla extract)</span></li><li class="ingredient missed">1 tsp oil</li><li class="ingredient matched">25g pecans roughly chopped <span class="match-info">(matched by: pecans)</span></li><li class="ingredient matched">125g raspberries <span class="match-info">(matched by: raspberries)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">1 large banana</li><li class="ingredient matched">2 medium eggs beaten <span class="match-info">(matched by: eggs)</span></li><li class="ingredient matched">pinch of baking powder (gluten-free if coeliac) <span class="match-info">(matched by: baking powder)</span></li><li class="ingredient matched">splash of vanilla extract <span class="match-info">(matched by: vanilla extract)</span></li><li class="ingredient missed">1 tsp oil</li><li class="ingredient matched">25g pecans roughly chopped <span class="match-info">(matched by: pecans)</span></li><li class="ingredient matched">125g raspberries <span class="match-info">(matched by: raspberries)</span></li>
                     </ul>
 
                 </div>
@@ -949,6 +1185,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (11 ingredients)</div>
+                        <div class="meal-title">Pancakes with Raspberries and Pecans</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">pancakes <em>(cooked)</em></li><li class="ingredient correct">raspberries <em>(raw)</em> <span class="match-info">(full: raspberries)</span></li><li class="ingredient correct">pecans <em>(raw)</em> <span class="match-info">(full: pecans roughly chopped)</span></li><li class="ingredient wrong">all-purpose flour <em>(processed)</em></li><li class="ingredient wrong">milk <em>(processed)</em></li><li class="ingredient correct">egg <em>(raw)</em> <span class="match-info">(full: eggs beaten)</span></li><li class="ingredient wrong">butter <em>(processed)</em></li><li class="ingredient correct">baking powder <em>(processed)</em> <span class="match-info">(full: of baking powder (gluten-free if coeliac))</span></li><li class="ingredient wrong">sugar <em>(processed)</em></li><li class="ingredient correct">vanilla extract <em>(processed)</em> <span class="match-info">(full: splash of vanilla extract)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (10 ingredients)</div>
+                        <div class="meal-title">Pancakes with raspberries and pecans</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">flour <em>(cooked)</em></li><li class="ingredient correct">eggs <em>(cooked)</em> <span class="match-info">(full: eggs beaten)</span></li><li class="ingredient wrong">milk <em>(cooked)</em></li><li class="ingredient correct">raspberries <em>(raw)</em> <span class="match-info">(full: raspberries)</span></li><li class="ingredient correct">pecans <em>(raw)</em> <span class="match-info">(full: pecans roughly chopped)</span></li><li class="ingredient wrong">butter <em>(cooked)</em></li><li class="ingredient wrong">sugar <em>(cooked)</em></li><li class="ingredient correct">baking powder <em>(cooked)</em> <span class="match-info">(full: of baking powder (gluten-free if coeliac))</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient correct">vanilla extract <em>(cooked)</em> <span class="match-info">(full: splash of vanilla extract)</span></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -957,7 +1209,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_greek-salad</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 53%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 54%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 57%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 53%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 54%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 57%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 57%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 51%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -979,6 +1231,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">4 large  vine tomatoes cut into irregular wedges <span class="match-info">(matched by: tomatoes)</span></li><li class="ingredient matched">1 cucumber peeled, deseeded, then roughly chopped <span class="match-info">(matched by: cucumber)</span></li><li class="ingredient matched">½ a red onion thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient missed">16 Kalamata olives</li><li class="ingredient matched">1 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient matched">85g feta cheese cut into chunks (barrel matured feta is the best) <span class="match-info">(matched by: feta cheese)</span></li><li class="ingredient matched">4 tbsp Greek extra virgin olive oil <span class="match-info">(matched by: olive oil)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">4 large  vine tomatoes cut into irregular wedges <span class="match-info">(matched by: tomatoes)</span></li><li class="ingredient matched">1 cucumber peeled, deseeded, then roughly chopped <span class="match-info">(matched by: cucumber)</span></li><li class="ingredient matched">½ a red onion thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient missed">16 Kalamata olives</li><li class="ingredient matched">1 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient matched">85g feta cheese cut into chunks (barrel matured feta is the best) <span class="match-info">(matched by: feta cheese)</span></li><li class="ingredient matched">4 tbsp Greek extra virgin olive oil <span class="match-info">(matched by: olive oil)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">4 large  vine tomatoes cut into irregular wedges <span class="match-info">(matched by: tomato)</span></li><li class="ingredient matched">1 cucumber peeled, deseeded, then roughly chopped <span class="match-info">(matched by: cucumber)</span></li><li class="ingredient matched">½ a red onion thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient missed">16 Kalamata olives</li><li class="ingredient matched">1 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient missed">85g feta cheese cut into chunks (barrel matured feta is the best)</li><li class="ingredient matched">4 tbsp Greek extra virgin olive oil <span class="match-info">(matched by: olive oil)</span></li>
                     </ul>
 
                 </div>
@@ -1008,6 +1268,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (14 ingredients)</div>
+                        <div class="meal-title">Greek Chicken Souvlaki with Salad and Tzatziki</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chicken breast <em>(cooked)</em></li><li class="ingredient wrong">pita bread <em>(cooked)</em></li><li class="ingredient wrong">Greek yogurt <em>(processed)</em></li><li class="ingredient correct">cucumber <em>(raw)</em> <span class="match-info">(full: cucumber peeled)</span></li><li class="ingredient correct">tomatoes <em>(raw)</em> <span class="match-info">(full: vine tomatoes cut into irregular wedges)</span></li><li class="ingredient correct">red onion <em>(raw)</em> <span class="match-info">(full: a red onion thinly sliced)</span></li><li class="ingredient correct">feta cheese <em>(processed)</em> <span class="match-info">(full: feta cheese cut into chunks (barrel matured feta is the best))</span></li><li class="ingredient wrong">dill <em>(raw)</em></li><li class="ingredient correct">olive oil <em>(raw)</em> <span class="match-info">(full: Greek extra virgin olive oil)</span></li><li class="ingredient wrong">lemon juice <em>(raw)</em></li><li class="ingredient wrong">garlic <em>(raw)</em></li><li class="ingredient correct">oregano <em>(processed)</em> <span class="match-info">(full: dried oregano)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (15 ingredients)</div>
+                        <div class="meal-title">Greek-style chicken souvlaki with salad and tzatziki</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chicken breast <em>(cooked)</em></li><li class="ingredient correct">tomato <em>(raw)</em> <span class="match-info">(full: vine tomatoes cut into irregular wedges)</span></li><li class="ingredient correct">cucumber <em>(raw)</em> <span class="match-info">(full: cucumber peeled)</span></li><li class="ingredient correct">red onion <em>(raw)</em> <span class="match-info">(full: a red onion thinly sliced)</span></li><li class="ingredient correct">feta cheese <em>(raw)</em> <span class="match-info">(full: feta cheese)</span></li><li class="ingredient wrong">pita bread <em>(cooked)</em></li><li class="ingredient wrong">Greek yogurt <em>(raw)</em></li><li class="ingredient wrong">dill <em>(raw)</em></li><li class="ingredient correct">olive oil <em>(raw)</em> <span class="match-info">(full: Greek extra virgin olive oil)</span></li><li class="ingredient wrong">lemon juice <em>(raw)</em></li><li class="ingredient wrong">garlic <em>(raw)</em></li><li class="ingredient correct">oregano <em>(cooked)</em> <span class="match-info">(full: dried oregano)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li><li class="ingredient wrong">red wine vinegar <em>(raw)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1016,7 +1292,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_healthy-chicken-katsu-curry</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 24%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 40%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 24%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 40%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 40%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 46%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1038,6 +1314,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">25g flaked almonds</li><li class="ingredient partial">1 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2 boneless, skinless chicken breasts (about 300g total)</li><li class="ingredient missed">lime wedges, for squeezing over</li><li class="ingredient partial">2 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 medium onion roughly chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 garlic cloves finely chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">thumb-sized piece ginger peeled and finely chopped</li><li class="ingredient matched">2 tsp medium curry powder <span class="match-info">(matched by: curry powder)</span></li><li class="ingredient missed">1 star anise</li><li class="ingredient missed">¼ tsp ground turmeric</li><li class="ingredient matched">1 tbsp plain wholemeal flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient partial">100g long-grain brown rice <span class="match-info">(matched by: white rice)</span></li><li class="ingredient missed">2 spring onions finely sliced (include the green part)</li><li class="ingredient matched">1 medium carrot peeled into long strips with a vegetable peeler <span class="match-info">(matched by: carrot)</span></li><li class="ingredient matched">⅓ cucumber peeled into long strips with a vegetable peeler <span class="match-info">(matched by: cucumber)</span></li><li class="ingredient missed">1 small red chilli finely chopped (deseeded if you don&#x27;t like it too hot)</li><li class="ingredient missed">juice ½ lime</li><li class="ingredient missed">small handful mint leaves</li><li class="ingredient missed">small handful coriander leaves</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">25g flaked almonds</li><li class="ingredient partial">1 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2 boneless, skinless chicken breasts (about 300g total)</li><li class="ingredient missed">lime wedges, for squeezing over</li><li class="ingredient partial">2 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 medium onion roughly chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 garlic cloves finely chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">thumb-sized piece ginger peeled and finely chopped</li><li class="ingredient matched">2 tsp medium curry powder <span class="match-info">(matched by: curry powder)</span></li><li class="ingredient missed">1 star anise</li><li class="ingredient missed">¼ tsp ground turmeric</li><li class="ingredient matched">1 tbsp plain wholemeal flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient partial">100g long-grain brown rice <span class="match-info">(matched by: white rice)</span></li><li class="ingredient missed">2 spring onions finely sliced (include the green part)</li><li class="ingredient matched">1 medium carrot peeled into long strips with a vegetable peeler <span class="match-info">(matched by: carrot)</span></li><li class="ingredient matched">⅓ cucumber peeled into long strips with a vegetable peeler <span class="match-info">(matched by: cucumber)</span></li><li class="ingredient missed">1 small red chilli finely chopped (deseeded if you don&#x27;t like it too hot)</li><li class="ingredient missed">juice ½ lime</li><li class="ingredient missed">small handful mint leaves</li><li class="ingredient missed">small handful coriander leaves</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">25g flaked almonds</li><li class="ingredient partial">1 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2 boneless, skinless chicken breasts (about 300g total)</li><li class="ingredient matched">lime wedges, for squeezing over <span class="match-info">(matched by: lime)</span></li><li class="ingredient partial">2 tsp cold-pressed rapeseed oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 medium onion roughly chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 garlic cloves finely chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">thumb-sized piece ginger peeled and finely chopped <span class="match-info">(matched by: ginger)</span></li><li class="ingredient matched">2 tsp medium curry powder <span class="match-info">(matched by: curry powder)</span></li><li class="ingredient missed">1 star anise</li><li class="ingredient matched">¼ tsp ground turmeric <span class="match-info">(matched by: turmeric)</span></li><li class="ingredient matched">1 tbsp plain wholemeal flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient partial">100g long-grain brown rice <span class="match-info">(matched by: jasmine rice)</span></li><li class="ingredient missed">2 spring onions finely sliced (include the green part)</li><li class="ingredient matched">1 medium carrot peeled into long strips with a vegetable peeler <span class="match-info">(matched by: carrot)</span></li><li class="ingredient missed">⅓ cucumber peeled into long strips with a vegetable peeler</li><li class="ingredient missed">1 small red chilli finely chopped (deseeded if you don&#x27;t like it too hot)</li><li class="ingredient missed">juice ½ lime</li><li class="ingredient missed">small handful mint leaves</li><li class="ingredient missed">small handful coriander leaves</li>
                     </ul>
 
                 </div>
@@ -1067,6 +1351,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (18 ingredients)</div>
+                        <div class="meal-title">Katsu Curry with Vegetables and Rice</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chicken breast <em>(cooked)</em></li><li class="ingredient wrong">panko breadcrumbs <em>(cooked)</em></li><li class="ingredient partial">curry sauce <em>(cooked)</em> <span class="match-info">(partial: curry powder)</span></li><li class="ingredient partial">white rice <em>(cooked)</em> <span class="match-info">(partial: long-grain brown rice)</span></li><li class="ingredient wrong">bell pepper <em>(raw)</em></li><li class="ingredient correct">carrot <em>(raw)</em> <span class="match-info">(full: carrot peeled into long strips with a vegetable peeler)</span></li><li class="ingredient wrong">snow peas <em>(raw)</em></li><li class="ingredient correct">cucumber <em>(raw)</em> <span class="match-info">(full: cucumber peeled into long strips with a vegetable peeler)</span></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: coriander leaves)</span></li><li class="ingredient wrong">sesame seeds <em>(raw)</em></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion roughly chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves finely chopped)</span></li><li class="ingredient correct">curry powder <em>(processed)</em> <span class="match-info">(full: curry powder)</span></li><li class="ingredient correct">flour <em>(processed)</em> <span class="match-info">(full: plain wholemeal flour)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient partial">vegetable oil <em>(processed)</em> <span class="match-info">(partial: cold-pressed rapeseed oil)</span></li><li class="ingredient wrong">soy sauce <em>(processed)</em></li><li class="ingredient wrong">butter <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (21 ingredients)</div>
+                        <div class="meal-title">Breaded Fish with Curry Sauce and Stir-Fried Vegetables over Rice</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">white fish fillet <em>(cooked)</em></li><li class="ingredient wrong">panko breadcrumbs <em>(cooked)</em></li><li class="ingredient partial">jasmine rice <em>(cooked)</em> <span class="match-info">(partial: long-grain brown rice)</span></li><li class="ingredient wrong">red bell pepper <em>(cooked)</em></li><li class="ingredient correct">carrot <em>(cooked)</em> <span class="match-info">(full: carrot peeled into long strips with a vegetable peeler)</span></li><li class="ingredient wrong">snap peas <em>(cooked)</em></li><li class="ingredient correct">cilantro <em>(raw)</em> <span class="match-info">(full: coriander leaves)</span></li><li class="ingredient correct">lime <em>(raw)</em> <span class="match-info">(full: lime wedges)</span></li><li class="ingredient wrong">coconut milk <em>(cooked)</em></li><li class="ingredient correct">curry powder <em>(cooked)</em> <span class="match-info">(full: curry powder)</span></li><li class="ingredient correct">turmeric <em>(cooked)</em> <span class="match-info">(full: ground turmeric)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient correct">flour <em>(cooked)</em> <span class="match-info">(full: plain wholemeal flour)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves finely chopped)</span></li><li class="ingredient correct">ginger <em>(cooked)</em> <span class="match-info">(full: thumb-sized piece ginger peeled and finely chopped)</span></li><li class="ingredient partial">vegetable oil <em>(cooked)</em> <span class="match-info">(partial: cold-pressed rapeseed oil)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion roughly chopped)</span></li><li class="ingredient wrong">fish sauce <em>(cooked)</em></li><li class="ingredient wrong">sugar <em>(cooked)</em></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1075,7 +1375,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_lasagne</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 31%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 33%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 33%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 31%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 33%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 33%</span><span class="score-badge poor" data-version="3"><span class="version-name">v3_recipe_:</span> 33%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 47%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1097,6 +1397,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">2 celery sticks, finely chopped</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 carrot (about 100g), finely chopped</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">140g cubetti di pancetta</li><li class="ingredient matched">500g beef mince (we used 10% fat) <span class="match-info">(matched by: ground beef)</span></li><li class="ingredient missed">500g pork mince or British veal mince</li><li class="ingredient missed">200ml milk</li><li class="ingredient missed">2 x 400g cans chopped tomatoes</li><li class="ingredient missed">2 bay leaves</li><li class="ingredient missed">1 rosemary sprig</li><li class="ingredient missed">2 thyme sprigs</li><li class="ingredient matched">2 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient missed">2 beef stock cubes</li><li class="ingredient missed">500ml red wine</li><li class="ingredient missed">about 400g dried pasta sheets</li><li class="ingredient matched">50g parmesan finely grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">1.5l milk</li><li class="ingredient missed">1 onion thickly sliced</li><li class="ingredient missed">3 bay leaves</li><li class="ingredient missed">3 cloves</li><li class="ingredient missed">100g butter</li><li class="ingredient missed">100g plain flour</li><li class="ingredient missed">good grating of  nutmeg</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">2 celery sticks, finely chopped</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 carrot (about 100g), finely chopped</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">140g cubetti di pancetta</li><li class="ingredient matched">500g beef mince (we used 10% fat) <span class="match-info">(matched by: ground beef)</span></li><li class="ingredient missed">500g pork mince or British veal mince</li><li class="ingredient missed">200ml milk</li><li class="ingredient missed">2 x 400g cans chopped tomatoes</li><li class="ingredient missed">2 bay leaves</li><li class="ingredient missed">1 rosemary sprig</li><li class="ingredient missed">2 thyme sprigs</li><li class="ingredient matched">2 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient missed">2 beef stock cubes</li><li class="ingredient missed">500ml red wine</li><li class="ingredient missed">about 400g dried pasta sheets</li><li class="ingredient matched">50g parmesan finely grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">1.5l milk</li><li class="ingredient missed">1 onion thickly sliced</li><li class="ingredient missed">3 bay leaves</li><li class="ingredient missed">3 cloves</li><li class="ingredient missed">100g butter</li><li class="ingredient missed">100g plain flour</li><li class="ingredient missed">good grating of  nutmeg</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">2 celery sticks, finely chopped</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 carrot (about 100g), finely chopped</li><li class="ingredient matched">3 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">140g cubetti di pancetta</li><li class="ingredient missed">500g beef mince (we used 10% fat)</li><li class="ingredient missed">500g pork mince or British veal mince</li><li class="ingredient matched">200ml milk <span class="match-info">(matched by: milk)</span></li><li class="ingredient missed">2 x 400g cans chopped tomatoes</li><li class="ingredient matched">2 bay leaves <span class="match-info">(matched by: bay leaf)</span></li><li class="ingredient missed">1 rosemary sprig</li><li class="ingredient missed">2 thyme sprigs</li><li class="ingredient matched">2 tsp dried oregano <span class="match-info">(matched by: oregano)</span></li><li class="ingredient missed">2 beef stock cubes</li><li class="ingredient missed">500ml red wine</li><li class="ingredient missed">about 400g dried pasta sheets</li><li class="ingredient matched">50g parmesan finely grated <span class="match-info">(matched by: parmesan)</span></li><li class="ingredient missed">1.5l milk</li><li class="ingredient missed">1 onion thickly sliced</li><li class="ingredient matched">3 bay leaves <span class="match-info">(matched by: bay leaf)</span></li><li class="ingredient missed">3 cloves</li><li class="ingredient matched">100g butter <span class="match-info">(matched by: butter)</span></li><li class="ingredient matched">100g plain flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient missed">good grating of  nutmeg</li>
                     </ul>
 
                 </div>
@@ -1126,6 +1434,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (15 ingredients)</div>
+                        <div class="meal-title">Lasagna</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">lasagna pasta sheets <em>(cooked)</em> <span class="match-info">(full: dried pasta sheets)</span></li><li class="ingredient correct">ground beef <em>(cooked)</em> <span class="match-info">(full: beef mince (we used 10% fat))</span></li><li class="ingredient wrong">mozzarella cheese <em>(cooked)</em></li><li class="ingredient correct">parmesan cheese <em>(cooked)</em> <span class="match-info">(full: parmesan finely grated)</span></li><li class="ingredient wrong">ricotta cheese <em>(cooked)</em></li><li class="ingredient partial">tomato sauce <em>(cooked)</em> <span class="match-info">(partial: chopped tomatoes)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient partial">tomato paste <em>(cooked)</em> <span class="match-info">(partial: chopped tomatoes)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient correct">oregano <em>(processed)</em> <span class="match-info">(full: dried oregano)</span></li><li class="ingredient wrong">basil <em>(processed)</em></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li><li class="ingredient wrong">egg <em>(raw)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (16 ingredients)</div>
+                        <div class="meal-title">Moussaka</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">eggplant <em>(cooked)</em></li><li class="ingredient wrong">ground lamb <em>(cooked)</em></li><li class="ingredient wrong">potato <em>(cooked)</em></li><li class="ingredient correct">milk <em>(cooked)</em> <span class="match-info">(full: milk)</span></li><li class="ingredient correct">butter <em>(cooked)</em> <span class="match-info">(full: butter)</span></li><li class="ingredient correct">flour <em>(cooked)</em> <span class="match-info">(full: plain flour)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient correct">parmesan <em>(cooked)</em> <span class="match-info">(full: parmesan finely grated)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">tomato <em>(cooked)</em> <span class="match-info">(full: chopped tomatoes)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">cinnamon <em>(cooked)</em></li><li class="ingredient correct">nutmeg <em>(cooked)</em> <span class="match-info">(full: nutmeg)</span></li><li class="ingredient correct">oregano <em>(cooked)</em> <span class="match-info">(full: dried oregano)</span></li><li class="ingredient correct">bay leaf <em>(cooked)</em> <span class="match-info">(full: bay leaves)</span></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1134,7 +1458,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_mushroom-stroganoff</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 48%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 55%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 44%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 48%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 55%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 55%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 59%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1156,6 +1480,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient missed">2 tsp olive oil</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 tbsp sweet paprika</li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">300g mixed mushrooms chopped <span class="match-info">(matched by: mushrooms)</span></li><li class="ingredient matched">150ml low-sodium beef or vegetable stock <span class="match-info">(matched by: beef stock)</span></li><li class="ingredient missed">1 tbsp Worcestershire sauce or vegetarian alternative</li><li class="ingredient matched">3 tbsp half-fat soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient matched">small bunch of parsley roughly chopped <span class="match-info">(matched by: parsley)</span></li><li class="ingredient missed">250g pouch cooked  wild rice</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient missed">2 tsp olive oil</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 tbsp sweet paprika</li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">300g mixed mushrooms chopped <span class="match-info">(matched by: mushrooms)</span></li><li class="ingredient matched">150ml low-sodium beef or vegetable stock <span class="match-info">(matched by: beef stock)</span></li><li class="ingredient missed">1 tbsp Worcestershire sauce or vegetarian alternative</li><li class="ingredient matched">3 tbsp half-fat soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient matched">small bunch of parsley roughly chopped <span class="match-info">(matched by: parsley)</span></li><li class="ingredient missed">250g pouch cooked  wild rice</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">2 tsp olive oil</li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">1 tbsp sweet paprika</li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">300g mixed mushrooms chopped <span class="match-info">(matched by: mushrooms)</span></li><li class="ingredient matched">150ml low-sodium beef or vegetable stock <span class="match-info">(matched by: beef)</span></li><li class="ingredient missed">1 tbsp Worcestershire sauce or vegetarian alternative</li><li class="ingredient matched">3 tbsp half-fat soured cream <span class="match-info">(matched by: sour cream)</span></li><li class="ingredient matched">small bunch of parsley roughly chopped <span class="match-info">(matched by: parsley)</span></li><li class="ingredient missed">250g pouch cooked  wild rice</li>
                     </ul>
 
                 </div>
@@ -1185,6 +1517,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (12 ingredients)</div>
+                        <div class="meal-title">Beef Stroganoff</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">beef strips <em>(cooked)</em></li><li class="ingredient correct">mushrooms <em>(cooked)</em> <span class="match-info">(full: mixed mushrooms chopped)</span></li><li class="ingredient correct">sour cream <em>(processed)</em> <span class="match-info">(full: half-fat soured cream)</span></li><li class="ingredient wrong">egg noodles <em>(cooked)</em></li><li class="ingredient correct">parsley <em>(raw)</em> <span class="match-info">(full: bunch of parsley roughly chopped)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient wrong">butter <em>(cooked)</em></li><li class="ingredient correct">beef stock <em>(processed)</em> <span class="match-info">(full: low-sodium beef or vegetable stock)</span></li><li class="ingredient wrong">Dijon mustard <em>(processed)</em></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient wrong">black pepper <em>(processed)</em></li><li class="ingredient wrong">salt <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (12 ingredients)</div>
+                        <div class="meal-title">Beef Stroganoff</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">beef <em>(cooked)</em> <span class="match-info">(full: low-sodium beef or vegetable stock)</span></li><li class="ingredient correct">mushrooms <em>(cooked)</em> <span class="match-info">(full: mixed mushrooms chopped)</span></li><li class="ingredient correct">sour cream <em>(processed)</em> <span class="match-info">(full: half-fat soured cream)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient wrong">butter <em>(cooked)</em></li><li class="ingredient wrong">flour <em>(cooked)</em></li><li class="ingredient correct">beef stock <em>(cooked)</em> <span class="match-info">(full: low-sodium beef or vegetable stock)</span></li><li class="ingredient wrong">mustard <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(raw)</em></li><li class="ingredient wrong">salt <em>(raw)</em></li><li class="ingredient correct">parsley <em>(raw)</em> <span class="match-info">(full: bunch of parsley roughly chopped)</span></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1193,7 +1541,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_pad-thai</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 65%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 83%</span><span class="score-badge good" data-version="2"><span class="version-name">v3_recipe_:</span> 85%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 65%</span><span class="score-badge good" data-version="1"><span class="version-name">v2_recall_:</span> 83%</span><span class="score-badge good" data-version="2"><span class="version-name">v3_recipe_:</span> 85%</span><span class="score-badge good" data-version="3"><span class="version-name">v3_recipe_:</span> 85%</span><span class="score-badge good" data-version="4"><span class="version-name">v4_atomic_:</span> 77%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1215,6 +1563,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">250g pack medium rice noodle <span class="match-info">(matched by: rice noodles)</span></li><li class="ingredient matched">2 tsp tamarind paste <span class="match-info">(matched by: tamarind paste)</span></li><li class="ingredient matched">3 tbsp fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient partial">2 tsp sugar <span class="match-info">(matched by: palm sugar)</span></li><li class="ingredient matched">1 garlic clove <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">3 spring onions <span class="match-info">(matched by: scallions)</span></li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 egg <span class="match-info">(matched by: eggs)</span></li><li class="ingredient partial">200g pack large cooked prawn <span class="match-info">(matched by: shrimp)</span></li><li class="ingredient matched">75g beansprout <span class="match-info">(matched by: bean sprouts)</span></li><li class="ingredient matched">handful salted peanut chopped to serve <span class="match-info">(matched by: peanuts)</span></li><li class="ingredient matched">lime wedges, to serve <span class="match-info">(matched by: lime)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">250g pack medium rice noodle <span class="match-info">(matched by: rice noodles)</span></li><li class="ingredient matched">2 tsp tamarind paste <span class="match-info">(matched by: tamarind paste)</span></li><li class="ingredient matched">3 tbsp fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient partial">2 tsp sugar <span class="match-info">(matched by: palm sugar)</span></li><li class="ingredient matched">1 garlic clove <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">3 spring onions <span class="match-info">(matched by: scallions)</span></li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 egg <span class="match-info">(matched by: eggs)</span></li><li class="ingredient partial">200g pack large cooked prawn <span class="match-info">(matched by: shrimp)</span></li><li class="ingredient matched">75g beansprout <span class="match-info">(matched by: bean sprouts)</span></li><li class="ingredient matched">handful salted peanut chopped to serve <span class="match-info">(matched by: peanuts)</span></li><li class="ingredient matched">lime wedges, to serve <span class="match-info">(matched by: lime)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">250g pack medium rice noodle <span class="match-info">(matched by: rice noodles)</span></li><li class="ingredient matched">2 tsp tamarind paste <span class="match-info">(matched by: tamarind paste)</span></li><li class="ingredient matched">3 tbsp fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient partial">2 tsp sugar <span class="match-info">(matched by: palm sugar)</span></li><li class="ingredient matched">1 garlic clove <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 spring onions</li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 egg <span class="match-info">(matched by: egg)</span></li><li class="ingredient partial">200g pack large cooked prawn <span class="match-info">(matched by: shrimp)</span></li><li class="ingredient matched">75g beansprout <span class="match-info">(matched by: bean sprouts)</span></li><li class="ingredient matched">handful salted peanut chopped to serve <span class="match-info">(matched by: peanuts)</span></li><li class="ingredient matched">lime wedges, to serve <span class="match-info">(matched by: lime)</span></li>
                     </ul>
 
                 </div>
@@ -1244,6 +1600,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (14 ingredients)</div>
+                        <div class="meal-title">Pad Thai</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">rice noodles <em>(cooked)</em> <span class="match-info">(full: pack medium rice noodle)</span></li><li class="ingredient partial">shrimp <em>(cooked)</em> <span class="match-info">(partial: pack large cooked prawn)</span></li><li class="ingredient correct">bean sprouts <em>(raw)</em> <span class="match-info">(full: beansprout)</span></li><li class="ingredient correct">lime <em>(raw)</em> <span class="match-info">(full: lime wedges)</span></li><li class="ingredient correct">scallions <em>(raw)</em> <span class="match-info">(full: spring onions)</span></li><li class="ingredient wrong">cilantro <em>(raw)</em></li><li class="ingredient correct">eggs <em>(cooked)</em> <span class="match-info">(full: egg)</span></li><li class="ingredient correct">fish sauce <em>(processed)</em> <span class="match-info">(full: fish sauce)</span></li><li class="ingredient correct">tamarind paste <em>(processed)</em> <span class="match-info">(full: tamarind paste)</span></li><li class="ingredient partial">palm sugar <em>(processed)</em> <span class="match-info">(partial: sugar)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic clove)</span></li><li class="ingredient correct">peanuts <em>(processed)</em> <span class="match-info">(full: salted peanut chopped to serve)</span></li><li class="ingredient correct">vegetable oil <em>(processed)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">dried shrimp <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (14 ingredients)</div>
+                        <div class="meal-title">Pad Thai</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">rice noodles <em>(cooked)</em> <span class="match-info">(full: pack medium rice noodle)</span></li><li class="ingredient partial">shrimp <em>(cooked)</em> <span class="match-info">(partial: pack large cooked prawn)</span></li><li class="ingredient correct">lime <em>(raw)</em> <span class="match-info">(full: lime wedges)</span></li><li class="ingredient correct">bean sprouts <em>(raw)</em> <span class="match-info">(full: beansprout)</span></li><li class="ingredient wrong">fresh herbs <em>(raw)</em></li><li class="ingredient correct">egg <em>(cooked)</em> <span class="match-info">(full: egg)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic clove)</span></li><li class="ingredient correct">peanuts <em>(raw)</em> <span class="match-info">(full: salted peanut chopped to serve)</span></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient correct">fish sauce <em>(processed)</em> <span class="match-info">(full: fish sauce)</span></li><li class="ingredient correct">tamarind paste <em>(processed)</em> <span class="match-info">(full: tamarind paste)</span></li><li class="ingredient partial">palm sugar <em>(processed)</em> <span class="match-info">(partial: sugar)</span></li><li class="ingredient wrong">shallot <em>(cooked)</em></li><li class="ingredient wrong">dried shrimp <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1252,7 +1624,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_pizza-margherita-in-4-easy-steps</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 41%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 57%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 68%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 41%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 57%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 68%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 62%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 58%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1274,6 +1646,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient partial">300g strong bread flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">1 tsp instant yeast (from a sachet or a tub) <span class="match-info">(matched by: yeast)</span></li><li class="ingredient matched">1 tsp salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient matched">1 tbsp olive oil plus extra for drizzling <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient partial">100ml passata <span class="match-info">(matched by: tomato sauce)</span></li><li class="ingredient matched">handful fresh basil or 1 tsp dried <span class="match-info">(matched by: fresh basil)</span></li><li class="ingredient matched">1 garlic clove crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">125g ball mozzarella sliced <span class="match-info">(matched by: mozzarella cheese)</span></li><li class="ingredient missed">handful grated or shaved parmesan (or vegetarian alternative)</li><li class="ingredient missed">handful of cherry tomatoes halved</li><li class="ingredient missed">handful of basil leaves (optional)</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient partial">300g strong bread flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient matched">1 tsp instant yeast (from a sachet or a tub) <span class="match-info">(matched by: yeast)</span></li><li class="ingredient matched">1 tsp salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient missed">1 tbsp olive oil plus extra for drizzling</li><li class="ingredient partial">100ml passata <span class="match-info">(matched by: tomato sauce)</span></li><li class="ingredient matched">handful fresh basil or 1 tsp dried <span class="match-info">(matched by: fresh basil)</span></li><li class="ingredient matched">1 garlic clove crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">125g ball mozzarella sliced <span class="match-info">(matched by: mozzarella cheese)</span></li><li class="ingredient missed">handful grated or shaved parmesan (or vegetarian alternative)</li><li class="ingredient missed">handful of cherry tomatoes halved</li><li class="ingredient missed">handful of basil leaves (optional)</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient partial">300g strong bread flour <span class="match-info">(matched by: flour)</span></li><li class="ingredient missed">1 tsp instant yeast (from a sachet or a tub)</li><li class="ingredient matched">1 tsp salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient matched">1 tbsp olive oil plus extra for drizzling <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient partial">100ml passata <span class="match-info">(matched by: tomato sauce)</span></li><li class="ingredient matched">handful fresh basil or 1 tsp dried <span class="match-info">(matched by: fresh basil)</span></li><li class="ingredient matched">1 garlic clove crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">125g ball mozzarella sliced <span class="match-info">(matched by: mozzarella cheese)</span></li><li class="ingredient missed">handful grated or shaved parmesan (or vegetarian alternative)</li><li class="ingredient missed">handful of cherry tomatoes halved</li><li class="ingredient missed">handful of basil leaves (optional)</li>
                     </ul>
 
                 </div>
@@ -1303,6 +1683,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (11 ingredients)</div>
+                        <div class="meal-title">Margherita Pizza</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">pizza dough <em>(cooked)</em></li><li class="ingredient correct">mozzarella cheese <em>(cooked)</em> <span class="match-info">(full: ball mozzarella sliced)</span></li><li class="ingredient partial">tomato sauce <em>(cooked)</em> <span class="match-info">(partial: passata)</span></li><li class="ingredient correct">fresh basil <em>(raw)</em> <span class="match-info">(full: fresh basil or 1 tsp dried)</span></li><li class="ingredient correct">cherry tomatoes <em>(cooked)</em> <span class="match-info">(full: cherry tomatoes)</span></li><li class="ingredient correct">olive oil <em>(processed)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient partial">flour <em>(processed)</em> <span class="match-info">(partial: strong bread flour)</span></li><li class="ingredient correct">yeast <em>(processed)</em> <span class="match-info">(full: instant yeast (from a sachet or a tub))</span></li><li class="ingredient correct">salt <em>(processed)</em> <span class="match-info">(full: salt)</span></li><li class="ingredient correct">garlic <em>(processed)</em> <span class="match-info">(full: garlic clove crushed)</span></li><li class="ingredient wrong">oregano <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (12 ingredients)</div>
+                        <div class="meal-title">Margherita Pizza</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">pizza dough <em>(cooked)</em></li><li class="ingredient correct">mozzarella cheese <em>(cooked)</em> <span class="match-info">(full: ball mozzarella sliced)</span></li><li class="ingredient correct">fresh basil <em>(raw)</em> <span class="match-info">(full: fresh basil or 1 tsp dried)</span></li><li class="ingredient partial">tomato sauce <em>(cooked)</em> <span class="match-info">(partial: passata)</span></li><li class="ingredient correct">olive oil <em>(raw)</em> <span class="match-info">(full: olive oil plus extra for drizzling)</span></li><li class="ingredient partial">flour <em>(raw)</em> <span class="match-info">(partial: strong bread flour)</span></li><li class="ingredient wrong">water <em>(raw)</em></li><li class="ingredient correct">yeast <em>(raw)</em> <span class="match-info">(full: instant yeast)</span></li><li class="ingredient correct">salt <em>(raw)</em> <span class="match-info">(full: salt)</span></li><li class="ingredient partial">tomato <em>(cooked)</em> <span class="match-info">(partial: cherry tomatoes)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic clove crushed)</span></li><li class="ingredient wrong">sugar <em>(raw)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1311,7 +1707,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_ratatouille</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 68%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 62%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 50%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 68%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 62%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 50%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 55%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 63%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1333,6 +1729,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">2 large aubergines <span class="match-info">(matched by: eggplant)</span></li><li class="ingredient missed">4 small courgettes</li><li class="ingredient matched">2 red or yellow peppers <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">4 large ripe tomatoes</li><li class="ingredient matched">5 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">supermarket pack or small bunch basil</li><li class="ingredient partial">1 medium onion peeled and thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient matched">3 garlic cloves peeled and crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 tbsp red wine vinegar</li><li class="ingredient missed">1 tsp sugar (any kind)</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">2 large aubergines <span class="match-info">(matched by: eggplant)</span></li><li class="ingredient missed">4 small courgettes</li><li class="ingredient matched">2 red or yellow peppers <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">4 large ripe tomatoes</li><li class="ingredient matched">5 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient missed">supermarket pack or small bunch basil</li><li class="ingredient matched">1 medium onion peeled and thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient matched">3 garlic cloves peeled and crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 tbsp red wine vinegar</li><li class="ingredient missed">1 tsp sugar (any kind)</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">2 large aubergines <span class="match-info">(matched by: eggplant)</span></li><li class="ingredient missed">4 small courgettes</li><li class="ingredient matched">2 red or yellow peppers <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">4 large ripe tomatoes</li><li class="ingredient matched">5 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">supermarket pack or small bunch basil <span class="match-info">(matched by: fresh basil)</span></li><li class="ingredient matched">1 medium onion peeled and thinly sliced <span class="match-info">(matched by: red onion)</span></li><li class="ingredient matched">3 garlic cloves peeled and crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 tbsp red wine vinegar</li><li class="ingredient missed">1 tsp sugar (any kind)</li>
                     </ul>
 
                 </div>
@@ -1362,6 +1766,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (10 ingredients)</div>
+                        <div class="meal-title">Mediterranean Roasted Vegetables</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">zucchini <em>(cooked)</em></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red or yellow peppers)</span></li><li class="ingredient correct">eggplant <em>(cooked)</em> <span class="match-info">(full: aubergines)</span></li><li class="ingredient correct">red onion <em>(cooked)</em> <span class="match-info">(full: onion peeled and thinly sliced)</span></li><li class="ingredient correct">fresh basil <em>(raw)</em> <span class="match-info">(full: basil)</span></li><li class="ingredient correct">olive oil <em>(processed)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves peeled and crushed)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li><li class="ingredient wrong">balsamic vinegar <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (9 ingredients)</div>
+                        <div class="meal-title">Mediterranean Roasted Vegetables</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">zucchini <em>(cooked)</em></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red or yellow peppers)</span></li><li class="ingredient correct">eggplant <em>(cooked)</em> <span class="match-info">(full: aubergines)</span></li><li class="ingredient correct">red onion <em>(cooked)</em> <span class="match-info">(full: onion peeled and thinly sliced)</span></li><li class="ingredient correct">fresh basil <em>(raw)</em> <span class="match-info">(full: supermarket pack or small bunch basil)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves peeled and crushed)</span></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1370,7 +1790,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_spinach-ricotta-cannelloni</span>
                 <div class="score-badges">
-                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 49%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 36%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 36%</span>
+                    <span class="score-badge medium" data-version="0"><span class="version-name">Run 1:</span> 49%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 36%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 36%</span><span class="score-badge poor" data-version="3"><span class="version-name">v3_recipe_:</span> 36%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 42%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1392,6 +1812,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">8 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp caster sugar</li><li class="ingredient missed">2 tbsp red wine vinegar</li><li class="ingredient missed">4 x 400g cans chopped tomatoes</li><li class="ingredient missed">small bunch basil leaves</li><li class="ingredient missed">2 x 250g tubs mascarpone</li><li class="ingredient missed">3 tbsp milk</li><li class="ingredient matched">85g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">2 x 125g balls mozzarella sliced</li><li class="ingredient matched">1kg spinach <span class="match-info">(matched by: spinach)</span></li><li class="ingredient matched">100g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">3 x 250g tubs ricotta</li><li class="ingredient missed">large pinch grated nutmeg</li><li class="ingredient missed">400g dried cannelloni</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">8 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp caster sugar</li><li class="ingredient missed">2 tbsp red wine vinegar</li><li class="ingredient missed">4 x 400g cans chopped tomatoes</li><li class="ingredient missed">small bunch basil leaves</li><li class="ingredient missed">2 x 250g tubs mascarpone</li><li class="ingredient missed">3 tbsp milk</li><li class="ingredient matched">85g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">2 x 125g balls mozzarella sliced</li><li class="ingredient matched">1kg spinach <span class="match-info">(matched by: spinach)</span></li><li class="ingredient matched">100g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">3 x 250g tubs ricotta</li><li class="ingredient missed">large pinch grated nutmeg</li><li class="ingredient missed">400g dried cannelloni</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">3 tbsp olive oil <span class="match-info">(matched by: olive oil)</span></li><li class="ingredient matched">8 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">3 tbsp caster sugar</li><li class="ingredient missed">2 tbsp red wine vinegar</li><li class="ingredient missed">4 x 400g cans chopped tomatoes</li><li class="ingredient matched">small bunch basil leaves <span class="match-info">(matched by: basil)</span></li><li class="ingredient missed">2 x 250g tubs mascarpone</li><li class="ingredient missed">3 tbsp milk</li><li class="ingredient matched">85g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">2 x 125g balls mozzarella sliced</li><li class="ingredient matched">1kg spinach <span class="match-info">(matched by: spinach)</span></li><li class="ingredient matched">100g parmesan (or vegetarian alternative), grated <span class="match-info">(matched by: parmesan cheese)</span></li><li class="ingredient missed">3 x 250g tubs ricotta</li><li class="ingredient missed">large pinch grated nutmeg</li><li class="ingredient missed">400g dried cannelloni</li>
                     </ul>
 
                 </div>
@@ -1421,6 +1849,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (13 ingredients)</div>
+                        <div class="meal-title">Vegetable Lasagna</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">lasagna pasta sheets <em>(cooked)</em></li><li class="ingredient correct">mozzarella cheese <em>(cooked)</em> <span class="match-info">(full: mozzarella sliced)</span></li><li class="ingredient correct">spinach <em>(cooked)</em> <span class="match-info">(full: spinach)</span></li><li class="ingredient correct">ricotta cheese <em>(processed)</em> <span class="match-info">(full: ricotta)</span></li><li class="ingredient partial">tomato sauce <em>(cooked)</em> <span class="match-info">(partial: chopped tomatoes)</span></li><li class="ingredient correct">parmesan cheese <em>(processed)</em> <span class="match-info">(full: parmesan (or vegetarian alternative))</span></li><li class="ingredient wrong">onion <em>(cooked)</em></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">olive oil <em>(processed)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient wrong">salt <em>(processed)</em></li><li class="ingredient wrong">black pepper <em>(processed)</em></li><li class="ingredient partial">italian herbs <em>(processed)</em> <span class="match-info">(partial: basil leaves)</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (14 ingredients)</div>
+                        <div class="meal-title">Vegetable Lasagna</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">lasagna pasta <em>(cooked)</em></li><li class="ingredient correct">mozzarella cheese <em>(cooked)</em> <span class="match-info">(full: mozzarella sliced)</span></li><li class="ingredient correct">spinach <em>(cooked)</em> <span class="match-info">(full: spinach)</span></li><li class="ingredient correct">ricotta cheese <em>(cooked)</em> <span class="match-info">(full: ricotta)</span></li><li class="ingredient correct">tomato <em>(cooked)</em> <span class="match-info">(full: chopped tomatoes)</span></li><li class="ingredient correct">parmesan cheese <em>(cooked)</em> <span class="match-info">(full: parmesan (or vegetarian alternative))</span></li><li class="ingredient wrong">onion <em>(cooked)</em></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient correct">olive oil <em>(cooked)</em> <span class="match-info">(full: olive oil)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient correct">basil <em>(cooked)</em> <span class="match-info">(full: bunch basil leaves)</span></li><li class="ingredient wrong">oregano <em>(cooked)</em></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1429,7 +1873,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_sweet-sour-chicken</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 27%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 36%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 50%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 27%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 36%</span><span class="score-badge medium" data-version="2"><span class="version-name">v3_recipe_:</span> 50%</span><span class="score-badge medium" data-version="3"><span class="version-name">v3_recipe_:</span> 50%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 47%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1451,6 +1895,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">sunflower or vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">100ml soda water chilled</li><li class="ingredient missed">140g self-raising flour</li><li class="ingredient matched">25g cornflour <span class="match-info">(matched by: cornstarch)</span></li><li class="ingredient missed">4 skinless, boneless chicken breasts cut into chunks</li><li class="ingredient matched">spring onions finely shredded, to serve <span class="match-info">(matched by: scallions)</span></li><li class="ingredient matched">1 red pepper deseeded and chopped into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">3 red chillies 1 cut into chunks, 2 halved and deseeded</li><li class="ingredient matched">425g can pineapple chunks, drained and juice reserved <span class="match-info">(matched by: pineapple)</span></li><li class="ingredient missed">4 star anise</li><li class="ingredient missed">50g tamarind paste</li><li class="ingredient matched">100g caster sugar <span class="match-info">(matched by: sugar)</span></li><li class="ingredient matched">100ml rice wine vinegar or Chinese vinegar <span class="match-info">(matched by: rice vinegar)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">sunflower or vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">100ml soda water chilled</li><li class="ingredient missed">140g self-raising flour</li><li class="ingredient matched">25g cornflour <span class="match-info">(matched by: cornstarch)</span></li><li class="ingredient missed">4 skinless, boneless chicken breasts cut into chunks</li><li class="ingredient matched">spring onions finely shredded, to serve <span class="match-info">(matched by: scallions)</span></li><li class="ingredient matched">1 red pepper deseeded and chopped into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">3 red chillies 1 cut into chunks, 2 halved and deseeded</li><li class="ingredient matched">425g can pineapple chunks, drained and juice reserved <span class="match-info">(matched by: pineapple)</span></li><li class="ingredient missed">4 star anise</li><li class="ingredient missed">50g tamarind paste</li><li class="ingredient matched">100g caster sugar <span class="match-info">(matched by: sugar)</span></li><li class="ingredient matched">100ml rice wine vinegar or Chinese vinegar <span class="match-info">(matched by: rice vinegar)</span></li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">sunflower or vegetable oil for frying <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">100ml soda water chilled</li><li class="ingredient missed">140g self-raising flour</li><li class="ingredient matched">25g cornflour <span class="match-info">(matched by: cornstarch)</span></li><li class="ingredient missed">4 skinless, boneless chicken breasts cut into chunks</li><li class="ingredient matched">spring onions finely shredded, to serve <span class="match-info">(matched by: scallion)</span></li><li class="ingredient matched">1 red pepper deseeded and chopped into chunks <span class="match-info">(matched by: red bell pepper)</span></li><li class="ingredient missed">3 red chillies 1 cut into chunks, 2 halved and deseeded</li><li class="ingredient matched">425g can pineapple chunks, drained and juice reserved <span class="match-info">(matched by: pineapple)</span></li><li class="ingredient missed">4 star anise</li><li class="ingredient missed">50g tamarind paste</li><li class="ingredient matched">100g caster sugar <span class="match-info">(matched by: sugar)</span></li><li class="ingredient matched">100ml rice wine vinegar or Chinese vinegar <span class="match-info">(matched by: rice vinegar)</span></li>
                     </ul>
 
                 </div>
@@ -1480,6 +1932,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (16 ingredients)</div>
+                        <div class="meal-title">Sweet and Sour Chicken with Rice</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chicken <em>(cooked)</em></li><li class="ingredient wrong">white rice <em>(cooked)</em></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red pepper deseeded and chopped into chunks)</span></li><li class="ingredient wrong">yellow bell pepper <em>(cooked)</em></li><li class="ingredient correct">pineapple <em>(cooked)</em> <span class="match-info">(full: can pineapple chunks)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: spring onions)</span></li><li class="ingredient correct">scallions <em>(raw)</em> <span class="match-info">(full: spring onions finely shredded)</span></li><li class="ingredient wrong">sweet and sour sauce <em>(processed)</em></li><li class="ingredient correct">cornstarch <em>(processed)</em> <span class="match-info">(full: cornflour)</span></li><li class="ingredient correct">vegetable oil <em>(processed)</em> <span class="match-info">(full: sunflower or vegetable oil for frying)</span></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient wrong">soy sauce <em>(processed)</em></li><li class="ingredient correct">rice vinegar <em>(processed)</em> <span class="match-info">(full: rice wine vinegar or Chinese vinegar)</span></li><li class="ingredient correct">sugar <em>(processed)</em> <span class="match-info">(full: caster sugar)</span></li><li class="ingredient wrong">ketchup <em>(processed)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (18 ingredients)</div>
+                        <div class="meal-title">Sweet and Sour Chicken with Rice</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">white rice <em>(cooked)</em></li><li class="ingredient wrong">chicken <em>(cooked)</em></li><li class="ingredient correct">red bell pepper <em>(cooked)</em> <span class="match-info">(full: red pepper deseeded and chopped into chunks)</span></li><li class="ingredient wrong">yellow bell pepper <em>(cooked)</em></li><li class="ingredient correct">pineapple <em>(cooked)</em> <span class="match-info">(full: can pineapple chunks)</span></li><li class="ingredient partial">onion <em>(cooked)</em> <span class="match-info">(partial: spring onions)</span></li><li class="ingredient correct">scallion <em>(raw)</em> <span class="match-info">(full: spring onions finely shredded)</span></li><li class="ingredient wrong">egg <em>(cooked)</em></li><li class="ingredient correct">cornstarch <em>(cooked)</em> <span class="match-info">(full: cornflour)</span></li><li class="ingredient correct">sugar <em>(cooked)</em> <span class="match-info">(full: caster sugar)</span></li><li class="ingredient correct">rice vinegar <em>(cooked)</em> <span class="match-info">(full: rice wine vinegar or Chinese vinegar)</span></li><li class="ingredient wrong">soy sauce <em>(cooked)</em></li><li class="ingredient wrong">ketchup <em>(cooked)</em></li><li class="ingredient wrong">garlic <em>(cooked)</em></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: sunflower or vegetable oil for frying)</span></li><li class="ingredient wrong">salt <em>(cooked)</em></li><li class="ingredient wrong">black pepper <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1488,7 +1956,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_thai-green-curry</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 29%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 42%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 35%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 29%</span><span class="score-badge medium" data-version="1"><span class="version-name">v2_recall_:</span> 42%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 35%</span><span class="score-badge poor" data-version="3"><span class="version-name">v3_recipe_:</span> 35%</span><span class="score-badge medium" data-version="4"><span class="version-name">v4_atomic_:</span> 54%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1510,6 +1978,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">1 tbsp  vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2-3 tbsp  green curry paste (see below)</li><li class="ingredient matched">200g  chicken thighs skinned, de-boned and cut into chunks <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">400g can  coconut milk</li><li class="ingredient missed">2 Thai aubergines</li><li class="ingredient missed">50g  pea aubergines</li><li class="ingredient matched">2 baby corn sliced at an angle <span class="match-info">(matched by: baby corn)</span></li><li class="ingredient missed">50g  sugar snap peas</li><li class="ingredient matched">2-4 tbsp  fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient missed">2-4 tsp sugar or  palm sugar</li><li class="ingredient missed">2 lime leaves stems removed</li><li class="ingredient missed">¼ bunch of Thai basil</li><li class="ingredient matched">1 red chilli sliced <span class="match-info">(matched by: red chili)</span></li><li class="ingredient missed">2 garlic cloves finely chopped</li><li class="ingredient missed">8 green chillies finely sliced</li><li class="ingredient missed">5g fresh  turmeric root</li><li class="ingredient missed">1 lemongrass stalk bruised and finely chopped</li><li class="ingredient missed">25g  galangal finely chopped</li><li class="ingredient missed">2 stalks  coriander root finely chopped</li><li class="ingredient missed">2 lime leaves roughly chopped</li><li class="ingredient missed">4 Thai shallots peeled and thinly sliced</li><li class="ingredient missed">10g  ginger finely chopped (optional)</li><li class="ingredient missed">½ tsp  shrimp paste</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">1 tbsp  vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2-3 tbsp  green curry paste (see below)</li><li class="ingredient matched">200g  chicken thighs skinned, de-boned and cut into chunks <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">400g can  coconut milk</li><li class="ingredient missed">2 Thai aubergines</li><li class="ingredient missed">50g  pea aubergines</li><li class="ingredient matched">2 baby corn sliced at an angle <span class="match-info">(matched by: baby corn)</span></li><li class="ingredient missed">50g  sugar snap peas</li><li class="ingredient matched">2-4 tbsp  fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient missed">2-4 tsp sugar or  palm sugar</li><li class="ingredient missed">2 lime leaves stems removed</li><li class="ingredient missed">¼ bunch of Thai basil</li><li class="ingredient matched">1 red chilli sliced <span class="match-info">(matched by: red chili)</span></li><li class="ingredient missed">2 garlic cloves finely chopped</li><li class="ingredient missed">8 green chillies finely sliced</li><li class="ingredient missed">5g fresh  turmeric root</li><li class="ingredient missed">1 lemongrass stalk bruised and finely chopped</li><li class="ingredient missed">25g  galangal finely chopped</li><li class="ingredient missed">2 stalks  coriander root finely chopped</li><li class="ingredient missed">2 lime leaves roughly chopped</li><li class="ingredient missed">4 Thai shallots peeled and thinly sliced</li><li class="ingredient missed">10g  ginger finely chopped (optional)</li><li class="ingredient missed">½ tsp  shrimp paste</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient missed">1 tbsp  vegetable oil</li><li class="ingredient missed">2-3 tbsp  green curry paste (see below)</li><li class="ingredient matched">200g  chicken thighs skinned, de-boned and cut into chunks <span class="match-info">(matched by: chicken)</span></li><li class="ingredient missed">400g can  coconut milk</li><li class="ingredient missed">2 Thai aubergines</li><li class="ingredient missed">50g  pea aubergines</li><li class="ingredient matched">2 baby corn sliced at an angle <span class="match-info">(matched by: baby corn)</span></li><li class="ingredient missed">50g  sugar snap peas</li><li class="ingredient matched">2-4 tbsp  fish sauce <span class="match-info">(matched by: fish sauce)</span></li><li class="ingredient missed">2-4 tsp sugar or  palm sugar</li><li class="ingredient missed">2 lime leaves stems removed</li><li class="ingredient missed">¼ bunch of Thai basil</li><li class="ingredient matched">1 red chilli sliced <span class="match-info">(matched by: red chili)</span></li><li class="ingredient matched">2 garlic cloves finely chopped <span class="match-info">(matched by: garlic)</span></li><li class="ingredient matched">8 green chillies finely sliced <span class="match-info">(matched by: green chili)</span></li><li class="ingredient missed">5g fresh  turmeric root</li><li class="ingredient matched">1 lemongrass stalk bruised and finely chopped <span class="match-info">(matched by: lemongrass)</span></li><li class="ingredient matched">25g  galangal finely chopped <span class="match-info">(matched by: galangal)</span></li><li class="ingredient missed">2 stalks  coriander root finely chopped</li><li class="ingredient missed">2 lime leaves roughly chopped</li><li class="ingredient matched">4 Thai shallots peeled and thinly sliced <span class="match-info">(matched by: shallot)</span></li><li class="ingredient missed">10g  ginger finely chopped (optional)</li><li class="ingredient missed">½ tsp  shrimp paste</li>
                     </ul>
 
                 </div>
@@ -1539,6 +2015,22 @@
                         </ul>
                     </div>
 
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (11 ingredients)</div>
+                        <div class="meal-title">Thai Green Curry</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: chicken thighs skinned)</span></li><li class="ingredient correct">Thai basil <em>(raw)</em> <span class="match-info">(full: Thai basil)</span></li><li class="ingredient correct">red chili <em>(raw)</em> <span class="match-info">(full: red chilli sliced)</span></li><li class="ingredient correct">baby corn <em>(cooked)</em> <span class="match-info">(full: baby corn sliced at an angle)</span></li><li class="ingredient wrong">mushrooms <em>(cooked)</em></li><li class="ingredient correct">coconut milk <em>(processed)</em> <span class="match-info">(full: can coconut milk)</span></li><li class="ingredient correct">green curry paste <em>(processed)</em> <span class="match-info">(full: green curry paste)</span></li><li class="ingredient correct">fish sauce <em>(processed)</em> <span class="match-info">(full: fish sauce)</span></li><li class="ingredient correct">palm sugar <em>(processed)</em> <span class="match-info">(full: sugar or palm sugar)</span></li><li class="ingredient correct">vegetable oil <em>(processed)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient correct">kaffir lime leaves <em>(raw)</em> <span class="match-info">(full: lime leaves)</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (16 ingredients)</div>
+                        <div class="meal-title">Thai Green Curry</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient correct">chicken <em>(cooked)</em> <span class="match-info">(full: chicken thighs skinned)</span></li><li class="ingredient correct">coconut milk <em>(cooked)</em> <span class="match-info">(full: can coconut milk)</span></li><li class="ingredient correct">Thai basil <em>(raw)</em> <span class="match-info">(full: Thai basil)</span></li><li class="ingredient correct">red chili <em>(raw)</em> <span class="match-info">(full: red chilli sliced)</span></li><li class="ingredient correct">baby corn <em>(cooked)</em> <span class="match-info">(full: baby corn sliced at an angle)</span></li><li class="ingredient wrong">mushroom <em>(cooked)</em></li><li class="ingredient correct">green chili <em>(cooked)</em> <span class="match-info">(full: green chillies finely sliced)</span></li><li class="ingredient correct">lemongrass <em>(cooked)</em> <span class="match-info">(full: lemongrass stalk bruised and finely chopped)</span></li><li class="ingredient correct">galangal <em>(cooked)</em> <span class="match-info">(full: galangal finely chopped)</span></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves finely chopped)</span></li><li class="ingredient correct">shallot <em>(cooked)</em> <span class="match-info">(full: Thai shallots peeled and thinly sliced)</span></li><li class="ingredient correct">fish sauce <em>(cooked)</em> <span class="match-info">(full: fish sauce)</span></li><li class="ingredient correct">lime leaves <em>(cooked)</em> <span class="match-info">(full: lime leaves)</span></li><li class="ingredient correct">coriander root <em>(cooked)</em> <span class="match-info">(full: coriander root)</span></li><li class="ingredient correct">sugar <em>(cooked)</em> <span class="match-info">(full: sugar or palm sugar)</span></li><li class="ingredient wrong">cumin <em>(cooked)</em></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1547,7 +2039,7 @@
             <div class="test-case-header">
                 <span class="test-case-id">bbc_vegetable-samosas</span>
                 <div class="score-badges">
-                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 18%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 28%</span>
+                    <span class="score-badge poor" data-version="0"><span class="version-name">Run 1:</span> 18%</span><span class="score-badge poor" data-version="1"><span class="version-name">v2_recall_:</span> 27%</span><span class="score-badge poor" data-version="2"><span class="version-name">v3_recipe_:</span> 28%</span><span class="score-badge poor" data-version="3"><span class="version-name">v3_recipe_:</span> 28%</span><span class="score-badge poor" data-version="4"><span class="version-name">v4_atomic_:</span> 30%</span>
                 </div>
             </div>
             <div class="test-case-body">
@@ -1569,6 +2061,14 @@
 
                     <ul class="ingredients-list prediction-version " data-version="2">
                         <li class="ingredient matched">1 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">2 garlic cloves crushed</li><li class="ingredient missed">1 potato (about 150g) finely diced</li><li class="ingredient missed">1 carrot (about 100g) finely diced</li><li class="ingredient missed">100g frozen peas</li><li class="ingredient partial">2 tsp curry powder or your own spices according to taste <span class="match-info">(matched by: garam masala)</span></li><li class="ingredient missed">100ml vegetable stock</li><li class="ingredient missed">225g plain flour</li><li class="ingredient matched">2 tsp sea salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2l vegetable oil to deep fry</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="3">
+                        <li class="ingredient matched">1 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient missed">2 garlic cloves crushed</li><li class="ingredient missed">1 potato (about 150g) finely diced</li><li class="ingredient missed">1 carrot (about 100g) finely diced</li><li class="ingredient missed">100g frozen peas</li><li class="ingredient partial">2 tsp curry powder or your own spices according to taste <span class="match-info">(matched by: garam masala)</span></li><li class="ingredient missed">100ml vegetable stock</li><li class="ingredient missed">225g plain flour</li><li class="ingredient matched">2 tsp sea salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2l vegetable oil to deep fry</li>
+                    </ul>
+
+                    <ul class="ingredients-list prediction-version " data-version="4">
+                        <li class="ingredient matched">1 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient matched">1 onion finely chopped <span class="match-info">(matched by: onion)</span></li><li class="ingredient matched">2 garlic cloves crushed <span class="match-info">(matched by: garlic)</span></li><li class="ingredient missed">1 potato (about 150g) finely diced</li><li class="ingredient missed">1 carrot (about 100g) finely diced</li><li class="ingredient missed">100g frozen peas</li><li class="ingredient missed">2 tsp curry powder or your own spices according to taste</li><li class="ingredient missed">100ml vegetable stock</li><li class="ingredient missed">225g plain flour</li><li class="ingredient matched">2 tsp sea salt <span class="match-info">(matched by: salt)</span></li><li class="ingredient matched">2 tbsp vegetable oil <span class="match-info">(matched by: vegetable oil)</span></li><li class="ingredient missed">2l vegetable oil to deep fry</li>
                     </ul>
 
                 </div>
@@ -1595,6 +2095,22 @@
                         <div class="meal-title">Indian Vegetable Pakoras with Raita</div>
                         <ul class="ingredients-list">
                             <li class="ingredient wrong">chickpea flour <em>(cooked)</em></li><li class="ingredient partial">mixed vegetables <em>(cooked)</em> <span class="match-info">(partial: onion, garlic, potato, carrot, frozen peas)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient wrong">green chili <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">yogurt <em>(raw)</em></li><li class="ingredient wrong">fresh cilantro <em>(raw)</em></li><li class="ingredient wrong">turmeric powder <em>(cooked)</em></li><li class="ingredient wrong">cumin seeds <em>(cooked)</em></li><li class="ingredient correct">salt <em>(cooked)</em> <span class="match-info">(full: sea salt)</span></li><li class="ingredient wrong">baking soda <em>(cooked)</em></li><li class="ingredient partial">garam masala <em>(cooked)</em> <span class="match-info">(partial: curry powder or your own spices according to taste)</span></li><li class="ingredient wrong">chili powder <em>(cooked)</em></li><li class="ingredient wrong">cucumber <em>(raw)</em></li><li class="ingredient wrong">mint <em>(raw)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="3">
+                        <div class="column-header">Predicted - v3_recipe_inference (15 ingredients)</div>
+                        <div class="meal-title">Indian Vegetable Pakoras with Raita</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chickpea flour <em>(cooked)</em></li><li class="ingredient partial">mixed vegetables <em>(cooked)</em> <span class="match-info">(partial: onion, garlic, potato, carrot, frozen peas)</span></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient wrong">green chili <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">yogurt <em>(raw)</em></li><li class="ingredient wrong">fresh cilantro <em>(raw)</em></li><li class="ingredient wrong">turmeric powder <em>(cooked)</em></li><li class="ingredient wrong">cumin seeds <em>(cooked)</em></li><li class="ingredient correct">salt <em>(cooked)</em> <span class="match-info">(full: sea salt)</span></li><li class="ingredient wrong">baking soda <em>(cooked)</em></li><li class="ingredient partial">garam masala <em>(cooked)</em> <span class="match-info">(partial: curry powder or your own spices according to taste)</span></li><li class="ingredient wrong">chili powder <em>(cooked)</em></li><li class="ingredient wrong">cucumber <em>(raw)</em></li><li class="ingredient wrong">mint <em>(raw)</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="prediction-version " data-version="4">
+                        <div class="column-header">Predicted - v4_atomic_ingredients (15 ingredients)</div>
+                        <div class="meal-title">Vegetable Pakoras (Indian Fritters)</div>
+                        <ul class="ingredients-list">
+                            <li class="ingredient wrong">chickpea flour <em>(cooked)</em></li><li class="ingredient correct">onion <em>(cooked)</em> <span class="match-info">(full: onion finely chopped)</span></li><li class="ingredient wrong">green chili <em>(raw)</em></li><li class="ingredient wrong">corn kernels <em>(cooked)</em></li><li class="ingredient correct">vegetable oil <em>(cooked)</em> <span class="match-info">(full: vegetable oil)</span></li><li class="ingredient wrong">yogurt <em>(raw)</em></li><li class="ingredient wrong">cilantro <em>(raw)</em></li><li class="ingredient wrong">cumin seeds <em>(cooked)</em></li><li class="ingredient wrong">turmeric <em>(cooked)</em></li><li class="ingredient correct">salt <em>(cooked)</em> <span class="match-info">(full: sea salt)</span></li><li class="ingredient wrong">ginger <em>(cooked)</em></li><li class="ingredient correct">garlic <em>(cooked)</em> <span class="match-info">(full: garlic cloves crushed)</span></li><li class="ingredient wrong">coriander powder <em>(cooked)</em></li><li class="ingredient wrong">red chili powder <em>(cooked)</em></li><li class="ingredient wrong">baking soda <em>(cooked)</em></li>
                         </ul>
                     </div>
 

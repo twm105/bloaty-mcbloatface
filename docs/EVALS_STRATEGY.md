@@ -196,6 +196,9 @@ MEAL_ANALYSIS_SYSTEM_PROMPT = """..."""
 3. **Eval**: Run with `--prompt-version vN_name --notes "..."`
 4. **Record**: Update `history.md` with results and analysis
 5. **Repeat**: If target not met, form new hypothesis
+6. **Promote**: If eval results are acceptable, update production prompt in `app/services/prompts.py`
+   - Always eval BEFORE changing production — never update production prompts without running evals first
+   - Document the promotion in history.md
 
 ### CLI Examples
 

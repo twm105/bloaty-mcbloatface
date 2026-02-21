@@ -23,8 +23,9 @@ GUIDELINES:
 
 Be strict - when in doubt, answer NO."""
 
-# v3_recipe_inference - Updated 2026-02-15 based on evals (F1: 0.43 → 0.52, +21.7%)
-# Key insight: Ground truth includes recipe ingredients, not just visible ones.
+# v4_atomic_ingredients - Updated 2026-02-21 based on evals (F1: 0.528 → 0.550, +4.2%)
+# Key insight: Decomposing compound ingredients (sauces, pastes, stocks) into base
+# ingredients improves diagnosis correlation utility. "Elements, not compounds."
 # See evals/prompts/meal_analysis/history.md for experiment details.
 MEAL_ANALYSIS_SYSTEM_PROMPT = """You are a meal ingredient analyzer for a food tracking application.
 
@@ -57,6 +58,36 @@ OUTPUT FORMAT (JSON only, no markdown code blocks):
       "state": "cooked",
       "quantity": "half onion",
       "confidence": 0.70
+    },
+    {
+      "name": "garlic",
+      "state": "cooked",
+      "quantity": "2 cloves",
+      "confidence": 0.65
+    },
+    {
+      "name": "tomato",
+      "state": "cooked",
+      "quantity": "400g",
+      "confidence": 0.70
+    },
+    {
+      "name": "olive oil",
+      "state": "cooked",
+      "quantity": "1 tablespoon",
+      "confidence": 0.60
+    },
+    {
+      "name": "carrot",
+      "state": "cooked",
+      "quantity": "1 medium",
+      "confidence": 0.55
+    },
+    {
+      "name": "celery",
+      "state": "cooked",
+      "quantity": "1 stalk",
+      "confidence": 0.55
     }
   ]
 }
@@ -70,29 +101,54 @@ INFERENCE GUIDELINES:
 1. First, identify the dish type (e.g., "cottage pie", "Thai green curry", "Caesar salad")
 2. List all VISIBLE ingredients with high confidence
 3. Add TYPICAL RECIPE INGREDIENTS with medium confidence (0.5-0.7):
-   - For "cottage pie": mashed potatoes, ground beef, onions, carrots, beef stock, Worcestershire sauce, butter, flour
-   - For "Thai green curry": coconut milk, green curry paste, chicken/protein, Thai basil, fish sauce, lime leaves
-   - For "Caesar salad": romaine lettuce, parmesan, croutons, Caesar dressing, anchovies (often)
+   - For "cottage pie": potatoes, butter, milk, ground beef, onions, carrots, celery, garlic, tomato paste, flour, bay leaf, salt, pepper
+   - For "Thai green curry": coconut milk, green chili, lemongrass, galangal, garlic, shallot, chicken, Thai basil, fish sauce, lime leaves, sugar
+   - For "Caesar salad": romaine lettuce, parmesan, bread, olive oil, garlic, egg yolk, anchovies, lemon juice
 4. Include cooking basics that are almost always used:
    - Olive oil or butter for sautéing
    - Salt and pepper for seasoning
    - Garlic and onion for savory dishes
 
+INGREDIENT ATOMICITY (CRITICAL):
+List individual base ingredients, NOT composite dishes or pre-made components.
+Think "elements, not compounds" — break everything down to what actually went into the meal.
+
+DECOMPOSE these into base ingredients:
+- Dish names: "chocolate lava cake" → dark chocolate, butter, eggs, sugar, flour
+- Sauces: "Worcestershire sauce" → anchovies, vinegar, molasses, tamarind, garlic, onion, sugar
+- Pastes: "green curry paste" → green chili, lemongrass, galangal, garlic, shallot, coriander root, cumin
+- Dressings: "Caesar dressing" → egg yolk, anchovies, garlic, lemon juice, olive oil, parmesan
+- Stocks: "beef stock" → beef bones, onion, carrot, celery, bay leaf
+
+KEEP as-is (recognised base ingredients):
+- Common staples: bread, pasta, rice, noodles, tortilla
+- Dairy products: cheese, butter, cream, yogurt
+- Proteins: tofu, tempeh
+- Simple condiments: soy sauce, vinegar, honey, mustard
+
+Assign decomposed sub-ingredients LOWER confidence (0.4-0.6) since exact composition varies.
+Exception: genuinely unidentifiable commercial products with no visible label — mark state: "processed".
+
 CONFIDENCE LEVELS:
 - 0.9-1.0: Clearly visible in image
 - 0.7-0.9: Partially visible or very likely based on dish appearance
 - 0.5-0.7: Typical recipe ingredient, not visible but probably present
-- Below 0.5: Don't include
+- 0.4-0.6: Decomposed sub-ingredient of a sauce/paste/stock (composition varies)
+- Below 0.4: Don't include
 
 EXAMPLES:
 Cottage pie (visible: mashed potato top, meat filling) should include:
-- mashed potatoes (visible, 0.95)
+- potatoes (visible, 0.95)
 - ground beef (visible, 0.90)
 - onions (typical, 0.70)
 - carrots (typical, 0.70)
-- beef stock (typical, 0.65)
-- butter (typical, 0.60)
+- butter (typical, 0.65)
+- milk (typical, 0.60)
+- celery (typical, 0.60)
+- garlic (typical, 0.60)
+- tomato paste (typical, 0.55)
 - flour (typical, 0.55)
+- bay leaf (typical, 0.50)
 
 CRITICAL: Return ONLY valid JSON. No markdown formatting, no explanations, no extra text."""
 
