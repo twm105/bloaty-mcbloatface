@@ -162,7 +162,7 @@ class TestImageOptimization:
     """Tests for image optimization."""
 
     def test_optimizes_large_image(self):
-        """Test that large images are resized."""
+        """Test that large images are resized to fit Anthropic API limit."""
         with tempfile.TemporaryDirectory() as tmpdir:
             service = FileService(upload_dir=tmpdir)
 
@@ -172,11 +172,11 @@ class TestImageOptimization:
             img.save(large_image_path)
 
             # Optimize it
-            service._optimize_image(Path(large_image_path), max_width=1920)
+            service._optimize_image(Path(large_image_path), max_dim=1568)
 
-            # Check new size
+            # Check longest side fits within limit
             optimized = Image.open(large_image_path)
-            assert optimized.width <= 1920
+            assert max(optimized.width, optimized.height) <= 1568
 
     def test_preserves_small_image(self):
         """Test that small images are not resized."""
@@ -189,12 +189,44 @@ class TestImageOptimization:
             img.save(small_image_path)
 
             # Optimize it
-            service._optimize_image(Path(small_image_path), max_width=1920)
+            service._optimize_image(Path(small_image_path), max_dim=1568)
 
             # Size should be unchanged
             optimized = Image.open(small_image_path)
             assert optimized.width == 800
             assert optimized.height == 600
+
+    def test_optimizes_tall_portrait_image(self):
+        """Test that portrait images are resized by longest side (height)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = FileService(upload_dir=tmpdir)
+
+            # Create a tall portrait image (height > width)
+            portrait_path = os.path.join(tmpdir, "portrait.jpg")
+            img = Image.new("RGB", (2000, 4000), color="green")
+            img.save(portrait_path)
+
+            service._optimize_image(Path(portrait_path))
+
+            optimized = Image.open(portrait_path)
+            assert max(optimized.width, optimized.height) <= 1568
+            # Aspect ratio preserved: width should scale proportionally
+            assert abs(optimized.width / optimized.height - 2000 / 4000) < 0.01
+
+    def test_default_max_dim_is_1568(self):
+        """Test that default optimization targets Anthropic API recommended max (1568px)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = FileService(upload_dir=tmpdir)
+
+            large_path = os.path.join(tmpdir, "large.jpg")
+            img = Image.new("RGB", (3000, 2000), color="red")
+            img.save(large_path)
+
+            # Call without explicit max_dim - should use default 1568
+            service._optimize_image(Path(large_path))
+
+            optimized = Image.open(large_path)
+            assert max(optimized.width, optimized.height) <= 1568
 
     def test_converts_rgba_to_rgb(self):
         """Test that RGBA images are converted to RGB."""

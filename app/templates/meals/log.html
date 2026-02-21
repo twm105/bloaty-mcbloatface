@@ -17,17 +17,39 @@
             x-data="{
                 imagePreview: null,
                 showOptional: false,
+                resizedBlob: null,
                 handleFileChange(event) {
                     const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.imagePreview = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
+                    if (!file) return;
+                    const maxDim = 1568;
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > maxDim || height > maxDim) {
+                            const scale = maxDim / Math.max(width, height);
+                            width = Math.round(width * scale);
+                            height = Math.round(height * scale);
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        this.imagePreview = canvas.toDataURL('image/jpeg', 0.85);
+                        canvas.toBlob((blob) => { this.resizedBlob = blob; }, 'image/jpeg', 0.85);
+                    };
+                    img.src = URL.createObjectURL(file);
+                },
+                submitForm(event) {
+                    if (!this.resizedBlob) return;
+                    event.preventDefault();
+                    const form = event.target;
+                    const formData = new FormData(form);
+                    formData.set('image', this.resizedBlob, 'meal.jpg');
+                    fetch(form.action, { method: 'POST', body: formData, redirect: 'follow' })
+                        .then(r => { window.location.href = r.url; });
                 }
             }"
+            @submit="submitForm($event)"
         >
             <!-- Image Upload -->
             <div>

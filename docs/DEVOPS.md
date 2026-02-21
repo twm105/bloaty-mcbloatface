@@ -397,3 +397,13 @@ This manual setup is designed to be converted to Terraform. Key resources to cod
 - `aws_route53_record`
 
 The `deploy/` scripts can remain as-is for server configuration (Terraform handles infrastructure, scripts handle application setup).
+
+---
+
+## TODO
+
+- [ ] **Fix SSL auto-renewal**: Current setup uses `--standalone` which fails because nginx holds port 80. Switch to webroot method:
+  1. Add shared `/var/www/certbot` volume to `docker-compose.prod.yml` (nginx needs to serve `/.well-known/acme-challenge/`)
+  2. Switch certbot preferred authenticator from `standalone` to `webroot` (`sudo certbot certonly --webroot -w /var/www/certbot -d bloaty-app.com --force-renewal`)
+  3. Update cron job in `setup-ec2.sh` to use `certbot renew --webroot -w /var/www/certbot`
+  - **Context**: Cert expired 2026-02-21, manually renewed with standalone (expires 2026-05-22)

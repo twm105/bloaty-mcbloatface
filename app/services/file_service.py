@@ -55,13 +55,13 @@ class FileService:
         # Return relative path for database storage
         return str(file_path)
 
-    def _optimize_image(self, file_path: Path, max_width: int = 1920):
+    def _optimize_image(self, file_path: Path, max_dim: int = 1568):
         """
-        Optimize image size while maintaining quality.
+        Optimize image for Anthropic API (max 1568px on longest side).
 
         Args:
             file_path: Path to image file
-            max_width: Maximum width in pixels
+            max_dim: Maximum dimension (width or height) in pixels
         """
         try:
             with Image.open(file_path) as img:
@@ -74,11 +74,13 @@ class FileService:
                     rgb_img.paste(img, mask=img.split()[3])
                     img = rgb_img
 
-                # Resize if too large
-                if img.width > max_width:
-                    ratio = max_width / img.width
+                # Resize if longest side exceeds max
+                longest = max(img.width, img.height)
+                if longest > max_dim:
+                    ratio = max_dim / longest
+                    new_width = int(img.width * ratio)
                     new_height = int(img.height * ratio)
-                    img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+                    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
                 # Save optimized version
                 img.save(file_path, optimize=True, quality=85)
