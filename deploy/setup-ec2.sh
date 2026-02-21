@@ -39,6 +39,7 @@ systemctl start crond
 # Create app directory structure
 echo "Setting up app directory..."
 mkdir -p /opt/bloaty/uploads
+mkdir -p /var/www/certbot
 chown -R ec2-user:ec2-user /opt/bloaty
 
 # Create systemd service for docker-compose
@@ -68,7 +69,7 @@ systemctl enable bloaty.service
 # Set up certbot auto-renewal
 echo "Configuring SSL auto-renewal..."
 cat > /etc/cron.d/certbot-renew << 'EOF'
-0 0,12 * * * root certbot renew --quiet --deploy-hook "/usr/local/lib/docker/cli-plugins/docker-compose -f /opt/bloaty/docker-compose.yml -f /opt/bloaty/deploy/docker-compose.prod.yml exec nginx nginx -s reload"
+0 0,12 * * * root certbot renew --quiet --webroot -w /var/www/certbot --deploy-hook "docker compose -f /opt/bloaty/docker-compose.yml -f /opt/bloaty/deploy/docker-compose.prod.yml exec -T nginx nginx -s reload"
 EOF
 
 # Set up daily backup cron job
@@ -86,6 +87,8 @@ echo "Next steps:"
 echo "1. Clone your repo to /opt/bloaty (or copy files)"
 echo "2. Run: cd /opt/bloaty && ./deploy/fetch-secrets.sh"
 echo "3. Run: sudo certbot certonly --standalone -d YOUR_DOMAIN"
+echo "   Then reconfigure for webroot renewal:"
+echo "   sudo certbot reconfigure -d YOUR_DOMAIN --authenticator webroot --webroot-path /var/www/certbot"
 echo "4. Run: docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d"
 echo ""
 echo "Automated tasks configured:"

@@ -49,6 +49,7 @@ services:
       - ./app/static:/app/static:ro
       - /opt/bloaty/uploads:/app/uploads:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
     restart: unless-stopped
 
 volumes:

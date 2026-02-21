@@ -250,11 +250,14 @@ sudo bash deploy/setup-ec2.sh
 # Fetch secrets from AWS and create .env
 ./deploy/fetch-secrets.sh
 
-# Get SSL certificate
+# Get SSL certificate (standalone for initial setup, before nginx starts)
 sudo certbot certonly --standalone -d YOUR_DOMAIN --non-interactive --agree-tos -m YOUR_EMAIL
 
 # Start services
 docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
+
+# Reconfigure certbot for webroot renewal (so renewals work while nginx is running)
+sudo certbot reconfigure -d YOUR_DOMAIN --authenticator webroot --webroot-path /var/www/certbot
 ```
 
 ---
@@ -264,7 +267,7 @@ docker-compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d
 Both daily backups and SSL certificate renewal are configured automatically by `setup-ec2.sh`:
 
 - **Daily backups**: 3 AM via `/etc/cron.d/bloaty-backup` → logs to `/var/log/bloaty-backup.log`
-- **SSL renewal**: Twice daily via `/etc/cron.d/certbot-renew`
+- **SSL renewal**: Twice daily via `/etc/cron.d/certbot-renew` (webroot method)
 
 Verify cron jobs:
 ```bash
@@ -280,6 +283,22 @@ Test backup manually:
 Test SSL renewal:
 ```bash
 sudo certbot renew --dry-run
+```
+
+#### Troubleshooting SSL
+
+The SSL setup uses the **webroot** method for renewals: certbot writes challenge files to `/var/www/certbot`, which nginx serves at `/.well-known/acme-challenge/`. This allows renewal without stopping nginx.
+
+If renewal fails:
+1. **Verify webroot directory exists**: `ls -la /var/www/certbot`
+2. **Check certbot config**: `cat /etc/letsencrypt/renewal/bloaty-app.com.conf` — should show `authenticator = webroot`
+3. **Test challenge path**: `curl http://bloaty-app.com/.well-known/acme-challenge/test` — should return 404 (not redirect to HTTPS)
+4. **Dry run**: `sudo certbot renew --dry-run --webroot -w /var/www/certbot`
+5. **Check volume mount**: Ensure `/var/www/certbot` is mounted in the nginx container (`docker-compose.prod.yml`)
+
+If certbot is still configured for `standalone` (e.g., after initial setup), reconfigure:
+```bash
+sudo certbot reconfigure -d bloaty-app.com --authenticator webroot --webroot-path /var/www/certbot
 ```
 
 ---
@@ -397,13 +416,3 @@ This manual setup is designed to be converted to Terraform. Key resources to cod
 - `aws_route53_record`
 
 The `deploy/` scripts can remain as-is for server configuration (Terraform handles infrastructure, scripts handle application setup).
-
----
-
-## TODO
-
-- [ ] **Fix SSL auto-renewal**: Current setup uses `--standalone` which fails because nginx holds port 80. Switch to webroot method:
-  1. Add shared `/var/www/certbot` volume to `docker-compose.prod.yml` (nginx needs to serve `/.well-known/acme-challenge/`)
-  2. Switch certbot preferred authenticator from `standalone` to `webroot` (`sudo certbot certonly --webroot -w /var/www/certbot -d bloaty-app.com --force-renewal`)
-  3. Update cron job in `setup-ec2.sh` to use `certbot renew --webroot -w /var/www/certbot`
-  - **Context**: Cert expired 2026-02-21, manually renewed with standalone (expires 2026-05-22)
