@@ -62,7 +62,11 @@ Agent-authored software is production-viable for web applications of this comple
 
 ---
 
-## UI & Features
+## UI, Features
+
+### Design-by-Example
+
+Initially the agent produced an emoji-rich Notion-esque design, which needed improvement! Not having time or access to proper design tools, a custom dark theme was developed by the user providing reference style-guides from apps like Linear, VSCO, and Slite with custom design concepts. The coding agent then captured the resulting design decisions in `DESIGN_PRINCIPLES.md`, a living style guide that it consults when implementing any UI change. The 60/30/10 colour palette (dark/forest green/terracotta), typography scale, and component specifications all emerged from this process.
 
 <table>
 <tr>
@@ -74,7 +78,7 @@ Agent-authored software is production-viable for web applications of this comple
 </td>
 <td width="50%">
 
-**Meal history.** Circular AI-cropped thumbnails with expandable ingredient lists per meal.
+**Meal history.** Meal thumbnails with expandable ingredient lists are searchable and are grouped by day except for the most recently recorded.
 <img src="docs/images/meal-history.png" alt="Meal history grid with circular food images" width="100%">
 
 </td>
@@ -219,27 +223,17 @@ Scraped 53 recipes from BBC Good Food with images and full ingredient lists. Gro
 
 ### Iterative Improvement
 
-| Version | Strategy | F1 | Precision | Recall | Delta |
-|---------|----------|-----|-----------|--------|-------|
-| v1_baseline | Production prompt as-is | 0.429 | 0.616 | 0.353 | — |
-| v2_recall_focus | "List ALL visible ingredients" | 0.483 | 0.541 | 0.465 | +12.6% |
-| v3_recipe_inference | Infer typical recipe ingredients from dish type | 0.522 | 0.582 | 0.514 | +21.7% |
-| v4_atomic_ingredients | Split compound ingredients into atomic items | **0.550** | 0.593 | **0.538** | **+28.2%** |
+Once the eval dataset was captured and the initial prompt baseline, the coding agent was prompted to review the results and propose hypotheses for improving the performance through prompt engineering. This led to a pattern of recursive improvement, with the agent setting a hypothesis based on prior results, re-running the eval, and repeating.
 
-A breakthrough (found through hypothesis-led evaluation and prompt-engineering) was that ground truth recipes include invisible ingredients (onion, garlic, stock) that no vision model can detect from a photo. Prompting the model to infer typical recipe ingredients based on the identified dish type was the key unlock for recall.
+A key breakthrough was that ground truth images/recipes include invisible ingredients (onion, garlic, stock) that no vision model can detect from a photo. Prompting the model to infer typical recipe ingredients based on the identified dish type was the key unlock for recall.
+
+<img src="docs/images/evals-dashboard.png" alt="Evals dashboard showing F1 progression across prompt versions" width="700">
+
+<sub>Custom-built HTML dashboard comparing per-image performance across prompt versions</sub>
 
 ### LLM-as-Judge
 
 Uses Haiku as a judge to provide soft scores (0, 0.5, 1.0) for ingredient matching. Handles semantic equivalence ("ground beef" matches "minced beef" at 1.0, "cheddar cheese" matches "cheese" at 0.5) that string matching misses entirely.
-
-<details>
-<summary>Evals dashboard (click to expand)</summary>
-
-Custom-built HTML dashboard comparing per-image performance across prompt versions:
-
-<img src="docs/images/evals-dashboard.png" alt="Evals dashboard showing F1 progression across prompt versions" width="700">
-
-</details>
 
 See [docs/EVALS_STRATEGY.md](docs/EVALS_STRATEGY.md) for the full eval framework including diagnosis evals.
 
@@ -247,7 +241,7 @@ See [docs/EVALS_STRATEGY.md](docs/EVALS_STRATEGY.md) for the full eval framework
 
 ## Agentic Workflow
 
-Claude Code's memory persists across sessions through structured documentation files, not chat history.
+Early on, it was decided that key information such as delivery status and design principles should be captured in stand-alone documents. However, while Claude Code's memory persisted across sessions through structured documentation files, each time the chat was cleared (e.g. new session or new plan) it would lose track of these documents and begin repeating old mistakes or duplicating information. A more structured approach was needed.
 
 ### CLAUDE.md as Agent Memory
 
@@ -270,10 +264,6 @@ This federated structure means the coding agent loads only the high-level contex
 
 `STATUS.md` serves as the coding agent's session-to-session memory. At the end of each session, the agent updates the "Last Updated" date, moves completed items, and records what to prioritise next. The next session starts by reading this file to understand current state.
 
-### Design-by-Example
-
-The custom dark theme was developed by the user providing reference screenshots from apps like Linear, VSCO, and Slite, then the coding agent captured the resulting design decisions in `DESIGN_PRINCIPLES.md`, a living style guide that it consults when implementing any UI change. The 60/30/10 colour palette (dark/forest green/terracotta), typography scale, and component specifications all emerged from this process.
-
 ---
 
 ## Testing Strategy
@@ -282,7 +272,7 @@ Every test runs inside a database transaction that rolls back automatically, so 
 
 **771 tests across 28 files, 95% coverage.**
 
-Test categories: unit tests (model/service logic), integration tests (API endpoints, template rendering), and security tests (SQL injection, XSS, CSRF, path traversal, access control).
+Test categories: unit tests (model/service logic), integration tests (API endpoints, template rendering), and security tests (SQL injection, XSS, CSRF, path traversal, access control). Linting further assures high code quality.
 
 ```bash
 # All tests run inside Docker (required for database access)
@@ -299,29 +289,29 @@ See [docs/TESTING.md](docs/TESTING.md) for patterns and merge workflow.
 
 ## Local DevOps
 
-Running CI checks locally after each merge is faster than pushing and waiting for GitHub Actions, and lets the coding agent fix failures before code ever reaches remote.
+As coding agents are reliable for longer time-horizon tasks, they can work locally in parallel directed by the user as an agentic dev-team. Running CI checks locally after each merge is faster than pushing and waiting for GitHub Actions, and lets the coding agent fix failures before code ever reaches remote.
 
-### Post-Merge, Pre-Push Testing
+### Git Worktree + Docker Port Isolation
 
-After merging a feature branch to main locally, the full test suite runs before pushing to remote. When tests fail post-merge, the coding agent fixes the issues in-loop, so broken code never reaches GitHub.
+For parallel development (multiple Claude Code sessions working simultaneously), the project uses git worktrees with automatic Docker port allocation to avoid network clashes on the same machine. A custom local Claude Code skill (`gwt-docker`) with bash-script 'CLI' detects the worktree name and assigns unique port ranges per worktree, preventing container conflicts. The skill allows the coding agent to maintain the associated 'local DevOps' design patterns in the project.
+
+### Post-Merge, Pre-Commit Testing
+
+After merging a feature branch to main locally, the full test suite runs before pushing to remote. When tests fail post-merge, the coding agent fixes the issues in-loop, so broken code should never reaches GitHub.
 
 ### Pre-commit Hooks
 
 Ruff lint and format checks run as pre-commit hooks, catching style issues before they enter the commit history.
 
-### Git Worktree + Docker Port Isolation
-
-For parallel development (multiple Claude Code sessions working simultaneously), the project uses git worktrees with automatic Docker port allocation. A custom Claude Code skill (`gwt-docker`) detects the worktree name and assigns unique port ranges per worktree, preventing container conflicts.
-
 ### Containerised Development
 
-All code runs inside Docker. Tests, linting, and formatting all execute via `docker compose exec web` to match the production environment exactly. The `docker-entrypoint.sh` handles permissions, and the web container includes hot-reload for development.
+All code runs inside Docker. Tests, linting, and formatting all execute via `docker compose exec web` to match the production environment exactly. The `docker-entrypoint.sh` handles permissions, and the web container includes hot-reload for development. A deploy/docker-compose.prod.yml is layered on top for deploying the app (on AWS only), overwriting some configuration settings for the production setting.
 
 ---
 
 ## Security
 
-Seven layers of defence from TLS termination through to AI response schema validation, with the user catching issues the coding agent introduced along the way.
+Seven layers of defence from TLS termination through to AI response schema validation, with the user catching issues the coding agent introduced along the way. A `secure-design` skill was developed for assured design of this project and future projects, including a custom `security-audit` CLI that can runs standard open-source tools to audit the code. This returns stdout codes, so can be integrated into CI pipelines.
 
 | Layer | Implementation |
 |-------|---------------|
@@ -341,7 +331,7 @@ Public security docs: [docs/SECURITY.md](docs/SECURITY.md). Operational details 
 
 ## DevOps & AWS
 
-A single EC2 instance runs all five containers for about $20/month, with manual deploys via EC2 Instance Connect while full CI/CD remains a TODO.
+A single EC2 instance runs all five containers for about $20/month, with manual deploys via EC2 Instance Connect while fully automated CI/CD remains a TODO. The app is ready to horizontally scale if needed, with web servers (FastAPI) and analysis workers (Dramatiq) duplicating based on demand.
 
 The user set up AWS infrastructure manually. The coding agent handled Docker configuration, nginx setup, deploy scripts, and backup automation.
 
@@ -368,7 +358,7 @@ Daily backup --> S3 bucket (pg_dump + uploads)
 
 Secrets managed via AWS Secrets Manager (`bloaty/production` secret containing API key, session key, DB password, and S3 bucket name), fetched at deploy time. The EC2 instance uses an IAM role (`bloaty-ec2-role`) with minimal permissions: Secrets Manager read-only and S3 write-only for backups. The instance can write backups but cannot read them, limiting blast radius if compromised.
 
-Currently deploys via EC2 Instance Connect (SSH). Full CI/CD pipeline end-to-end is a TODO.
+Currently deploys via EC2 Instance Connect. Full CI/CD pipeline end-to-end is a TODO.
 
 Automated daily backups at 3 AM to S3 with 90-day lifecycle. GitHub Actions CI pipeline on every push.
 
