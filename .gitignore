@@ -42,6 +42,9 @@ uploads/
 *.png
 *.gif
 
+# But allow README screenshots
+!docs/images/*.png
+
 # Eval data
 evals/data/downloaded/
 evals/datasets/meal_images/
