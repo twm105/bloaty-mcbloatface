@@ -3,7 +3,9 @@
 **A production web app for meal tracking and food trigger diagnosis, built with human direction and AI implementation via [Claude Code](https://docs.anthropic.com/en/docs/claude-code).**
 
 <p align="center">
-  <code>100% AI-coded</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~90% MVP</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~27k lines of code</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~$0.60/user/month AI cost</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>Live at bloaty-app.com</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>Deployed in &lt;16hrs</code>
+  <code>100% AI-coded</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~90% MVP</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~27k lines of code</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>~$0.60/user/month AI cost</code>
+  <br>
+  <code>Live at bloaty-app.com</code>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<code>Deployed in &lt;16hrs</code>
 </p>
 
 <p align="center">
@@ -78,8 +80,22 @@ Initially the agent produced an emoji-rich Notion-esque design, which needed imp
 </td>
 <td width="50%">
 
+**Meal analysis.** AI-detected ingredients with state tracking (raw/cooked/processed) and estimated quantities, editable by the user.
+<img src="docs/images/meal-analysis.png" alt="Meal analysis showing AI-detected ingredients with state and quantity" width="100%">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
 **Meal history.** Meal thumbnails with expandable ingredient lists are searchable and are grouped by day except for the most recently recorded.
 <img src="docs/images/meal-history.png" alt="Meal history grid with circular food images" width="100%">
+
+</td>
+<td width="50%">
+
+**Diagnosis.** Ingredient-level trigger analysis with medical citations, confounder detection, and plain-English recommendations.
+<img src="docs/images/diagnosis-detail.png" alt="Diagnosis results showing ingredient analysis with medical grounding and citations" width="100%">
 
 </td>
 </tr>
@@ -94,20 +110,6 @@ Initially the agent produced an emoji-rich Notion-esque design, which needed imp
 
 **Symptom history.** Severity-coded cards with colour-coded tags for at-a-glance review.
 <img src="docs/images/symptom-history.png" alt="Symptom history with colour-coded severity tags" width="100%">
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Meal analysis.** AI-detected ingredients with state tracking (raw/cooked/processed) and estimated quantities, editable by the user.
-<img src="docs/images/meal-analysis.png" alt="Meal analysis showing AI-detected ingredients with state and quantity" width="100%">
-
-</td>
-<td width="50%">
-
-**Diagnosis.** Ingredient-level trigger analysis with medical citations, confounder detection, and plain-English recommendations.
-<img src="docs/images/diagnosis-detail.png" alt="Diagnosis results showing ingredient analysis with medical grounding and citations" width="100%">
 
 </td>
 </tr>
@@ -421,4 +423,4 @@ This is a personal project, but suggestions welcome via issues.
 
 ## License
 
-TBD
+[PolyForm Noncommercial 1.0.0](LICENSE). Free to view, fork, and learn from. Commercial use is not permitted.
