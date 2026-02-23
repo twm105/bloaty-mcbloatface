@@ -297,13 +297,9 @@ As coding agents are reliable for longer time-horizon tasks, they can work local
 
 For parallel development (multiple Claude Code sessions working simultaneously), the project uses git worktrees with automatic Docker port allocation to avoid network clashes on the same machine. A custom local Claude Code skill (`gwt-docker`) with bash-script 'CLI' detects the worktree name and assigns unique port ranges per worktree, preventing container conflicts. The skill allows the coding agent to maintain the associated 'local DevOps' design patterns in the project.
 
-### Post-Merge, Pre-Commit Testing
+### Agent-Driven Testing Discipline
 
-After merging a feature branch to main locally, the full test suite runs before pushing to remote. When tests fail post-merge, the coding agent fixes the issues in-loop, so broken code should never reaches GitHub.
-
-### Pre-commit Hooks
-
-Ruff lint and format checks run as pre-commit hooks, catching style issues before they enter the commit history.
+Testing is currently instructed through agent documentation. `CLAUDE.md` directs the coding agent to run the full test suite, linter, and formatter before considering any work complete, and `docs/TESTING.md` requires test coverage before merging to main. When tests fail, the coding agent fixes the issues in-loop, so broken code should never reach GitHub.
 
 ### Containerised Development
 
