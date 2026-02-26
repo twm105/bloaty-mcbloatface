@@ -35,6 +35,7 @@ def main():
             "meal_validation",
             "symptom_elaboration",
             "diagnosis_root_cause",
+            "diagnosis_e2e",
             "all",
         ],
         required=True,
@@ -92,7 +93,7 @@ def main():
     eval_parser.add_argument(
         "--web-search",
         action="store_true",
-        help="Enable web search for diagnosis_root_cause (realistic but expensive/slow)",
+        help="Enable web search for diagnosis evals (realistic but expensive/slow)",
     )
 
     # Scrape command

@@ -259,11 +259,19 @@ The diagnosis feature has 5 eval suites covering each pipeline step ("unit evals
 - **Scoring**: LLM judges for relevance, ethics, citation quality + deterministic checks (ingredient coverage, confidence consistency)
 - **Targets**: relevance ≥0.80, ethics ≥0.90, citation_quality ≥0.70
 
-### Eval 5: End-to-End Pipeline (~$1.50)
-- **What**: 10 full scenarios with 3-5 ingredients each (mix of triggers and bystanders)
-- **Why**: Validates the complete flow: scoring → root cause → medical grounding → explanation
-- **Scoring**: Kept/discarded precision and recall, plain English pass rate, citations present
-- **Targets**: kept_recall ≥0.90, discarded_recall ≥0.85
+### Eval 5: End-to-End Pipeline ✅ (~$0.10 fast, ~$2.50 realistic)
+- **What**: 10 full scenarios with 2-4 ingredients each (mix of triggers and bystanders)
+- **Why**: Tests cross-ingredient reasoning — whether the system can synthesize across multiple ingredients in a multi-meal history to correctly identify triggers and exonerate bystanders
+- **Scenarios**: Single trigger with bystander, two independent triggers, high co-occurrence confounder, state-dependent trigger, small sample allergic signal, red herring (no trigger), multiple masked triggers, cumulative dose effect, textbook FODMAP, mixed evidence borderline
+- **Two-tier scoring**:
+  - **Tier 1 (deterministic)**: Trigger precision/recall/F1, bystander precision/recall/F1, no-false-alarm rate for no-trigger scenarios
+  - **Tier 2 (LLM judge)**: Cross-referencing quality, medical accuracy, plain English readability, appropriate uncertainty
+- **Targets**: trigger_recall ≥0.90, trigger_F1 ≥0.85, bystander_recall ≥0.85, perfect_scenario_rate ≥0.40
+- **Fast mode** (default): pre-baked medical context, skips web search (~$0.10)
+- **Realistic mode** (`--web-search`): calls `research_ingredient()` live (~$2.50)
+- **Dataset**: `evals/datasets/ground_truth/diagnosis_e2e.json` — each scenario includes full meal timeline, pre-computed ingredient stats with cooccurrence, medical context, and ground truth
+- **Runner**: `evals/runners/diagnosis_e2e.py` — iterates ingredients, calls classify_root_cause + adapt_to_plain_english, scores against ground truth
+- **Expected baseline** (current pipeline, no synthesis step): trigger_recall ~0.70-0.80, cross_referencing ~0.0-0.2, perfect_scenario_rate ~20-40%
 
 ### Dataset Strategy
 - **Primary**: Synthetic — programmatically constructed correlation scenarios with known expected outcomes
@@ -334,6 +342,22 @@ The diagnosis feature has 5 eval suites covering each pipeline step ("unit evals
 | Citation Quality (LLM judge) | ≥0.70 |
 | Confidence Consistency | ≥0.80 |
 
+### Diagnosis E2E
+
+| Metric | Formula | Target |
+|--------|---------|--------|
+| Trigger Recall | Correct triggers kept / total GT triggers | ≥0.90 |
+| Trigger Precision | Correct triggers / all kept ingredients | ≥0.80 |
+| Trigger F1 | Harmonic mean of trigger P + R | ≥0.85 |
+| Bystander Recall | Correct bystanders discarded / total GT bystanders | ≥0.85 |
+| Bystander Precision | Correct bystanders / all discarded ingredients | ≥0.80 |
+| Perfect Scenario Rate | % scenarios with all correct | ≥0.40 |
+| No-False-Alarm Rate | No high-confidence keeps in no-trigger scenarios | 1.0 |
+| Cross-Referencing (LLM) | References cross-meal evidence | ≥0.50 |
+| Medical Accuracy (LLM) | Correct medical mechanisms | ≥0.70 |
+| Plain English (LLM) | Readable, non-technical | ≥0.70 |
+| Appropriate Uncertainty (LLM) | Confidence language matches evidence | ≥0.60 |
+
 ## Results Storage
 
 Results stored in `eval_runs` table (see `app/models/eval_run.py`):
@@ -396,13 +420,13 @@ To avoid repeated API costs during development:
 ### Phase 3: Diagnosis Evals ← NEXT
 Full plan: `.claude/plans/rosy-zooming-blanket.md`
 - [ ] Confidence scoring eval (deterministic, 30 test vectors)
-- [ ] Root cause classification eval (40 cases, 20 keep + 20 discard)
+- [x] Root cause classification eval (40 cases, 20 keep + 20 discard)
 - [ ] Single ingredient plain English eval (20 cases + LLM judges)
 - [ ] Correlations medical analysis eval (15 cases + LLM judges)
-- [ ] End-to-end pipeline eval (10 scenarios)
-- [ ] LLM judge prompts for relevance, ethics, plain English, citation quality
-- [ ] Prompt versioning for diagnosis methods
-- [ ] Config + metric targets for all diagnosis evals
+- [x] End-to-end pipeline eval (10 scenarios, 2-tier scoring)
+- [x] LLM judge prompts for cross-referencing, medical accuracy, plain English, uncertainty
+- [x] Prompt versioning for diagnosis methods
+- [x] Config + metric targets for all diagnosis evals
 
 ### Phase 4: Secondary Evals
 - [ ] AllRecipes scraper

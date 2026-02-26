@@ -55,6 +55,15 @@ METRIC_TARGETS = {
         "discard_accuracy": 0.85,
         "keep_accuracy": 0.90,
     },
+    "diagnosis_e2e": {
+        "trigger_recall": 0.90,
+        "trigger_precision": 0.80,
+        "trigger_f1": 0.85,
+        "bystander_recall": 0.85,
+        "bystander_precision": 0.80,
+        "bystander_f1": 0.82,
+        "perfect_scenario_rate": 0.40,
+    },
 }
 
 # Fuzzy matching threshold for ingredient names

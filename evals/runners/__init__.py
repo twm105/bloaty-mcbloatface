@@ -3,11 +3,13 @@
 from .base import BaseEvalRunner
 from .meal_analysis import MealAnalysisRunner
 from .diagnosis_root_cause import DiagnosisRootCauseRunner
+from .diagnosis_e2e import DiagnosisE2ERunner
 
 # Registry of available runners
 RUNNERS = {
     "meal_analysis": MealAnalysisRunner,
     "diagnosis_root_cause": DiagnosisRootCauseRunner,
+    "diagnosis_e2e": DiagnosisE2ERunner,
 }
 
 
@@ -36,6 +38,7 @@ __all__ = [
     "BaseEvalRunner",
     "MealAnalysisRunner",
     "DiagnosisRootCauseRunner",
+    "DiagnosisE2ERunner",
     "get_runner",
     "RUNNERS",
 ]

@@ -616,6 +616,201 @@ def score_meal_validation(predicted: bool, expected: bool) -> dict:
     }
 
 
+# --- E2E Diagnosis Scenario Scoring ---
+
+
+@dataclass
+class E2EScenarioScore:
+    """Scores for a single E2E diagnosis scenario."""
+
+    trigger_precision: float
+    trigger_recall: float
+    trigger_f1: float
+    bystander_precision: float
+    bystander_recall: float
+    bystander_f1: float
+    no_false_alarm: Optional[float]  # Only for no-trigger scenarios
+    details: dict
+
+
+def score_e2e_scenario(
+    predicted_results: list[dict],
+    ground_truth: dict,
+) -> E2EScenarioScore:
+    """Score a single E2E scenario's keep/discard decisions against ground truth.
+
+    Args:
+        predicted_results: List of dicts, one per ingredient analyzed, each with:
+            - ingredient_name: str
+            - root_cause: bool (True = kept as trigger)
+            - confidence_level: str (optional, for no-trigger scenarios)
+        ground_truth: Dict with:
+            - triggers: list[str] (ingredient names that are real triggers)
+            - bystanders: list[str] (ingredient names that are innocent)
+
+    Returns:
+        E2EScenarioScore with precision, recall, F1 for both triggers and bystanders.
+    """
+    gt_triggers = set(ground_truth.get("triggers", []))
+    gt_bystanders = set(ground_truth.get("bystanders", []))
+
+    kept = []
+    discarded = []
+    for result in predicted_results:
+        if result.get("root_cause", False):
+            kept.append(result)
+        else:
+            discarded.append(result)
+
+    kept_names = {r["ingredient_name"] for r in kept}
+    discarded_names = {r["ingredient_name"] for r in discarded}
+
+    # Trigger metrics (positive = correctly kept trigger)
+    correct_triggers_kept = kept_names & gt_triggers
+    false_triggers_kept = kept_names - gt_triggers  # bystanders wrongly kept
+    missed_triggers = gt_triggers - kept_names
+
+    trigger_precision = (
+        len(correct_triggers_kept) / len(kept_names)
+        if kept_names
+        else (1.0 if not gt_triggers else 0.0)
+    )
+    trigger_recall = (
+        len(correct_triggers_kept) / len(gt_triggers)
+        if gt_triggers
+        else 1.0  # No triggers to recall = perfect
+    )
+    trigger_f1 = (
+        2 * trigger_precision * trigger_recall / (trigger_precision + trigger_recall)
+        if (trigger_precision + trigger_recall) > 0
+        else 0.0
+    )
+
+    # Bystander metrics (positive = correctly discarded bystander)
+    correct_bystanders_discarded = discarded_names & gt_bystanders
+    missed_bystanders = gt_bystanders - discarded_names  # bystanders wrongly kept
+
+    bystander_precision = (
+        len(correct_bystanders_discarded) / len(discarded_names)
+        if discarded_names
+        else (1.0 if not gt_bystanders else 0.0)
+    )
+    bystander_recall = (
+        len(correct_bystanders_discarded) / len(gt_bystanders) if gt_bystanders else 1.0
+    )
+    bystander_f1 = (
+        2
+        * bystander_precision
+        * bystander_recall
+        / (bystander_precision + bystander_recall)
+        if (bystander_precision + bystander_recall) > 0
+        else 0.0
+    )
+
+    # No-false-alarm rate: for no-trigger scenarios only
+    no_false_alarm = None
+    if not gt_triggers:
+        # Check if any ingredient was kept with HIGH confidence
+        high_conf_keeps = [
+            r for r in kept if r.get("confidence_level", "").lower() == "high"
+        ]
+        no_false_alarm = 0.0 if high_conf_keeps else 1.0
+
+    return E2EScenarioScore(
+        trigger_precision=trigger_precision,
+        trigger_recall=trigger_recall,
+        trigger_f1=trigger_f1,
+        bystander_precision=bystander_precision,
+        bystander_recall=bystander_recall,
+        bystander_f1=bystander_f1,
+        no_false_alarm=no_false_alarm,
+        details={
+            "correct_triggers_kept": sorted(correct_triggers_kept),
+            "false_triggers_kept": sorted(false_triggers_kept),
+            "missed_triggers": sorted(missed_triggers),
+            "correct_bystanders_discarded": sorted(correct_bystanders_discarded),
+            "missed_bystanders": sorted(missed_bystanders),
+        },
+    )
+
+
+def aggregate_e2e_scores(results: list[dict]) -> dict:
+    """Compute aggregate metrics from E2E scenario results.
+
+    Args:
+        results: List of dicts from evaluate_single(), each with a 'score' dict
+
+    Returns:
+        Dict with macro-averaged trigger/bystander F1, perfect scenario rate,
+        per-scenario breakdown, and no-false-alarm rate.
+    """
+    if not results:
+        return {}
+
+    scores = [r["score"] for r in results if "score" in r]
+    if not scores:
+        return {}
+
+    total = len(scores)
+
+    # Macro-averaged metrics
+    trigger_f1s = [s["trigger_f1"] for s in scores]
+    bystander_f1s = [s["bystander_f1"] for s in scores]
+    trigger_precisions = [s["trigger_precision"] for s in scores]
+    trigger_recalls = [s["trigger_recall"] for s in scores]
+    bystander_precisions = [s["bystander_precision"] for s in scores]
+    bystander_recalls = [s["bystander_recall"] for s in scores]
+
+    # Perfect scenario rate: all triggers + bystanders correct
+    perfect = sum(
+        1 for s in scores if s["trigger_f1"] == 1.0 and s["bystander_f1"] == 1.0
+    )
+
+    # No-false-alarm rate (only for no-trigger scenarios)
+    no_trigger_scores = [s for s in scores if s.get("no_false_alarm") is not None]
+    no_false_alarm_rate = (
+        sum(s["no_false_alarm"] for s in no_trigger_scores) / len(no_trigger_scores)
+        if no_trigger_scores
+        else None
+    )
+
+    # Judge metrics (if present)
+    judge_metrics = {}
+    judge_scores = [r.get("judge_scores", {}) for r in results if r.get("judge_scores")]
+    if judge_scores:
+        for dimension in [
+            "cross_referencing",
+            "medical_accuracy",
+            "plain_english",
+            "appropriate_uncertainty",
+        ]:
+            values = [
+                js[dimension]
+                for js in judge_scores
+                if dimension in js and js[dimension] is not None
+            ]
+            if values:
+                judge_metrics[f"mean_{dimension}"] = sum(values) / len(values)
+
+    aggregate = {
+        "trigger_f1": sum(trigger_f1s) / total,
+        "trigger_precision": sum(trigger_precisions) / total,
+        "trigger_recall": sum(trigger_recalls) / total,
+        "bystander_f1": sum(bystander_f1s) / total,
+        "bystander_precision": sum(bystander_precisions) / total,
+        "bystander_recall": sum(bystander_recalls) / total,
+        "perfect_scenario_rate": perfect / total,
+        "total_scenarios": total,
+    }
+
+    if no_false_alarm_rate is not None:
+        aggregate["no_false_alarm_rate"] = no_false_alarm_rate
+
+    aggregate.update(judge_metrics)
+
+    return aggregate
+
+
 def aggregate_meal_analysis_scores(results: list[dict]) -> dict:
     """Compute aggregate metrics from individual meal analysis results.
 

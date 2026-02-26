@@ -1,0 +1,1151 @@
+{
+  "version": "1.0",
+  "description": "End-to-end diagnosis pipeline evaluation. 10 synthetic scenarios testing cross-ingredient reasoning, each with a meal timeline, pre-computed ingredient stats, and ground truth triggers/bystanders.",
+  "scenarios": [
+    {
+      "id": "e2e_01_single_trigger_wheat",
+      "name": "Single trigger with co-occurring bystander",
+      "description": "Wheat is the sole trigger. Cheddar cheese frequently co-occurs but is innocent. Key test: 3 cheese-only meals with no symptoms prove cheese is a bystander.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Pasta with cheese sauce", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 2, "name": "Cheese omelette", "timestamp": "2026-02-02T08:00:00Z", "ingredients": [{"name": "cheddar cheese", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "butter", "state": "cooked"}], "note": "Cheese-only meal (no wheat) — NO symptoms"},
+          {"id": 3, "name": "Cheese sandwich", "timestamp": "2026-02-03T12:30:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "cheddar cheese", "state": "raw"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 4, "name": "Grilled chicken salad", "timestamp": "2026-02-04T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}]},
+          {"id": 5, "name": "Pizza margherita", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "wheat base", "state": "cooked"}, {"name": "mozzarella", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}]},
+          {"id": 6, "name": "Rice stir-fry", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "bell pepper", "state": "cooked"}]},
+          {"id": 7, "name": "Toast with avocado", "timestamp": "2026-02-07T12:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "avocado", "state": "raw"}], "note": "Wheat-only meal (no cheese) — symptoms follow"},
+          {"id": 8, "name": "Mac and cheese", "timestamp": "2026-02-08T12:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 9, "name": "Baked potato with tuna", "timestamp": "2026-02-09T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "tuna", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 10, "name": "Cheese and rice crackers", "timestamp": "2026-02-10T08:00:00Z", "ingredients": [{"name": "cheddar cheese", "state": "raw"}, {"name": "rice crackers", "state": "cooked"}], "note": "Cheese-only meal (no wheat) — NO symptoms"},
+          {"id": 11, "name": "Salmon with rice", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "green beans", "state": "cooked"}]},
+          {"id": 12, "name": "Cheese toastie", "timestamp": "2026-02-12T18:30:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 13, "name": "Chicken rice bowl", "timestamp": "2026-02-13T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "avocado", "state": "raw"}]},
+          {"id": 14, "name": "Fish with potato", "timestamp": "2026-02-14T18:00:00Z", "ingredients": [{"name": "cod", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "peas", "state": "cooked"}]},
+          {"id": 15, "name": "Wheat pasta with parmesan", "timestamp": "2026-02-15T12:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "parmesan", "state": "raw"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 16, "name": "Cheese salad", "timestamp": "2026-02-16T12:00:00Z", "ingredients": [{"name": "cheddar cheese", "state": "raw"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "Cheese-only meal (no wheat) — NO symptoms"},
+          {"id": 17, "name": "Egg fried rice", "timestamp": "2026-02-17T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "spring onion", "state": "cooked"}]},
+          {"id": 18, "name": "Chicken soup", "timestamp": "2026-02-18T18:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}]},
+          {"id": 19, "name": "Bread roll with soup", "timestamp": "2026-02-19T18:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}]},
+          {"id": 20, "name": "Tuna salad", "timestamp": "2026-02-21T12:00:00Z", "ingredients": [{"name": "tuna", "state": "raw"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T14:30:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 3},
+          {"timestamp": "2026-02-05T20:00:00Z", "tags": [{"name": "bloating", "severity": 8}, {"name": "cramping", "severity": 5}], "follows_meal": 5},
+          {"timestamp": "2026-02-07T13:30:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 3}], "follows_meal": 7},
+          {"timestamp": "2026-02-08T14:30:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 8},
+          {"timestamp": "2026-02-12T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 12},
+          {"timestamp": "2026-02-15T14:00:00Z", "tags": [{"name": "bloating", "severity": 5}], "follows_meal": 15},
+          {"timestamp": "2026-02-19T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 19}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "wheat",
+          "ingredient_id": 1,
+          "times_eaten": 8,
+          "total_symptom_occurrences": 8,
+          "confidence_score": 0.82,
+          "confidence_level": "high",
+          "immediate_total": 6,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 8, "severity_avg": 6.5, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 3, "severity_avg": 4.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {
+              "with_ingredient_name": "cheddar cheese",
+              "with_ingredient_id": 2,
+              "cooccurrence_meals": 5,
+              "conditional_probability": 0.63,
+              "reverse_probability": 0.56,
+              "lift": 1.4
+            },
+            {
+              "with_ingredient_name": "butter",
+              "with_ingredient_id": 3,
+              "cooccurrence_meals": 4,
+              "conditional_probability": 0.50,
+              "reverse_probability": 0.57,
+              "lift": 1.3
+            }
+          ],
+          "medical_context": "Wheat contains fructans (FODMAPs) and gluten. Fructans are rapidly fermented by gut bacteria causing bloating and gas. Wheat is one of the most common IBS triggers and is the first food eliminated on a low-FODMAP diet. Gluten may also cause symptoms in non-coeliac gluten sensitivity. Source: Monash University FODMAP App (red-light); Biesiekierski et al. 2011."
+        },
+        {
+          "ingredient_name": "cheddar cheese",
+          "ingredient_id": 2,
+          "times_eaten": 9,
+          "total_symptom_occurrences": 5,
+          "confidence_score": 0.45,
+          "confidence_level": "medium",
+          "immediate_total": 4,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 5, "severity_avg": 6.8, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 2, "severity_avg": 4.5, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {
+              "with_ingredient_name": "wheat",
+              "with_ingredient_id": 1,
+              "cooccurrence_meals": 5,
+              "conditional_probability": 0.56,
+              "reverse_probability": 0.63,
+              "lift": 1.4
+            }
+          ],
+          "medical_context": "Hard cheeses like cheddar are low-FODMAP. The aging process breaks down most lactose. Cheddar contains less than 0.1g lactose per serve compared to 12g in milk. Safe on low-FODMAP diets. Source: Monash University FODMAP App (green-light); British Dietetic Association."
+        },
+        {
+          "ingredient_name": "butter",
+          "ingredient_id": 3,
+          "times_eaten": 7,
+          "total_symptom_occurrences": 4,
+          "confidence_score": 0.38,
+          "confidence_level": "low",
+          "immediate_total": 3,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 4, "severity_avg": 6.5, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {
+              "with_ingredient_name": "wheat",
+              "with_ingredient_id": 1,
+              "cooccurrence_meals": 4,
+              "conditional_probability": 0.57,
+              "reverse_probability": 0.50,
+              "lift": 1.3
+            }
+          ],
+          "medical_context": "Butter is almost pure fat with minimal lactose (0.1g per serve). It is low-FODMAP and well-tolerated by most lactose-intolerant individuals. Used freely on elimination diets. Source: Monash University FODMAP App (green-light)."
+        }
+      ],
+
+      "meal_history_summary": "20 meals over 3 weeks. Wheat appeared in 8 meals with symptoms following all 8. Cheddar cheese appeared in 9 meals, 5 with symptoms — but all 5 symptomatic cheese meals also contained wheat. Three cheese-only meals (no wheat) produced zero symptoms. Butter appeared in 7 meals, always alongside wheat or cheese.",
+
+      "ground_truth": {
+        "triggers": ["wheat"],
+        "bystanders": ["cheddar cheese", "butter"],
+        "key_evidence": [
+          "Wheat present in all 8 symptomatic meals (100%)",
+          "3 cheese-only meals with no symptoms prove cheese is innocent",
+          "2 wheat-only meals (no cheese) both caused symptoms",
+          "Butter always co-occurs with wheat — confounded, not independent"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_02_two_independent_triggers",
+      "name": "Two independent triggers with different temporal signatures",
+      "description": "Garlic causes immediate symptoms (1-2hr). Cream causes delayed symptoms (6-12hr). Chicken and rice are innocent bystanders confounded by both triggers.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Garlic chicken stir-fry", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "soy sauce", "state": "raw"}]},
+          {"id": 2, "name": "Creamy pasta", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "cream", "state": "cooked"}, {"name": "pasta", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}]},
+          {"id": 3, "name": "Plain chicken and rice", "timestamp": "2026-02-03T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "green beans", "state": "cooked"}], "note": "No garlic, no cream — NO symptoms"},
+          {"id": 4, "name": "Garlic bread with salad", "timestamp": "2026-02-04T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "wheat bread", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 5, "name": "Cream of mushroom soup", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "cream", "state": "cooked"}, {"name": "mushroom", "state": "cooked"}, {"name": "potato", "state": "cooked"}]},
+          {"id": 6, "name": "Grilled chicken salad", "timestamp": "2026-02-06T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No triggers — NO symptoms"},
+          {"id": 7, "name": "Garlic prawn rice", "timestamp": "2026-02-07T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "prawns", "state": "cooked"}, {"name": "rice", "state": "cooked"}]},
+          {"id": 8, "name": "Rice with steamed veg", "timestamp": "2026-02-08T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No triggers — NO symptoms"},
+          {"id": 9, "name": "Creamy chicken pasta", "timestamp": "2026-02-09T18:00:00Z", "ingredients": [{"name": "cream", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "pasta", "state": "cooked"}]},
+          {"id": 10, "name": "Garlic mushroom rice", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "mushroom", "state": "cooked"}, {"name": "rice", "state": "cooked"}]},
+          {"id": 11, "name": "Chicken soup", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No triggers — NO symptoms"},
+          {"id": 12, "name": "Garlic chicken with rice", "timestamp": "2026-02-12T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}]},
+          {"id": 13, "name": "Cream sauce on fish", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "cream", "state": "cooked"}, {"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}]},
+          {"id": 14, "name": "Tuna rice bowl", "timestamp": "2026-02-14T12:00:00Z", "ingredients": [{"name": "tuna", "state": "raw"}, {"name": "rice", "state": "cooked"}, {"name": "avocado", "state": "raw"}], "note": "No triggers — NO symptoms"},
+          {"id": 15, "name": "Garlic stir-fry noodles", "timestamp": "2026-02-15T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "rice noodles", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}]},
+          {"id": 16, "name": "Creamy potato bake", "timestamp": "2026-02-16T18:00:00Z", "ingredients": [{"name": "cream", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T13:30:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 1, "note": "Immediate onset (1.5hr) — garlic signature"},
+          {"timestamp": "2026-02-02T20:00:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "nausea", "severity": 3}], "follows_meal": 2, "note": "Delayed onset (8hr) — cream signature"},
+          {"timestamp": "2026-02-04T19:30:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 4, "note": "Immediate (1.5hr) — garlic"},
+          {"timestamp": "2026-02-06T00:00:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "cramping", "severity": 3}], "follows_meal": 5, "note": "Delayed (6hr) — cream"},
+          {"timestamp": "2026-02-07T13:30:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 4}], "follows_meal": 7, "note": "Immediate — garlic"},
+          {"timestamp": "2026-02-10T02:00:00Z", "tags": [{"name": "bloating", "severity": 4}, {"name": "nausea", "severity": 3}], "follows_meal": 9, "note": "Delayed (8hr) — cream"},
+          {"timestamp": "2026-02-10T13:30:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 10, "note": "Immediate — garlic"},
+          {"timestamp": "2026-02-12T13:30:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}], "follows_meal": 12, "note": "Immediate — garlic"},
+          {"timestamp": "2026-02-14T02:00:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "nausea", "severity": 4}], "follows_meal": 13, "note": "Delayed (8hr) — cream"},
+          {"timestamp": "2026-02-15T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 3}], "follows_meal": 15, "note": "Immediate — garlic"},
+          {"timestamp": "2026-02-17T02:00:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "nausea", "severity": 3}], "follows_meal": 16, "note": "Delayed (8hr) — cream"}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "garlic",
+          "ingredient_id": 1,
+          "times_eaten": 7,
+          "total_symptom_occurrences": 7,
+          "confidence_score": 0.85,
+          "confidence_level": "high",
+          "immediate_total": 7,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 7, "severity_avg": 6.3, "lag_hours": 1.5},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.0, "lag_hours": 1.5},
+            {"name": "gas", "frequency": 2, "severity_avg": 4.5, "lag_hours": 1.5}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "chicken breast", "with_ingredient_id": 4, "cooccurrence_meals": 4, "conditional_probability": 0.57, "reverse_probability": 0.50, "lift": 1.1},
+            {"with_ingredient_name": "rice", "with_ingredient_id": 5, "cooccurrence_meals": 4, "conditional_probability": 0.57, "reverse_probability": 0.40, "lift": 0.9}
+          ],
+          "medical_context": "Garlic is one of the highest-FODMAP foods, rich in fructans. Fructans are not absorbed in the small intestine and are rapidly fermented by gut bacteria causing bloating, gas, and cramping. Garlic is the most commonly identified trigger in IBS patients. Source: Monash University FODMAP App (red-light at any quantity); Staudacher et al. 2012."
+        },
+        {
+          "ingredient_name": "cream",
+          "ingredient_id": 2,
+          "times_eaten": 5,
+          "total_symptom_occurrences": 5,
+          "confidence_score": 0.78,
+          "confidence_level": "high",
+          "immediate_total": 0,
+          "delayed_total": 5,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 5, "severity_avg": 4.8, "lag_hours": 8.0},
+            {"name": "nausea", "frequency": 3, "severity_avg": 3.3, "lag_hours": 8.0},
+            {"name": "cramping", "frequency": 1, "severity_avg": 3.0, "lag_hours": 6.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "chicken breast", "with_ingredient_id": 4, "cooccurrence_meals": 2, "conditional_probability": 0.40, "reverse_probability": 0.25, "lift": 0.8}
+          ],
+          "medical_context": "Cream is high in lactose and saturated fat. A significant trigger for lactose-intolerant individuals and those with IBS. Lactose intolerance affects 65-70% of global adult population. High fat content slows gastric emptying. Source: Monash University FODMAP App; Suchy et al. 2010."
+        },
+        {
+          "ingredient_name": "chicken breast",
+          "ingredient_id": 4,
+          "times_eaten": 8,
+          "total_symptom_occurrences": 5,
+          "confidence_score": 0.42,
+          "confidence_level": "medium",
+          "immediate_total": 3,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 5, "severity_avg": 6.0, "lag_hours": 3.0},
+            {"name": "cramping", "frequency": 2, "severity_avg": 4.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 1, "cooccurrence_meals": 4, "conditional_probability": 0.50, "reverse_probability": 0.57, "lift": 1.1},
+            {"with_ingredient_name": "cream", "with_ingredient_id": 2, "cooccurrence_meals": 2, "conditional_probability": 0.25, "reverse_probability": 0.40, "lift": 0.8}
+          ],
+          "medical_context": "Chicken breast is a lean, low-fat protein with no fibre, no FODMAPs, and no known allergens (outside rare poultry allergy). Universally recommended on elimination diets including low-FODMAP, GAPS, and autoimmune protocol diets. Source: Monash University FODMAP App; NICE IBS guidelines."
+        },
+        {
+          "ingredient_name": "rice",
+          "ingredient_id": 5,
+          "times_eaten": 10,
+          "total_symptom_occurrences": 4,
+          "confidence_score": 0.30,
+          "confidence_level": "low",
+          "immediate_total": 3,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 4, "severity_avg": 6.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 1, "cooccurrence_meals": 4, "conditional_probability": 0.40, "reverse_probability": 0.57, "lift": 0.9}
+          ],
+          "medical_context": "White rice is the most easily digestible starch. It is low-FODMAP, gluten-free, and contains no known digestive irritants. Standard 'safe food' on elimination diets worldwide. Source: Monash University FODMAP App; American College of Gastroenterology."
+        }
+      ],
+
+      "meal_history_summary": "16 meals over 2 weeks. Garlic appeared in 7 meals — all 7 followed by immediate symptoms (1-2hr). Cream appeared in 5 meals — all 5 followed by delayed symptoms (6-12hr). Chicken appeared in 8 meals but 3 without garlic/cream had no symptoms. Rice appeared in 10 meals but 2 without triggers had no symptoms. Two distinct temporal signatures.",
+
+      "ground_truth": {
+        "triggers": ["garlic", "cream"],
+        "bystanders": ["chicken breast", "rice"],
+        "key_evidence": [
+          "Garlic → 100% immediate symptoms (1-2hr lag), consistent pattern",
+          "Cream → 100% delayed symptoms (6-12hr lag), different temporal signature",
+          "4 chicken-only or rice-only meals with no symptoms",
+          "Two independent triggers with distinct onset patterns"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_03_high_cooccurrence_confounder",
+      "name": "High co-occurrence confounder",
+      "description": "Onion is the real trigger. Garlic appears in 90% of onion meals, creating a strong confounding signal. Key test: 2 garlic-only meals with no symptoms prove garlic is innocent here.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Onion and garlic soup", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 2, "name": "Garlic bread", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "wheat bread", "state": "cooked"}, {"name": "butter", "state": "cooked"}], "note": "Garlic-only (no onion) — NO symptoms"},
+          {"id": 3, "name": "Bolognese sauce", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "beef mince", "state": "cooked"}, {"name": "tomato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 4, "name": "Grilled chicken", "timestamp": "2026-02-04T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "olive oil", "state": "raw"}, {"name": "lemon", "state": "raw"}], "note": "No onion, no garlic — NO symptoms"},
+          {"id": 5, "name": "French onion soup", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "beef stock", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 6, "name": "Garlic prawn stir-fry", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "prawns", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "Garlic-only (no onion) — NO symptoms"},
+          {"id": 7, "name": "Onion and garlic curry", "timestamp": "2026-02-07T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 8, "name": "Salmon with rice", "timestamp": "2026-02-08T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "No onion, no garlic — NO symptoms"},
+          {"id": 9, "name": "Stir-fry with onion and garlic", "timestamp": "2026-02-09T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "beef", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 10, "name": "Garlic mushroom pasta", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "mushroom", "state": "cooked"}, {"name": "pasta", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "Garlic-only — NO symptoms (mushroom may be a trigger in other contexts but garlic-only point stands)"},
+          {"id": 11, "name": "Onion and garlic stew", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 12, "name": "Rice with steamed veg", "timestamp": "2026-02-12T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No triggers — NO symptoms"},
+          {"id": 13, "name": "Caramelised onion tart", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "wheat pastry", "state": "cooked"}], "note": "Onion WITHOUT garlic — symptoms follow, proving onion is independent trigger"},
+          {"id": 14, "name": "Onion and garlic pizza", "timestamp": "2026-02-14T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "garlic", "state": "cooked"}, {"name": "wheat base", "state": "cooked"}, {"name": "mozzarella", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 15, "name": "Baked potato with tuna", "timestamp": "2026-02-15T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "tuna", "state": "cooked"}, {"name": "lettuce", "state": "raw"}], "note": "No triggers — NO symptoms"}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T14:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 4}], "follows_meal": 3},
+          {"timestamp": "2026-02-05T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 5},
+          {"timestamp": "2026-02-07T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 4}], "follows_meal": 7},
+          {"timestamp": "2026-02-09T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 4}], "follows_meal": 9},
+          {"timestamp": "2026-02-11T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 3}], "follows_meal": 11},
+          {"timestamp": "2026-02-13T20:00:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "cramping", "severity": 4}], "follows_meal": 13},
+          {"timestamp": "2026-02-14T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 14}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "onion",
+          "ingredient_id": 1,
+          "times_eaten": 8,
+          "total_symptom_occurrences": 8,
+          "confidence_score": 0.85,
+          "confidence_level": "high",
+          "immediate_total": 6,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 8, "severity_avg": 6.5, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 5, "severity_avg": 4.6, "lag_hours": 2.0},
+            {"name": "gas", "frequency": 3, "severity_avg": 3.7, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 2, "cooccurrence_meals": 7, "conditional_probability": 0.88, "reverse_probability": 0.58, "lift": 1.2},
+            {"with_ingredient_name": "olive oil", "with_ingredient_id": 3, "cooccurrence_meals": 7, "conditional_probability": 0.88, "reverse_probability": 0.64, "lift": 1.1}
+          ],
+          "medical_context": "Onion is high-FODMAP, containing significant fructans and fructose. Along with garlic, onion is one of the two most commonly identified triggers in IBS and FODMAP-sensitive individuals. Source: Monash University FODMAP App (red-light); NICE IBS guidelines."
+        },
+        {
+          "ingredient_name": "garlic",
+          "ingredient_id": 2,
+          "times_eaten": 12,
+          "total_symptom_occurrences": 7,
+          "confidence_score": 0.50,
+          "confidence_level": "medium",
+          "immediate_total": 5,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 7, "severity_avg": 6.6, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.8, "lag_hours": 2.0},
+            {"name": "gas", "frequency": 3, "severity_avg": 3.7, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "onion", "with_ingredient_id": 1, "cooccurrence_meals": 7, "conditional_probability": 0.58, "reverse_probability": 0.88, "lift": 1.2},
+            {"with_ingredient_name": "olive oil", "with_ingredient_id": 3, "cooccurrence_meals": 9, "conditional_probability": 0.75, "reverse_probability": 0.82, "lift": 1.0}
+          ],
+          "medical_context": "Garlic is one of the highest-FODMAP foods, rich in fructans. However, in THIS scenario garlic appears in 12 meals but only 7 had symptoms — and all 7 also contained onion. 3 garlic-only meals (no onion) produced zero symptoms. The garlic signal is confounded by onion co-occurrence."
+        },
+        {
+          "ingredient_name": "olive oil",
+          "ingredient_id": 3,
+          "times_eaten": 11,
+          "total_symptom_occurrences": 7,
+          "confidence_score": 0.45,
+          "confidence_level": "medium",
+          "immediate_total": 5,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 7, "severity_avg": 6.6, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "onion", "with_ingredient_id": 1, "cooccurrence_meals": 7, "conditional_probability": 0.64, "reverse_probability": 0.88, "lift": 1.1},
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 2, "cooccurrence_meals": 9, "conditional_probability": 0.82, "reverse_probability": 0.75, "lift": 1.0}
+          ],
+          "medical_context": "Olive oil is a monounsaturated fat with no FODMAPs, no allergens, and no digestive irritants. Used as the recommended cooking fat on low-FODMAP and elimination diets. Source: Monash University FODMAP guidelines."
+        }
+      ],
+
+      "meal_history_summary": "15 meals over 2 weeks. Onion in 8 meals — all 8 caused symptoms. Garlic in 12 meals — 7 caused symptoms, but all 7 also had onion. Crucially, 3 garlic-only meals (no onion) had zero symptoms. Olive oil in 11 meals — confounded by both onion and garlic.",
+
+      "ground_truth": {
+        "triggers": ["onion"],
+        "bystanders": ["garlic", "olive oil"],
+        "key_evidence": [
+          "Onion present in all 8 symptomatic meals (100%)",
+          "3 garlic-only meals (no onion) had zero symptoms",
+          "1 onion-only meal (no garlic, meal 13) still caused symptoms",
+          "Garlic co-occurs with onion in 88% of onion meals — confounded"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_04_state_dependent_trigger",
+      "name": "State-dependent trigger",
+      "description": "Raw onion causes symptoms; cooked onion does not. Tests whether the system can distinguish ingredient state as a factor.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Greek salad", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "onion", "state": "raw"}, {"name": "tomato", "state": "raw"}, {"name": "cucumber", "state": "raw"}, {"name": "feta", "state": "raw"}]},
+          {"id": 2, "name": "Cooked onion stew", "timestamp": "2026-02-02T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}, {"name": "beef", "state": "cooked"}], "note": "Cooked onion — NO symptoms"},
+          {"id": 3, "name": "Burger with raw onion", "timestamp": "2026-02-03T12:00:00Z", "ingredients": [{"name": "onion", "state": "raw"}, {"name": "beef patty", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}]},
+          {"id": 4, "name": "Chicken stir-fry", "timestamp": "2026-02-04T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "bell pepper", "state": "cooked"}], "note": "Cooked onion — NO symptoms"},
+          {"id": 5, "name": "Tomato and onion salad", "timestamp": "2026-02-05T12:00:00Z", "ingredients": [{"name": "onion", "state": "raw"}, {"name": "tomato", "state": "raw"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 6, "name": "Pasta with cooked onion sauce", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "pasta", "state": "cooked"}, {"name": "tomato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "Cooked onion — NO symptoms"},
+          {"id": 7, "name": "Grilled chicken salad", "timestamp": "2026-02-07T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No onion — NO symptoms"},
+          {"id": 8, "name": "Taco with raw onion", "timestamp": "2026-02-08T18:00:00Z", "ingredients": [{"name": "onion", "state": "raw"}, {"name": "beef mince", "state": "cooked"}, {"name": "tomato", "state": "raw"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 9, "name": "French onion soup", "timestamp": "2026-02-09T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "beef stock", "state": "cooked"}, {"name": "wheat bread", "state": "cooked"}], "note": "Cooked onion — NO symptoms"},
+          {"id": 10, "name": "Rice with steamed veg", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No onion — NO symptoms"},
+          {"id": 11, "name": "Sandwich with raw onion", "timestamp": "2026-02-11T12:00:00Z", "ingredients": [{"name": "onion", "state": "raw"}, {"name": "wheat bread", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "tomato", "state": "raw"}]},
+          {"id": 12, "name": "Salmon with rice", "timestamp": "2026-02-12T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "lemon", "state": "raw"}], "note": "No onion — NO symptoms"},
+          {"id": 13, "name": "Tomato salad (no onion)", "timestamp": "2026-02-13T12:00:00Z", "ingredients": [{"name": "tomato", "state": "raw"}, {"name": "cucumber", "state": "raw"}, {"name": "olive oil", "state": "raw"}], "note": "Tomato without onion — NO symptoms"},
+          {"id": 14, "name": "Cooked onion and potato bake", "timestamp": "2026-02-14T18:00:00Z", "ingredients": [{"name": "onion", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}], "note": "Cooked onion — NO symptoms"}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T14:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 3},
+          {"timestamp": "2026-02-05T14:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}], "follows_meal": 5},
+          {"timestamp": "2026-02-08T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 8},
+          {"timestamp": "2026-02-11T14:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 11}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "onion (raw)",
+          "ingredient_id": 1,
+          "times_eaten": 5,
+          "total_symptom_occurrences": 5,
+          "confidence_score": 0.88,
+          "confidence_level": "high",
+          "immediate_total": 5,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 5, "severity_avg": 6.6, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.5, "lag_hours": 2.0},
+            {"name": "gas", "frequency": 1, "severity_avg": 5.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "tomato", "with_ingredient_id": 3, "cooccurrence_meals": 4, "conditional_probability": 0.80, "reverse_probability": 0.57, "lift": 1.3}
+          ],
+          "medical_context": "Raw onion contains concentrated fructans and fructose, which are FODMAPs. Raw onion retains more fructans than cooked — cooking breaks down some fructans through heat. Raw onion is one of the most potent IBS triggers. Source: Monash University FODMAP App (red-light raw); Muir et al. 2009."
+        },
+        {
+          "ingredient_name": "onion (cooked)",
+          "ingredient_id": 2,
+          "times_eaten": 5,
+          "total_symptom_occurrences": 0,
+          "confidence_score": 0.10,
+          "confidence_level": "low",
+          "immediate_total": 0,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [],
+          "cooccurrence": [],
+          "medical_context": "Cooked onion still contains some fructans but at reduced levels compared to raw. Some individuals tolerate cooked onion but not raw. In this user's history, 5 cooked onion meals produced zero symptoms. Source: Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "tomato",
+          "ingredient_id": 3,
+          "times_eaten": 7,
+          "total_symptom_occurrences": 4,
+          "confidence_score": 0.40,
+          "confidence_level": "medium",
+          "immediate_total": 3,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 4, "severity_avg": 6.5, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 3, "severity_avg": 4.3, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "onion (raw)", "with_ingredient_id": 1, "cooccurrence_meals": 4, "conditional_probability": 0.57, "reverse_probability": 0.80, "lift": 1.3}
+          ],
+          "medical_context": "Tomatoes are low-FODMAP in standard portions. They are acidic and can exacerbate GERD but do not typically cause bloating or cramping. In this user's data, 1 tomato-only meal (no onion) produced no symptoms. Source: Monash University FODMAP App."
+        }
+      ],
+
+      "meal_history_summary": "14 meals over 2 weeks. Raw onion in 5 meals — all 5 caused symptoms. Cooked onion in 5 meals — zero symptoms. Tomato in 7 meals — 4 symptoms, but all 4 also had raw onion. 1 tomato-only meal had no symptoms.",
+
+      "ground_truth": {
+        "triggers": ["onion (raw)"],
+        "bystanders": ["onion (cooked)", "tomato"],
+        "key_evidence": [
+          "5/5 raw onion meals caused symptoms (100%)",
+          "0/5 cooked onion meals caused symptoms (0%)",
+          "Same ingredient, different state = different outcome",
+          "1 tomato-only meal (no raw onion) had no symptoms"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_05_small_sample_strong_signal",
+      "name": "Small sample with strong allergic signal",
+      "description": "Only 3 peanut meals but all caused severe symptoms within 30 minutes. Classic allergic pattern with small sample but unmistakable signal.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Chicken satay with peanut sauce", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "peanut", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}]},
+          {"id": 2, "name": "Cashew stir-fry", "timestamp": "2026-02-02T18:00:00Z", "ingredients": [{"name": "cashew", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "soy sauce", "state": "raw"}], "note": "Cashew but no peanut — NO symptoms"},
+          {"id": 3, "name": "Grilled chicken salad", "timestamp": "2026-02-03T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No nuts — NO symptoms"},
+          {"id": 4, "name": "Pad thai with peanuts", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "peanut", "state": "cooked"}, {"name": "rice noodles", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "spring onion", "state": "cooked"}]},
+          {"id": 5, "name": "Rice with steamed veg", "timestamp": "2026-02-06T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No nuts — NO symptoms"},
+          {"id": 6, "name": "Cashew chicken", "timestamp": "2026-02-07T18:00:00Z", "ingredients": [{"name": "cashew", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "bell pepper", "state": "cooked"}, {"name": "rice", "state": "cooked"}], "note": "Cashew but no peanut — NO symptoms"},
+          {"id": 7, "name": "Salmon with potato", "timestamp": "2026-02-08T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "green beans", "state": "cooked"}], "note": "No nuts — NO symptoms"},
+          {"id": 8, "name": "Chicken rice bowl", "timestamp": "2026-02-09T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "avocado", "state": "raw"}], "note": "No nuts — NO symptoms"},
+          {"id": 9, "name": "Cashew trail mix snack", "timestamp": "2026-02-10T15:00:00Z", "ingredients": [{"name": "cashew", "state": "raw"}, {"name": "raisins", "state": "raw"}], "note": "Cashew but no peanut — NO symptoms"},
+          {"id": 10, "name": "Toast with peanut butter", "timestamp": "2026-02-11T08:00:00Z", "ingredients": [{"name": "peanut", "state": "raw"}, {"name": "wheat bread", "state": "cooked"}]},
+          {"id": 11, "name": "Pasta with tomato sauce", "timestamp": "2026-02-12T18:00:00Z", "ingredients": [{"name": "pasta", "state": "cooked"}, {"name": "tomato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "No nuts — NO symptoms"},
+          {"id": 12, "name": "Cashew curry", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "cashew", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "coconut milk", "state": "cooked"}], "note": "Cashew but no peanut — NO symptoms"}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T12:25:00Z", "tags": [{"name": "cramping", "severity": 9}, {"name": "nausea", "severity": 8}, {"name": "bloating", "severity": 7}], "follows_meal": 1, "note": "Severe, rapid onset (25min) — allergic pattern"},
+          {"timestamp": "2026-02-05T18:30:00Z", "tags": [{"name": "cramping", "severity": 8}, {"name": "nausea", "severity": 9}, {"name": "bloating", "severity": 7}], "follows_meal": 4, "note": "Severe, rapid onset (30min)"},
+          {"timestamp": "2026-02-11T08:20:00Z", "tags": [{"name": "cramping", "severity": 9}, {"name": "nausea", "severity": 8}, {"name": "bloating", "severity": 8}], "follows_meal": 10, "note": "Severe, rapid onset (20min)"}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "peanut",
+          "ingredient_id": 1,
+          "times_eaten": 3,
+          "total_symptom_occurrences": 3,
+          "confidence_score": 0.92,
+          "confidence_level": "high",
+          "immediate_total": 3,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "cramping", "frequency": 3, "severity_avg": 8.7, "lag_hours": 0.4},
+            {"name": "nausea", "frequency": 3, "severity_avg": 8.3, "lag_hours": 0.4},
+            {"name": "bloating", "frequency": 3, "severity_avg": 7.3, "lag_hours": 0.4}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "cashew", "with_ingredient_id": 2, "cooccurrence_meals": 0, "conditional_probability": 0.0, "reverse_probability": 0.0, "lift": 0.0}
+          ],
+          "medical_context": "Peanut is a top-9 FDA allergen. Peanut allergy is one of the most common food allergies, often causing severe GI symptoms including cramping, nausea, and vomiting within minutes. The rapid onset (under 30 minutes) and high severity are characteristic of IgE-mediated allergy. Source: FDA Major Allergens; Sicherer & Sampson 2014."
+        },
+        {
+          "ingredient_name": "cashew",
+          "ingredient_id": 2,
+          "times_eaten": 4,
+          "total_symptom_occurrences": 0,
+          "confidence_score": 0.08,
+          "confidence_level": "low",
+          "immediate_total": 0,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [],
+          "cooccurrence": [],
+          "medical_context": "Cashews are tree nuts (separate allergen category from peanuts, which are legumes). While tree nut allergy exists, cashew and peanut allergies are independent. In this user's data, 4 cashew meals produced zero symptoms. Source: FDA Major Allergens."
+        }
+      ],
+
+      "meal_history_summary": "12 meals over 2 weeks. Peanut appeared in only 3 meals — all 3 caused severe symptoms within 30 minutes (severity 7-9). Cashew appeared in 4 meals with zero symptoms. The rapid onset and high severity suggest an allergic mechanism rather than FODMAP intolerance.",
+
+      "ground_truth": {
+        "triggers": ["peanut"],
+        "bystanders": ["cashew"],
+        "key_evidence": [
+          "3/3 peanut meals caused severe symptoms (100%)",
+          "Extremely rapid onset (20-30 min) and high severity (8-9) suggest allergy",
+          "0/4 cashew meals caused symptoms — different nut category, independent",
+          "Small sample but unmistakable signal: 100% hit rate, severe, immediate"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_06_red_herring_no_trigger",
+      "name": "Red herring — no real trigger",
+      "description": "No ingredient is a real trigger. Random symptom timing creates spurious correlations. Potato correlates 3/4 by chance. Tests whether the system avoids false confidence.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Baked potato with cheese", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "cheddar cheese", "state": "raw"}, {"name": "butter", "state": "raw"}]},
+          {"id": 2, "name": "Rice with chicken", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "carrot", "state": "cooked"}]},
+          {"id": 3, "name": "Carrot and potato soup", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}, {"name": "onion", "state": "cooked"}]},
+          {"id": 4, "name": "Grilled chicken salad", "timestamp": "2026-02-04T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}]},
+          {"id": 5, "name": "Mashed potato with fish", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "cod", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 6, "name": "Rice stir-fry", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "carrot", "state": "cooked"}, {"name": "bell pepper", "state": "cooked"}]},
+          {"id": 7, "name": "Potato wedges with salad", "timestamp": "2026-02-07T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}]},
+          {"id": 8, "name": "Chicken rice bowl", "timestamp": "2026-02-08T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "avocado", "state": "raw"}]},
+          {"id": 9, "name": "Carrot sticks with hummus", "timestamp": "2026-02-09T15:00:00Z", "ingredients": [{"name": "carrot", "state": "raw"}, {"name": "chickpeas", "state": "cooked"}]},
+          {"id": 10, "name": "Salmon with rice", "timestamp": "2026-02-10T18:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "salmon", "state": "cooked"}, {"name": "green beans", "state": "cooked"}]},
+          {"id": 11, "name": "Potato salad", "timestamp": "2026-02-11T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 12, "name": "Rice with steamed veg", "timestamp": "2026-02-12T18:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}]},
+          {"id": 13, "name": "Baked potato", "timestamp": "2026-02-13T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "tuna", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 14, "name": "Pasta with tomato sauce", "timestamp": "2026-02-14T18:00:00Z", "ingredients": [{"name": "pasta", "state": "cooked"}, {"name": "tomato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T16:00:00Z", "tags": [{"name": "bloating", "severity": 4}], "follows_meal": 1, "note": "Mild, could be anything — stress, eating speed, etc."},
+          {"timestamp": "2026-02-03T22:00:00Z", "tags": [{"name": "bloating", "severity": 3}], "follows_meal": 3, "note": "Mild bloating, 4hr lag — nonspecific"},
+          {"timestamp": "2026-02-05T22:00:00Z", "tags": [{"name": "gas", "severity": 3}], "follows_meal": 5, "note": "Mild gas — coincidental"},
+          {"timestamp": "2026-02-08T16:00:00Z", "tags": [{"name": "bloating", "severity": 3}], "follows_meal": 8, "note": "Mild — no potato in this meal"},
+          {"timestamp": "2026-02-11T16:00:00Z", "tags": [{"name": "bloating", "severity": 4}], "follows_meal": 11, "note": "Potato present but mild, same as other meals"}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "potato",
+          "ingredient_id": 1,
+          "times_eaten": 6,
+          "total_symptom_occurrences": 4,
+          "confidence_score": 0.45,
+          "confidence_level": "medium",
+          "immediate_total": 2,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 3, "severity_avg": 3.7, "lag_hours": 4.0},
+            {"name": "gas", "frequency": 1, "severity_avg": 3.0, "lag_hours": 4.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "carrot", "with_ingredient_id": 2, "cooccurrence_meals": 2, "conditional_probability": 0.33, "reverse_probability": 0.33, "lift": 0.8}
+          ],
+          "medical_context": "Potatoes are low-FODMAP, gluten-free, and contain no known digestive irritants. One of the safest starches for sensitive digestive systems. The 67% symptom rate (4/6) looks suspicious but all symptoms were mild (severity 3-4) and could be coincidental. Source: Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "carrot",
+          "ingredient_id": 2,
+          "times_eaten": 6,
+          "total_symptom_occurrences": 2,
+          "confidence_score": 0.22,
+          "confidence_level": "low",
+          "immediate_total": 1,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 2, "severity_avg": 3.0, "lag_hours": 4.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "potato", "with_ingredient_id": 1, "cooccurrence_meals": 2, "conditional_probability": 0.33, "reverse_probability": 0.33, "lift": 0.8}
+          ],
+          "medical_context": "Carrots are low-FODMAP at standard portions and contain no known digestive irritants. One of the safest vegetables for sensitive digestive systems. Source: Monash University FODMAP App; British Dietetic Association IBS guidelines."
+        },
+        {
+          "ingredient_name": "rice",
+          "ingredient_id": 3,
+          "times_eaten": 6,
+          "total_symptom_occurrences": 1,
+          "confidence_score": 0.12,
+          "confidence_level": "low",
+          "immediate_total": 1,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 1, "severity_avg": 3.0, "lag_hours": 4.0}
+          ],
+          "cooccurrence": [],
+          "medical_context": "White rice is the most easily digestible starch. Low-FODMAP, gluten-free, no known digestive irritants. Standard 'safe food' used in elimination diets worldwide. Source: Monash University FODMAP App."
+        }
+      ],
+
+      "meal_history_summary": "14 meals over 2 weeks. 5 mild symptom episodes scattered randomly. Potato present in 4/5 symptomatic meals (67%) but absent from 1 symptomatic meal. All symptoms are mild severity (3-4). No ingredient shows a convincing pattern — symptoms appear random and likely caused by non-dietary factors (stress, eating speed, etc.).",
+
+      "ground_truth": {
+        "triggers": [],
+        "bystanders": ["potato", "carrot", "rice"],
+        "key_evidence": [
+          "No ingredient has 100% correlation — potato misses 1 symptomatic meal",
+          "All symptoms are mild (severity 3-4) — not characteristic of food intolerance",
+          "Potato, carrot, and rice are all medically safe (low-FODMAP, no allergens)",
+          "Symptom pattern is random — likely non-dietary causes"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_07_multiple_triggers_masked",
+      "name": "Multiple triggers, one masked by the other",
+      "description": "Both wheat and dairy are triggers, but dairy's signal is partially masked because 3 of its symptomatic meals also contained wheat. Key test: 2 dairy-only meals still caused symptoms.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Cheese sandwich", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "whole milk cheese", "state": "raw"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 2, "name": "Plain chicken and rice", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "lettuce", "state": "raw"}], "note": "No wheat, no dairy — NO symptoms"},
+          {"id": 3, "name": "Pasta with cream sauce", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "cream", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}]},
+          {"id": 4, "name": "Toast with jam", "timestamp": "2026-02-04T08:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "jam", "state": "raw"}]},
+          {"id": 5, "name": "Grilled chicken salad", "timestamp": "2026-02-05T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No wheat, no dairy — NO symptoms"},
+          {"id": 6, "name": "Pizza", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "wheat base", "state": "cooked"}, {"name": "mozzarella", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}]},
+          {"id": 7, "name": "Rice with steamed veg", "timestamp": "2026-02-07T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No wheat, no dairy — NO symptoms"},
+          {"id": 8, "name": "Cereal with milk", "timestamp": "2026-02-08T08:00:00Z", "ingredients": [{"name": "whole milk", "state": "raw"}, {"name": "oat cereal", "state": "raw"}], "note": "Dairy-only (no wheat) — SYMPTOMS (proving dairy is independent trigger)"},
+          {"id": 9, "name": "Wheat crackers with hummus", "timestamp": "2026-02-09T12:00:00Z", "ingredients": [{"name": "wheat crackers", "state": "cooked"}, {"name": "chickpeas", "state": "cooked"}]},
+          {"id": 10, "name": "Chicken lettuce wrap", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "avocado", "state": "raw"}], "note": "No wheat, no dairy — NO symptoms"},
+          {"id": 11, "name": "Mac and cheese", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 12, "name": "Bread with butter", "timestamp": "2026-02-12T08:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "butter", "state": "raw"}]},
+          {"id": 13, "name": "Salmon with rice", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "lemon", "state": "raw"}], "note": "No wheat, no dairy — NO symptoms"},
+          {"id": 14, "name": "Yoghurt with fruit", "timestamp": "2026-02-14T08:00:00Z", "ingredients": [{"name": "whole milk yoghurt", "state": "raw"}, {"name": "banana", "state": "raw"}], "note": "Dairy-only (no wheat) — SYMPTOMS (second dairy-only confirmation)"},
+          {"id": 15, "name": "Pasta with tomato sauce", "timestamp": "2026-02-15T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 16, "name": "Bread roll", "timestamp": "2026-02-16T12:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T14:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 4}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T20:00:00Z", "tags": [{"name": "bloating", "severity": 8}, {"name": "cramping", "severity": 5}], "follows_meal": 3},
+          {"timestamp": "2026-02-04T10:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 4},
+          {"timestamp": "2026-02-06T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 6},
+          {"timestamp": "2026-02-08T09:30:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "cramping", "severity": 3}], "follows_meal": 8, "note": "Dairy-only — symptoms confirm dairy is trigger"},
+          {"timestamp": "2026-02-09T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 9},
+          {"timestamp": "2026-02-11T20:00:00Z", "tags": [{"name": "bloating", "severity": 8}, {"name": "cramping", "severity": 5}], "follows_meal": 11},
+          {"timestamp": "2026-02-12T10:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 12},
+          {"timestamp": "2026-02-14T09:30:00Z", "tags": [{"name": "bloating", "severity": 5}, {"name": "cramping", "severity": 4}], "follows_meal": 14, "note": "Dairy-only — second confirmation"},
+          {"timestamp": "2026-02-15T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 15},
+          {"timestamp": "2026-02-16T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 16}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "wheat",
+          "ingredient_id": 1,
+          "times_eaten": 10,
+          "total_symptom_occurrences": 9,
+          "confidence_score": 0.80,
+          "confidence_level": "high",
+          "immediate_total": 7,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 9, "severity_avg": 6.8, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.8, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "dairy", "with_ingredient_id": 2, "cooccurrence_meals": 4, "conditional_probability": 0.40, "reverse_probability": 0.67, "lift": 1.1},
+            {"with_ingredient_name": "chicken breast", "with_ingredient_id": 3, "cooccurrence_meals": 2, "conditional_probability": 0.20, "reverse_probability": 0.25, "lift": 0.5}
+          ],
+          "medical_context": "Wheat contains fructans (FODMAPs) and gluten. Fructans are rapidly fermented by gut bacteria causing bloating and gas. One of the most common IBS triggers. Source: Monash University FODMAP App (red-light); Biesiekierski et al. 2011."
+        },
+        {
+          "ingredient_name": "dairy",
+          "ingredient_id": 2,
+          "times_eaten": 6,
+          "total_symptom_occurrences": 5,
+          "confidence_score": 0.65,
+          "confidence_level": "medium",
+          "immediate_total": 4,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 5, "severity_avg": 6.4, "lag_hours": 1.5},
+            {"name": "cramping", "frequency": 3, "severity_avg": 4.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "wheat", "with_ingredient_id": 1, "cooccurrence_meals": 4, "conditional_probability": 0.67, "reverse_probability": 0.40, "lift": 1.1}
+          ],
+          "medical_context": "Dairy products (milk, cream, soft cheese, yoghurt) contain lactose. Lactose intolerance affects 65-70% of global adult population. Symptoms include bloating, cramping, gas, and diarrhoea. Source: NIH Genetics Home Reference; Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "chicken breast",
+          "ingredient_id": 3,
+          "times_eaten": 8,
+          "total_symptom_occurrences": 3,
+          "confidence_score": 0.25,
+          "confidence_level": "low",
+          "immediate_total": 2,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 3, "severity_avg": 6.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "wheat", "with_ingredient_id": 1, "cooccurrence_meals": 2, "conditional_probability": 0.25, "reverse_probability": 0.20, "lift": 0.5}
+          ],
+          "medical_context": "Chicken breast is a lean, low-fat protein with no FODMAPs and no known allergens. Universally safe on elimination diets. Source: Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "lettuce",
+          "ingredient_id": 4,
+          "times_eaten": 7,
+          "total_symptom_occurrences": 2,
+          "confidence_score": 0.18,
+          "confidence_level": "low",
+          "immediate_total": 1,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 2, "severity_avg": 6.5, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "wheat", "with_ingredient_id": 1, "cooccurrence_meals": 3, "conditional_probability": 0.43, "reverse_probability": 0.30, "lift": 0.7}
+          ],
+          "medical_context": "Lettuce is low-FODMAP, extremely low in fermentable carbohydrates. Mostly water and fibre. No known allergens or intolerance triggers. Source: Monash University FODMAP App."
+        }
+      ],
+
+      "meal_history_summary": "16 meals over 2+ weeks. Wheat in 10 meals — 9 caused symptoms (90%). Dairy in 6 meals — 5 caused symptoms (83%), but 3 of those also had wheat. Crucially: 2 dairy-only meals (no wheat) both caused symptoms, confirming dairy is an independent trigger. 5 meals with neither wheat nor dairy — zero symptoms.",
+
+      "ground_truth": {
+        "triggers": ["wheat", "dairy"],
+        "bystanders": ["chicken breast", "lettuce"],
+        "key_evidence": [
+          "Wheat present in 9/11 symptomatic meals, 90% hit rate",
+          "2 dairy-only meals (meals 8, 14) both caused symptoms — dairy is independent trigger",
+          "3 dairy+wheat meals had worse symptoms (severity 7-8) than either alone (5-6)",
+          "5 meals with neither trigger had zero symptoms"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_08_cumulative_dose_effect",
+      "name": "Cumulative dose effect",
+      "description": "Single coffee is usually fine. 3+ coffees in a day triggers symptoms. Tests whether the system can recognise dose-dependent patterns.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Morning coffee", "timestamp": "2026-02-01T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}, {"name": "sugar", "state": "raw"}], "note": "1st coffee of day"},
+          {"id": 2, "name": "Lunch", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 3, "name": "Morning coffee", "timestamp": "2026-02-02T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}], "note": "Single coffee day — NO symptoms"},
+          {"id": 4, "name": "Morning coffee", "timestamp": "2026-02-03T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "sugar", "state": "raw"}]},
+          {"id": 5, "name": "Afternoon coffee", "timestamp": "2026-02-03T14:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}]},
+          {"id": 6, "name": "Evening coffee", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "sugar", "state": "raw"}], "note": "3rd coffee — symptoms follow"},
+          {"id": 7, "name": "Morning coffee", "timestamp": "2026-02-04T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}], "note": "Single coffee day — NO symptoms"},
+          {"id": 8, "name": "Tea with lunch", "timestamp": "2026-02-05T12:00:00Z", "ingredients": [{"name": "tea", "state": "cooked"}, {"name": "milk", "state": "raw"}], "note": "No coffee — NO symptoms"},
+          {"id": 9, "name": "Morning coffee", "timestamp": "2026-02-06T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}, {"name": "sugar", "state": "raw"}]},
+          {"id": 10, "name": "Mid-morning coffee", "timestamp": "2026-02-06T11:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}]},
+          {"id": 11, "name": "Afternoon coffee", "timestamp": "2026-02-06T15:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}]},
+          {"id": 12, "name": "Evening coffee", "timestamp": "2026-02-06T19:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "sugar", "state": "raw"}], "note": "4th coffee — symptoms follow"},
+          {"id": 13, "name": "Morning coffee", "timestamp": "2026-02-07T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}], "note": "Single coffee day — NO symptoms"},
+          {"id": 14, "name": "Morning coffee", "timestamp": "2026-02-08T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "sugar", "state": "raw"}]},
+          {"id": 15, "name": "Afternoon coffee", "timestamp": "2026-02-08T14:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}]},
+          {"id": 16, "name": "After-dinner coffee", "timestamp": "2026-02-08T20:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}], "note": "3rd coffee — symptoms follow"},
+          {"id": 17, "name": "Morning coffee", "timestamp": "2026-02-09T08:00:00Z", "ingredients": [{"name": "coffee", "state": "cooked"}, {"name": "milk", "state": "raw"}]},
+          {"id": 18, "name": "Lunch", "timestamp": "2026-02-09T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "green beans", "state": "cooked"}], "note": "Single coffee day — NO symptoms"}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-03T19:30:00Z", "tags": [{"name": "cramping", "severity": 6}, {"name": "diarrhoea", "severity": 5}], "follows_meal": 6, "note": "After 3rd coffee of the day"},
+          {"timestamp": "2026-02-06T20:30:00Z", "tags": [{"name": "cramping", "severity": 7}, {"name": "diarrhoea", "severity": 6}, {"name": "bloating", "severity": 5}], "follows_meal": 12, "note": "After 4th coffee — more severe"},
+          {"timestamp": "2026-02-08T21:30:00Z", "tags": [{"name": "cramping", "severity": 6}, {"name": "diarrhoea", "severity": 5}], "follows_meal": 16, "note": "After 3rd coffee"}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "coffee",
+          "ingredient_id": 1,
+          "times_eaten": 14,
+          "total_symptom_occurrences": 3,
+          "confidence_score": 0.55,
+          "confidence_level": "medium",
+          "immediate_total": 0,
+          "delayed_total": 0,
+          "cumulative_total": 3,
+          "associated_symptoms": [
+            {"name": "cramping", "frequency": 3, "severity_avg": 6.3, "lag_hours": 1.5},
+            {"name": "diarrhoea", "frequency": 3, "severity_avg": 5.3, "lag_hours": 1.5},
+            {"name": "bloating", "frequency": 1, "severity_avg": 5.0, "lag_hours": 1.5}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "milk", "with_ingredient_id": 2, "cooccurrence_meals": 8, "conditional_probability": 0.57, "reverse_probability": 0.89, "lift": 1.0},
+            {"with_ingredient_name": "sugar", "with_ingredient_id": 3, "cooccurrence_meals": 6, "conditional_probability": 0.43, "reverse_probability": 1.0, "lift": 1.2}
+          ],
+          "medical_context": "Coffee stimulates gastric acid secretion and accelerates colonic motility. Caffeine is a known GI stimulant and has a dose-dependent effect — cumulative intake within a day compounds the motility stimulation. A well-documented trigger for IBS, especially at higher daily doses. Source: Boekema et al. 1999; Rao et al. 1998."
+        },
+        {
+          "ingredient_name": "milk",
+          "ingredient_id": 2,
+          "times_eaten": 9,
+          "total_symptom_occurrences": 2,
+          "confidence_score": 0.30,
+          "confidence_level": "low",
+          "immediate_total": 1,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "cramping", "frequency": 2, "severity_avg": 6.5, "lag_hours": 1.5}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "coffee", "with_ingredient_id": 1, "cooccurrence_meals": 8, "conditional_probability": 0.89, "reverse_probability": 0.57, "lift": 1.0}
+          ],
+          "medical_context": "Milk contains lactose but the small amounts in coffee (splash of milk) are typically below the threshold for lactose intolerance symptoms. In this user's data, many single-coffee-with-milk meals had no symptoms. Source: Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "sugar",
+          "ingredient_id": 3,
+          "times_eaten": 6,
+          "total_symptom_occurrences": 2,
+          "confidence_score": 0.28,
+          "confidence_level": "low",
+          "immediate_total": 1,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "cramping", "frequency": 2, "severity_avg": 6.0, "lag_hours": 1.5}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "coffee", "with_ingredient_id": 1, "cooccurrence_meals": 6, "conditional_probability": 1.0, "reverse_probability": 0.43, "lift": 1.2}
+          ],
+          "medical_context": "Table sugar (sucrose) is well-absorbed and is not a FODMAP. It contains no allergens or known digestive irritants at normal quantities. Not a recognised IBS trigger. Source: Monash University FODMAP App."
+        }
+      ],
+
+      "meal_history_summary": "18 entries over 9 days. Coffee appeared 14 times. Single-coffee days (5 days) had zero symptoms. On 3 days with 3+ coffees, symptoms occurred every time. Pattern: dose-dependent. Milk appeared in 9 coffee entries, sugar in 6 — both present in both symptomatic and asymptomatic coffees, ruling them out as triggers.",
+
+      "ground_truth": {
+        "triggers": ["coffee"],
+        "bystanders": ["milk", "sugar"],
+        "key_evidence": [
+          "3/3 days with 3+ coffees caused symptoms (100%)",
+          "0/5 single-coffee days caused symptoms (0%)",
+          "Dose-dependent pattern: more coffees = symptoms, single coffee = fine",
+          "Milk and sugar present in both symptomatic and asymptomatic entries — confounded"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_09_clear_fodmap_garlic",
+      "name": "Known FODMAP with textbook-clear stats",
+      "description": "Garlic is in every symptomatic meal and absent from all asymptomatic meals. Textbook case that the system should ace.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Garlic chicken pasta", "timestamp": "2026-02-01T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "pasta", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 2, "name": "Plain chicken and rice", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "green beans", "state": "cooked"}], "note": "No garlic — NO symptoms"},
+          {"id": 3, "name": "Garlic bread with soup", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "wheat bread", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 4, "name": "Salmon with rice", "timestamp": "2026-02-04T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "olive oil", "state": "raw"}], "note": "No garlic — NO symptoms"},
+          {"id": 5, "name": "Garlic prawn stir-fry", "timestamp": "2026-02-05T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "prawns", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 6, "name": "Baked potato with tuna", "timestamp": "2026-02-06T12:00:00Z", "ingredients": [{"name": "potato", "state": "cooked"}, {"name": "tuna", "state": "cooked"}, {"name": "lettuce", "state": "raw"}], "note": "No garlic — NO symptoms"},
+          {"id": 7, "name": "Garlic mushroom pasta", "timestamp": "2026-02-07T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "mushroom", "state": "cooked"}, {"name": "pasta", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 8, "name": "Grilled chicken salad", "timestamp": "2026-02-08T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No garlic — NO symptoms"},
+          {"id": 9, "name": "Garlic and herb chicken", "timestamp": "2026-02-09T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 10, "name": "Rice with steamed veg", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No garlic — NO symptoms"},
+          {"id": 11, "name": "Garlic stir-fry noodles", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "rice noodles", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 12, "name": "Egg fried rice", "timestamp": "2026-02-12T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "spring onion", "state": "cooked"}], "note": "No garlic — NO symptoms"},
+          {"id": 13, "name": "Garlic pizza", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "wheat base", "state": "cooked"}, {"name": "mozzarella", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 14, "name": "Chicken soup", "timestamp": "2026-02-14T18:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}], "note": "No garlic — NO symptoms"},
+          {"id": 15, "name": "Garlic butter shrimp", "timestamp": "2026-02-15T18:00:00Z", "ingredients": [{"name": "garlic", "state": "cooked"}, {"name": "prawns", "state": "cooked"}, {"name": "butter", "state": "cooked"}, {"name": "pasta", "state": "cooked"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}, {"name": "gas", "severity": 4}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 5}], "follows_meal": 3},
+          {"timestamp": "2026-02-05T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 4}, {"name": "gas", "severity": 4}], "follows_meal": 5},
+          {"timestamp": "2026-02-07T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 5}], "follows_meal": 7},
+          {"timestamp": "2026-02-09T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 9},
+          {"timestamp": "2026-02-11T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "gas", "severity": 4}], "follows_meal": 11},
+          {"timestamp": "2026-02-13T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 4}], "follows_meal": 13},
+          {"timestamp": "2026-02-15T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "gas", "severity": 5}], "follows_meal": 15}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "garlic",
+          "ingredient_id": 1,
+          "times_eaten": 8,
+          "total_symptom_occurrences": 8,
+          "confidence_score": 0.92,
+          "confidence_level": "high",
+          "immediate_total": 6,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 8, "severity_avg": 6.6, "lag_hours": 2.0},
+            {"name": "gas", "frequency": 6, "severity_avg": 4.5, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.5, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "olive oil", "with_ingredient_id": 4, "cooccurrence_meals": 7, "conditional_probability": 0.88, "reverse_probability": 0.70, "lift": 1.0},
+            {"with_ingredient_name": "pasta", "with_ingredient_id": 2, "cooccurrence_meals": 4, "conditional_probability": 0.50, "reverse_probability": 0.80, "lift": 1.3},
+            {"with_ingredient_name": "chicken breast", "with_ingredient_id": 3, "cooccurrence_meals": 3, "conditional_probability": 0.38, "reverse_probability": 0.43, "lift": 0.8}
+          ],
+          "medical_context": "Garlic is one of the highest-FODMAP foods, rich in fructans. Fructans are not absorbed in the small intestine and are rapidly fermented by gut bacteria causing bloating, gas, and cramping. The most commonly identified trigger in IBS patients. Source: Monash University FODMAP App (red-light at any quantity); Staudacher et al. 2012."
+        },
+        {
+          "ingredient_name": "pasta",
+          "ingredient_id": 2,
+          "times_eaten": 5,
+          "total_symptom_occurrences": 4,
+          "confidence_score": 0.55,
+          "confidence_level": "medium",
+          "immediate_total": 3,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 4, "severity_avg": 6.8, "lag_hours": 2.0},
+            {"name": "gas", "frequency": 3, "severity_avg": 4.7, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 1, "cooccurrence_meals": 4, "conditional_probability": 0.80, "reverse_probability": 0.50, "lift": 1.3}
+          ],
+          "medical_context": "Wheat pasta in standard portions (1 cup cooked) is low-FODMAP according to Monash testing. While wheat contains fructans, the amount in a normal pasta serving is below the trigger threshold for most people. Source: Monash University FODMAP App; Gibson & Shepherd 2010."
+        },
+        {
+          "ingredient_name": "chicken breast",
+          "ingredient_id": 3,
+          "times_eaten": 7,
+          "total_symptom_occurrences": 3,
+          "confidence_score": 0.30,
+          "confidence_level": "low",
+          "immediate_total": 2,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 3, "severity_avg": 6.7, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 1, "cooccurrence_meals": 3, "conditional_probability": 0.43, "reverse_probability": 0.38, "lift": 0.8}
+          ],
+          "medical_context": "Chicken breast is a lean, low-fat protein with no FODMAPs and no known allergens. Universally safe on elimination diets. Source: Monash University FODMAP App."
+        },
+        {
+          "ingredient_name": "olive oil",
+          "ingredient_id": 4,
+          "times_eaten": 10,
+          "total_symptom_occurrences": 7,
+          "confidence_score": 0.48,
+          "confidence_level": "medium",
+          "immediate_total": 5,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 7, "severity_avg": 6.6, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "garlic", "with_ingredient_id": 1, "cooccurrence_meals": 7, "conditional_probability": 0.70, "reverse_probability": 0.88, "lift": 1.0}
+          ],
+          "medical_context": "Olive oil is a monounsaturated fat with no FODMAPs, no allergens, and no digestive irritants. Recommended cooking fat on low-FODMAP and elimination diets. Source: Monash University FODMAP guidelines."
+        }
+      ],
+
+      "meal_history_summary": "15 meals over 2 weeks. Perfect split: 8 meals with garlic — all 8 caused symptoms. 7 meals without garlic — zero symptoms. Olive oil appeared in 10 meals (7 with garlic, 3 without) — the 3 without garlic had no symptoms. Pasta in 5 meals (4 with garlic) — the pattern follows garlic, not pasta.",
+
+      "ground_truth": {
+        "triggers": ["garlic"],
+        "bystanders": ["pasta", "chicken breast", "olive oil"],
+        "key_evidence": [
+          "Garlic in 8/8 symptomatic meals (100%), absent from 7/7 asymptomatic meals (100%)",
+          "Perfect binary split — garlic is necessary and sufficient for symptoms",
+          "Olive oil in 3 asymptomatic meals (without garlic) — proves oil is innocent",
+          "Pasta in 1 asymptomatic meal or only with garlic — confounded but pasta is low-FODMAP"
+        ]
+      }
+    },
+
+    {
+      "id": "e2e_10_mixed_evidence_borderline",
+      "name": "Mixed evidence with borderline trigger",
+      "description": "Wheat correlates strongly but 2 wheat-only meals had no symptoms. Tests whether the system identifies wheat with appropriate uncertainty rather than absolute confidence.",
+
+      "timeline": {
+        "meals": [
+          {"id": 1, "name": "Cheese sandwich", "timestamp": "2026-02-01T12:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "cheddar cheese", "state": "raw"}, {"name": "lettuce", "state": "raw"}]},
+          {"id": 2, "name": "Rice with chicken", "timestamp": "2026-02-02T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "chicken breast", "state": "cooked"}, {"name": "broccoli", "state": "cooked"}], "note": "No wheat — NO symptoms"},
+          {"id": 3, "name": "Pasta with tomato sauce", "timestamp": "2026-02-03T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}, {"name": "olive oil", "state": "raw"}]},
+          {"id": 4, "name": "Scrambled eggs on toast", "timestamp": "2026-02-04T08:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "butter", "state": "cooked"}]},
+          {"id": 5, "name": "Grilled chicken salad", "timestamp": "2026-02-05T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "lettuce", "state": "raw"}, {"name": "tomato", "state": "raw"}], "note": "No wheat — NO symptoms"},
+          {"id": 6, "name": "Pizza", "timestamp": "2026-02-06T18:00:00Z", "ingredients": [{"name": "wheat base", "state": "cooked"}, {"name": "mozzarella", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}]},
+          {"id": 7, "name": "Toast with jam", "timestamp": "2026-02-07T08:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "jam", "state": "raw"}], "note": "Wheat-only meal — NO symptoms (contradicts wheat-as-trigger)"},
+          {"id": 8, "name": "Salmon with rice", "timestamp": "2026-02-08T18:00:00Z", "ingredients": [{"name": "salmon", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "green beans", "state": "cooked"}], "note": "No wheat — NO symptoms"},
+          {"id": 9, "name": "Wheat crackers with cheese", "timestamp": "2026-02-09T12:00:00Z", "ingredients": [{"name": "wheat crackers", "state": "cooked"}, {"name": "cheddar cheese", "state": "raw"}]},
+          {"id": 10, "name": "Egg fried rice", "timestamp": "2026-02-10T12:00:00Z", "ingredients": [{"name": "rice", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "spring onion", "state": "cooked"}], "note": "No wheat — NO symptoms"},
+          {"id": 11, "name": "Bread roll with soup", "timestamp": "2026-02-11T18:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "potato", "state": "cooked"}, {"name": "carrot", "state": "cooked"}]},
+          {"id": 12, "name": "Chicken and rice bowl", "timestamp": "2026-02-12T12:00:00Z", "ingredients": [{"name": "chicken breast", "state": "cooked"}, {"name": "rice", "state": "cooked"}, {"name": "avocado", "state": "raw"}], "note": "No wheat — NO symptoms"},
+          {"id": 13, "name": "Pasta carbonara", "timestamp": "2026-02-13T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "egg", "state": "cooked"}, {"name": "cheddar cheese", "state": "cooked"}]},
+          {"id": 14, "name": "Plain toast", "timestamp": "2026-02-14T08:00:00Z", "ingredients": [{"name": "wheat bread", "state": "cooked"}, {"name": "butter", "state": "raw"}], "note": "Wheat-only meal — NO symptoms (second contradicting meal)"},
+          {"id": 15, "name": "Spaghetti bolognese", "timestamp": "2026-02-15T18:00:00Z", "ingredients": [{"name": "wheat pasta", "state": "cooked"}, {"name": "beef mince", "state": "cooked"}, {"name": "tomato sauce", "state": "cooked"}]}
+        ],
+        "symptoms": [
+          {"timestamp": "2026-02-01T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 4}], "follows_meal": 1},
+          {"timestamp": "2026-02-03T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 3},
+          {"timestamp": "2026-02-04T10:00:00Z", "tags": [{"name": "bloating", "severity": 5}], "follows_meal": 4},
+          {"timestamp": "2026-02-06T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 5}], "follows_meal": 6},
+          {"timestamp": "2026-02-09T14:00:00Z", "tags": [{"name": "bloating", "severity": 6}], "follows_meal": 9},
+          {"timestamp": "2026-02-11T20:00:00Z", "tags": [{"name": "bloating", "severity": 6}, {"name": "cramping", "severity": 3}], "follows_meal": 11},
+          {"timestamp": "2026-02-13T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}, {"name": "cramping", "severity": 4}], "follows_meal": 13},
+          {"timestamp": "2026-02-15T20:00:00Z", "tags": [{"name": "bloating", "severity": 7}], "follows_meal": 15}
+        ]
+      },
+
+      "ingredients_to_analyze": [
+        {
+          "ingredient_name": "wheat",
+          "ingredient_id": 1,
+          "times_eaten": 10,
+          "total_symptom_occurrences": 8,
+          "confidence_score": 0.68,
+          "confidence_level": "medium",
+          "immediate_total": 6,
+          "delayed_total": 2,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 8, "severity_avg": 6.4, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 4, "severity_avg": 4.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "cheddar cheese", "with_ingredient_id": 2, "cooccurrence_meals": 3, "conditional_probability": 0.30, "reverse_probability": 0.60, "lift": 0.9},
+            {"with_ingredient_name": "egg", "with_ingredient_id": 3, "cooccurrence_meals": 3, "conditional_probability": 0.30, "reverse_probability": 0.75, "lift": 1.1}
+          ],
+          "medical_context": "Wheat contains fructans (FODMAPs) and gluten. Fructans are rapidly fermented by gut bacteria causing bloating and gas. However, individual sensitivity varies — some people tolerate small portions (e.g., single slice of bread) but react to larger amounts. The 80% symptom rate (8/10) with 2 asymptomatic wheat meals is consistent with dose-dependent sensitivity. Source: Monash University FODMAP App; Biesiekierski et al. 2011."
+        },
+        {
+          "ingredient_name": "cheddar cheese",
+          "ingredient_id": 2,
+          "times_eaten": 5,
+          "total_symptom_occurrences": 3,
+          "confidence_score": 0.40,
+          "confidence_level": "medium",
+          "immediate_total": 2,
+          "delayed_total": 1,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 3, "severity_avg": 6.3, "lag_hours": 2.0},
+            {"name": "cramping", "frequency": 1, "severity_avg": 4.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "wheat", "with_ingredient_id": 1, "cooccurrence_meals": 3, "conditional_probability": 0.60, "reverse_probability": 0.30, "lift": 0.9}
+          ],
+          "medical_context": "Hard cheeses like cheddar are low-FODMAP. The aging process breaks down most lactose. Safe on low-FODMAP diets. Source: Monash University FODMAP App (green-light)."
+        },
+        {
+          "ingredient_name": "egg",
+          "ingredient_id": 3,
+          "times_eaten": 4,
+          "total_symptom_occurrences": 2,
+          "confidence_score": 0.35,
+          "confidence_level": "low",
+          "immediate_total": 2,
+          "delayed_total": 0,
+          "cumulative_total": 0,
+          "associated_symptoms": [
+            {"name": "bloating", "frequency": 2, "severity_avg": 6.0, "lag_hours": 2.0}
+          ],
+          "cooccurrence": [
+            {"with_ingredient_name": "wheat", "with_ingredient_id": 1, "cooccurrence_meals": 3, "conditional_probability": 0.75, "reverse_probability": 0.30, "lift": 1.1}
+          ],
+          "medical_context": "Eggs are a top-9 FDA allergen but also a very common food. Egg intolerance can cause GI symptoms in some individuals. In this user's data, eggs appeared 4 times — 2 with symptoms (both also had wheat), 2 without symptoms (1 had wheat). Insufficient evidence. Source: FDA Major Allergens."
+        }
+      ],
+
+      "meal_history_summary": "15 meals over 2 weeks. Wheat appeared in 10 meals — 8 caused symptoms (80%), but 2 wheat-only meals had NO symptoms (meals 7, 14). This contradicts a simple 'wheat always causes symptoms' model. Cheese in 5 meals — 3 symptoms, but all 3 also had wheat. Egg in 4 meals — confounded by wheat. 5 wheat-free meals — zero symptoms.",
+
+      "ground_truth": {
+        "triggers": ["wheat"],
+        "bystanders": ["cheddar cheese", "egg"],
+        "key_evidence": [
+          "8/10 wheat meals caused symptoms (80%) — strong but not perfect correlation",
+          "2 wheat-only meals had no symptoms — possibly dose-dependent or variable sensitivity",
+          "0/5 wheat-free meals caused symptoms — wheat is necessary condition",
+          "Wheat should be identified but with qualified confidence, not certainty"
+        ]
+      }
+    }
+  ]
+}
