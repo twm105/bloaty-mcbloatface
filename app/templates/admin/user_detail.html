@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ detail.user.email }} - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div style="max-width: var(--container-xl); margin: 0 auto;">
+    <div class="page-header">
+        <div style="display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4);">
+            <a href="/auth/account" style="color: var(--color-accent-green-light); text-decoration: none; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-1);">
+                <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#arrow-left"></use>
+                </svg>
+                Back to Account Management
+            </a>
+            <a href="/admin/dashboard" style="color: var(--color-accent-green-light); text-decoration: none; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-1);">
+                <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true">
+                    <use href="/static/icons/lucide-sprite.svg#arrow-left"></use>
+                </svg>
+                Back to Overview Dashboard
+            </a>
+        </div>
+        <h1 class="page-title">{{ detail.user.email }}</h1>
+    </div>
+
+    <div class="card-grid">
+        <!-- Account Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Account</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Member since</span>
+                    <span>{{ detail.account.member_since.strftime('%b %d, %Y') if detail.account.member_since else '-' }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Last active</span>
+                    <span>{{ detail.account.last_active.strftime('%b %d, %Y %H:%M') if detail.account.last_active else '-' }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Role</span>
+                    <span>{{ detail.account.role }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meals Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Meals</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Total</span>
+                    <span>{{ detail.meals.total }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">This month</span>
+                    <span>{{ detail.meals.this_month }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">With images</span>
+                    <span>{{ detail.meals.with_images }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Published</span>
+                    <span>{{ detail.meals.published }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Symptoms Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Symptoms</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Total</span>
+                    <span>{{ detail.symptoms.total }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">This month</span>
+                    <span>{{ detail.symptoms.this_month }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Unique types</span>
+                    <span>{{ detail.symptoms.unique_types }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Spend Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">API Spend</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Total spend</span>
+                    <span>${{ "%.2f"|format(detail.api.total_spend_dollars) }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">This month</span>
+                    <span>${{ "%.2f"|format(detail.api.spend_this_month) }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Total API calls</span>
+                    <span>{{ detail.api.total_calls }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Spend Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Weekly Spend</h3>
+            </div>
+            <div>
+                {% for week in detail.weekly_spend %}
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">{{ week.label }}</span>
+                    <span>${{ "%.2f"|format(week.dollars) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Feature Usage Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Feature Usage</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Diagnosis runs</span>
+                    <span>{{ detail.diagnosis.total_runs }} ({{ detail.diagnosis.completed_runs }} completed)</span>
+                </div>
+                {% for service, count in detail.feature_usage.items() %}
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">{{ service }}</span>
+                    <span>{{ count }}</span>
+                </div>
+                {% endfor %}
+                {% if not detail.feature_usage %}
+                <div class="stat-row">
+                    <span style="color: var(--color-text-tertiary);">No API usage recorded</span>
+                    <span></span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Token Usage Tile -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: var(--text-base);">Token Usage</h3>
+            </div>
+            <div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Input tokens</span>
+                    <span>{{ "{:,}".format(detail.tokens.input) }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Output tokens</span>
+                    <span>{{ "{:,}".format(detail.tokens.output) }}</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--color-text-secondary);">Cached tokens</span>
+                    <span>{{ "{:,}".format(detail.tokens.cached) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

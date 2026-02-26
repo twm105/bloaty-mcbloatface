@@ -247,3 +247,21 @@ button.star-btn:focus,
     animation: spin 1s linear infinite;
     display: inline-block;
 }
+
+/* Admin dashboard stat rows */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: var(--text-sm);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .weekly-cols { display: none; }
+}

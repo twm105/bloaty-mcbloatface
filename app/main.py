@@ -8,7 +8,16 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.exceptions import HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api import routes, meals, symptoms, diagnosis, diagnosis_sse, auth, feedback
+from app.api import (
+    routes,
+    meals,
+    symptoms,
+    diagnosis,
+    diagnosis_sse,
+    auth,
+    feedback,
+    admin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +143,7 @@ app.include_router(symptoms.router)
 app.include_router(diagnosis.router)
 app.include_router(diagnosis_sse.router)
 app.include_router(feedback.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

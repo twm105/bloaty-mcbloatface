@@ -23,6 +23,7 @@ from app.models import (
     DiagnosisResult,
     DiagnosisCitation,
     UserFeedback,
+    AIUsageLog,
     Session as UserSession,
     Invite,
 )
@@ -565,6 +566,67 @@ def create_user_feedback(
     db.add(feedback)
     db.flush()
     return feedback
+
+
+# =============================================================================
+# AIUsageLog Factory
+# =============================================================================
+
+
+def create_ai_usage_log(
+    db: Session,
+    user: User,
+    service_type: str = "meal_analysis",
+    model: str = "claude-sonnet-4-5-20250929",
+    input_tokens: int = 1000,
+    output_tokens: int = 500,
+    cached_tokens: int = 0,
+    estimated_cost_cents: float = 1.50,
+    timestamp: Optional[datetime] = None,
+    success: bool = True,
+    **overrides,
+) -> AIUsageLog:
+    """
+    Create an AI usage log entry.
+
+    Args:
+        db: Database session
+        user: User who made the API call
+        service_type: Type of service ('meal_analysis', 'diagnosis', etc.)
+        model: Model name used
+        input_tokens: Number of input tokens
+        output_tokens: Number of output tokens
+        cached_tokens: Number of cached input tokens
+        estimated_cost_cents: Cost in cents
+        timestamp: When the call was made
+        success: Whether the call succeeded
+        **overrides: Additional fields to override
+
+    Returns:
+        Created AIUsageLog object
+    """
+    from decimal import Decimal
+
+    if timestamp is None:
+        timestamp = datetime.now(timezone.utc)
+
+    defaults = {
+        "user_id": user.id,
+        "service_type": service_type,
+        "model": model,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cached_tokens": cached_tokens,
+        "estimated_cost_cents": Decimal(str(estimated_cost_cents)),
+        "timestamp": timestamp,
+        "success": success,
+    }
+    defaults.update(overrides)
+
+    log = AIUsageLog(**defaults)
+    db.add(log)
+    db.flush()
+    return log
 
 
 # =============================================================================

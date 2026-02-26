@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Bloaty McBloatface{% endblock %}
+
+{% block content %}
+<div style="max-width: var(--container-xl); margin: 0 auto;">
+    <div class="page-header">
+        <a href="/auth/account" style="color: var(--color-accent-green-light); text-decoration: none; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-4);">
+            <svg width="16" height="16" viewBox="0 0 24 24" class="icon icon-xs" aria-hidden="true">
+                <use href="/static/icons/lucide-sprite.svg#arrow-left"></use>
+            </svg>
+            Back to Account
+        </a>
+        <h1 class="page-title">Usage Dashboard</h1>
+    </div>
+
+    <!-- Platform Totals -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-8);">
+        <div class="card" style="padding: var(--space-4); text-align: center;">
+            <div style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1);">Users</div>
+            <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text-primary);">{{ totals.total_users }}</div>
+        </div>
+        <div class="card" style="padding: var(--space-4); text-align: center;">
+            <div style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1);">Meals</div>
+            <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text-primary);">{{ totals.total_meals }}</div>
+        </div>
+        <div class="card" style="padding: var(--space-4); text-align: center;">
+            <div style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1);">Symptoms</div>
+            <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text-primary);">{{ totals.total_symptoms }}</div>
+        </div>
+        <div class="card" style="padding: var(--space-4); text-align: center;">
+            <div style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-bottom: var(--space-1);">Total Spend</div>
+            <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text-primary);">${{ "%.2f"|format(totals.total_api_spend_dollars) }}</div>
+            <div style="font-size: var(--text-xs); color: var(--color-text-tertiary);">${{ "%.2f"|format(totals.spend_this_month) }} this month</div>
+        </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Users</h2>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: var(--text-sm);">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                        <th style="text-align: left; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">Email</th>
+                        <th style="text-align: left; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">Since</th>
+                        <th style="text-align: right; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">Meals</th>
+                        <th style="text-align: right; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">Symptoms</th>
+                        <th style="text-align: right; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">Spend</th>
+                        {% for label in week_labels %}
+                        <th class="weekly-cols" style="text-align: right; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--color-text-secondary); font-weight: var(--font-medium);">{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in overview %}
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04);">
+                        <td style="padding: var(--space-2) var(--space-3);">
+                            <a href="/admin/dashboard/user/{{ row.user.id }}" style="color: var(--color-accent-green-light); text-decoration: none;">{{ row.user.email }}</a>
+                            {% if row.user.is_admin %}
+                            <span class="badge" style="background-color: var(--color-highlight-sage, rgba(82, 183, 136, 0.15)); color: var(--color-text-primary); margin-left: var(--space-1); font-size: 10px;">Admin</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: var(--space-2) var(--space-3); color: var(--color-text-secondary);">{{ row.member_since.strftime('%b %d, %Y') if row.member_since else '-' }}</td>
+                        <td style="padding: var(--space-2) var(--space-3); text-align: right;">{{ row.total_meals }}</td>
+                        <td style="padding: var(--space-2) var(--space-3); text-align: right;">{{ row.total_symptoms }}</td>
+                        <td style="padding: var(--space-2) var(--space-3); text-align: right;">${{ "%.2f"|format(row.total_api_spend_dollars) }}</td>
+                        <td class="weekly-cols" style="padding: var(--space-2) var(--space-3); text-align: right; color: var(--color-text-secondary);">${{ "%.2f"|format(row.weekly_spend[0]) }}</td>
+                        <td class="weekly-cols" style="padding: var(--space-2) var(--space-3); text-align: right; color: var(--color-text-secondary);">${{ "%.2f"|format(row.weekly_spend[1]) }}</td>
+                        <td class="weekly-cols" style="padding: var(--space-2) var(--space-3); text-align: right; color: var(--color-text-secondary);">${{ "%.2f"|format(row.weekly_spend[2]) }}</td>
+                        <td class="weekly-cols" style="padding: var(--space-2) var(--space-3); text-align: right; color: var(--color-text-secondary);">${{ "%.2f"|format(row.weekly_spend[3]) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
