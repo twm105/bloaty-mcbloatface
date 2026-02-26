@@ -97,7 +97,9 @@ def get_all_users_overview(db: Session) -> list[dict]:
     """
     users = db.query(User).order_by(User.created_at).all()
     if not users:
-        return []
+        weeks = _week_boundaries(4)
+        week_labels = [w[2].strftime("w/c %b %d") for w in weeks]
+        return [], week_labels
 
     user_ids = [u.id for u in users]
 
